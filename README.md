@@ -5,8 +5,8 @@
 <h1 align="center">BioDreamer: World Models for Biological Design</h1>
 
 <p align="center">
-  <a href="https://loqmansamani.github.io/bio_dreamer/"><img src="https://img.shields.io/badge/Website-BioDreamer-blue?style=flat&logo=github-pages" alt="Website" /></a>
-  <a href="https://loqmansamani.github.io/bio_dreamer/blog/"><img src="https://img.shields.io/badge/Blog-Posts%20%26%20Articles-purple?style=flat&logo=readme" alt="Blog" /></a>
+  <a href="https://biodreamer.ciyalabs.com/"><img src="https://img.shields.io/badge/Website-BioDreamer-blue?style=flat&logo=github-pages" alt="Website" /></a>
+  <a href="https://biodreamer.ciyalabs.com/blog/"><img src="https://img.shields.io/badge/Blog-Posts%20%26%20Articles-purple?style=flat&logo=readme" alt="Blog" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT" /></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+" /></a>
   <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch" /></a>

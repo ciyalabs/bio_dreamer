@@ -4,7 +4,7 @@ date: 2026-04-02
 author: "Loghman Samani"
 tags: [announcement, world-models, protein-dreamer, mol-dreamer, cell-dreamer, JEPA, active-inference]
 summary: "Biology is expensive to query at every scale. BioDreamer applies JEPA-based world models and Active Inference to plan mutations, molecular dynamics, and gene perturbations in imagination before touching a single pipette."
-externalUrl: "https://loqmansamani.github.io/bio_dreamer/articles/bio_dreamer/index.html"
+externalUrl: "https://biodreamer.ciyalabs.com/articles/bio_dreamer/index.html"
 ---
 # Introducing BioDreamer: World Models for Biological Design
 
@@ -16,4 +16,4 @@ This post covers the problem, the architecture, the three modules in detail, and
 
 ---
 
-📖 **[Read the full article →](https://loqmansamani.github.io/bio_dreamer/articles/bio_dreamer/index.html)**
+📖 **[Read the full article →](https://biodreamer.ciyalabs.com/articles/bio_dreamer/index.html)**
