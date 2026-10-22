@@ -16,7 +16,7 @@ export default function HomePage() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 text-sm text-slate-600 dark:text-slate-300">
               <span className="w-2 h-2 rounded-full bg-mol-500 animate-pulse-slow" />
-              Open-source research framework
+              A research line of Ciya Labs &middot; open source
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-6">

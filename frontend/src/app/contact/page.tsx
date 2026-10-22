@@ -13,6 +13,12 @@ import {
 
 const LINKS = [
   {
+    icon: ExternalLink,
+    label: "Ciya Labs",
+    href: "https://ciyalabs.com/",
+    description: "The research lab behind BioDreamer",
+  },
+  {
     icon: Github,
     label: "Project GitHub",
     href: "https://github.com/LoqmanSamani/bio_dreamer",
@@ -21,8 +27,8 @@ const LINKS = [
   {
     icon: Mail,
     label: "Email",
-    href: "mailto:samaniloqman91@gmail.com",
-    description: "samaniloqman91@gmail.com",
+    href: "mailto:info@ciyalabs.com",
+    description: "info@ciyalabs.com",
   },
   {
     icon: BookOpen,

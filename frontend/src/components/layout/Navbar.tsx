@@ -33,13 +33,23 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
       <div className="section-container flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <Logo size={32} />
-          <span className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-protein-400 transition-colors">
-            BioDreamer
-          </span>
-        </Link>
+        {/* Logo, and the lab it belongs to */}
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 group">
+            <Logo size={32} />
+            <span className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-protein-400 transition-colors">
+              BioDreamer
+            </span>
+          </Link>
+          <a
+            href="https://ciyalabs.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline lg:hidden xl:inline pt-0.5 text-xs font-medium tracking-wide text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            by Ciya Labs
+          </a>
+        </div>
 
         {/* Desktop nav */}
         <div className="hidden lg:flex items-center gap-1">
@@ -97,6 +107,15 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
+          <a
+            href="https://ciyalabs.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileOpen(false)}
+            className="block px-6 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+          >
+            Ciya Labs &rarr;
+          </a>
         </div>
       )}
     </nav>

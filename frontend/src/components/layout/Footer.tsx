@@ -1,4 +1,4 @@
-import { Github, Mail, BookOpen } from "lucide-react";
+import { Github, Mail, BookOpen, ExternalLink } from "lucide-react";
 import Logo from "@/components/Logo";
 
 export default function Footer() {
@@ -16,12 +16,34 @@ export default function Footer() {
               JEPA-based world models and Active Inference for molecular
               dynamics, protein engineering, and cell reprogramming.
             </p>
+            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              A research line of{" "}
+              <a
+                href="https://ciyalabs.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                Ciya Labs
+              </a>
+              , an independent research lab.
+            </p>
           </div>
 
           {/* Links */}
           <div>
             <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Links</h4>
             <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+              <li>
+                <a
+                  href="https://ciyalabs.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-slate-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"
+                >
+                  <ExternalLink size={14} /> Ciya Labs
+                </a>
+              </li>
               <li>
                 <a
                   href="https://github.com/LoqmanSamani/bio_dreamer"
@@ -34,7 +56,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:samaniloqman91@gmail.com"
+                  href="mailto:info@ciyalabs.com"
                   className="hover:text-slate-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"
                 >
                   <Mail size={14} /> Email
@@ -73,10 +95,26 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            &copy; {new Date().getFullYear()} Loqman Samani. MIT License.
+            &copy; {new Date().getFullYear()} Ciya Labs. Code under the MIT License.
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            Built with Next.js, Tailwind CSS &amp; TypeScript
+            <a
+              href="https://ciyalabs.com/imprint.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Imprint
+            </a>
+            {" \u00b7 "}
+            <a
+              href="https://ciyalabs.com/privacy.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Privacy
+            </a>
           </p>
         </div>
       </div>

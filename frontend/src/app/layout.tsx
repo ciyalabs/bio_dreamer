@@ -7,7 +7,9 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "BioDreamer. World Models for Biological Design",
   description:
-    "An open-source framework that applies JEPA-based world models and Active Inference to molecular dynamics, protein engineering, and cell reprogramming.",
+    "An open-source framework that applies JEPA-based world models and Active Inference to molecular dynamics, protein engineering, and cell reprogramming. A research line of Ciya Labs.",
+  authors: [{ name: "Ciya Labs", url: "https://ciyalabs.com/" }],
+  publisher: "Ciya Labs",
   keywords: [
     "BioDreamer",
     "world models",
