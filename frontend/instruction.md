@@ -60,7 +60,7 @@ Build a multi-page (or single-page with smooth scroll navigation) static website
 
 - A clean card or section layout with all links:
   - 🔗 Project GitHub: https://github.com/LoqmanSamani/bio_dreamer
-  - 📧 Email: samaniloqman91@gmail.com
+  - 📧 Email: loghmansamani@ciyalabs.com
   - 📖 ReadTheDocs: *(placeholder — not yet created)*
   - 👤 Personal GitHub: https://github.com/LoqmanSamani
   - 💼 LinkedIn: https://www.linkedin.com/in/loghman-samani-8a5208199/
