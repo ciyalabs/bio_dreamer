@@ -104,7 +104,7 @@ export default function QuickStartPage() {
               How It Works <ArrowRight size={14} />
             </Link>
             <a
-              href="https://github.com/LoqmanSamani/bio_dreamer"
+              href="https://github.com/ciyalabs/bio_dreamer"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline text-sm"

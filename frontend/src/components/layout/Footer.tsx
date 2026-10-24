@@ -46,7 +46,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/LoqmanSamani/bio_dreamer"
+                  href="https://github.com/ciyalabs/bio_dreamer"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-slate-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"

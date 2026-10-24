@@ -59,7 +59,7 @@ export default function BlogPostPage({
             ))}
           </div>
           <a
-            href={`https://github.com/LoqmanSamani/bio_dreamer/blob/systembiology/blog/posts/${params.slug}.md`}
+            href={`https://github.com/ciyalabs/bio_dreamer/blob/systembiology/blog/posts/${params.slug}.md`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-slate-400 dark:text-slate-600 hover:text-protein-400 transition-colors inline-flex items-center gap-1"

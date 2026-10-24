@@ -72,7 +72,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <a
-            href="https://github.com/LoqmanSamani/bio_dreamer"
+            href="https://github.com/ciyalabs/bio_dreamer"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"

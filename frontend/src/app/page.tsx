@@ -33,7 +33,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap gap-4">
               <a
-                href="https://github.com/LoqmanSamani/bio_dreamer"
+                href="https://github.com/ciyalabs/bio_dreamer"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary"

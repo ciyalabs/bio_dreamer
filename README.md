@@ -12,7 +12,7 @@
   <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch" /></a>
   <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js" /></a>
   <a href="https://huggingface.co/"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-Hub-FFD21E" alt="Hugging Face" /></a>
-  <a href="https://github.com/LoqmanSamani/bio_dreamer/actions"><img src="https://img.shields.io/github/actions/workflow/status/LoqmanSamani/bio_dreamer/deploy.yml?branch=systembiology&label=deploy&logo=github-actions" alt="GitHub Actions" /></a>
+  <a href="https://github.com/ciyalabs/bio_dreamer/actions"><img src="https://img.shields.io/github/actions/workflow/status/LoqmanSamani/bio_dreamer/deploy.yml?branch=systembiology&label=deploy&logo=github-actions" alt="GitHub Actions" /></a>
 </p>
 
 

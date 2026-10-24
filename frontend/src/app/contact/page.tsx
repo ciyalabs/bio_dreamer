@@ -21,7 +21,7 @@ const LINKS = [
   {
     icon: Github,
     label: "Project GitHub",
-    href: "https://github.com/LoqmanSamani/bio_dreamer",
+    href: "https://github.com/ciyalabs/bio_dreamer",
     description: "Source code, issues, and contributions",
   },
   {
