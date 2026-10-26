@@ -1,0 +1,20 @@
+- why using GVP-GNN and not other structure and is gvp scalable and easy to train?
+- is esm-2 still the best choise? (the proposal was written six to eight months ago and the question is: is esm2 still the best choise for this task or there are other models published which can replace it)
+- A reward head translates latent states into fitness predictions (stability;delta_gg, binding affinity;K_d, catalytic activity;k_cat): this has been modified!
+- why not use esm3 instead of sequence and structure models, and take all the information needed just from a powerful foundation model?
+- are these three enough and only information available from the data?: "st consists of the current amino acid sequence xt ∈ {A, C, D, . . . , Y }L, its predicted 3D structure Ct ∈ RL×3 (Cα coordinates from ESMFold),
+                                                                         and associated property estimates (pLDDT confidence, contact maps)"
+- does the model needs "EMA" at all!?, because it uses sigreg(i think both encoder only need sigreg, as the original paper--leworld models-- uses only sigreg): "A target encoder f¯θ, an exponential moving average (EMA) 
+                                                                                                                                                                 copy of the context encoder with decay rate τema close to 1, 
+                                                                                                                                                                 provides stable prediction targets during training and prevents representational collapse."
+- is ddpm the most proper diffusion model for this matter? "During training, the target latent ¯zt+1 (from the EMA encoder, stop-gradient) is noised
+                                                            at a random level τ ∼ U(1, K) according to a cosine noise schedule following the DDPM formulation "
+- why: "The training loss is a denoising score-matching objective." this may be refined based on the current progresses in diffusion/flow matching models
+- so we train multiple models using this technique, which only changes the head of the model for each trained model for efficiency reasons: "since the
+deterministic predictor yields no distributional samples, uncertainty is estimated externally
+via an ensemble of M predictors or an evidential deep learning head that outputs a Normal-
+Inverse-Gamma distribution." but is this the most proper way to do this?
+
+- simplicity is the key of this research! we do not want to restrict the world model with heavily physics terms integrated into loss of the structure of the model we want the model learns what it needs to learn on its own
+  so giving it space to learn it is the best strategy!
+

@@ -1,0 +1,1064 @@
+\documentclass[12pt, a4paper]{article}
+
+% ── Packages ──
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[numbers]{natbib}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{microtype}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\onehalfspacing
+
+\title{
+    \textbf{ProteinDreamer: Latent World Models for Multi-Step Protein Engineering}\\[0.8em]
+    %\large PhD Research Proposal\\[0.4em]
+
+}
+
+\author{Loghman Samani}
+\date{October 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+% ══════════════════════════════════════════════════════════
+% CONTACT & PROJECT CONTEXT
+% ══════════════════════════════════════════════════════════
+\thispagestyle{empty}
+\vspace*{2cm}
+
+\begin{center}
+{\Large \textbf{Contact \& Project Context}}
+\end{center}
+
+\vspace{1.5cm}
+
+\noindent\textbf{Contact}\\[0.4em]
+\begin{tabular}{@{}ll}
+Email: & \href{mailto:loghmansamani@ciyalabs.com}{loghmansamani@ciyalabs.com} \\
+Webpage: & \url{https://loghmansamani.ciyalabs.com} \\
+\end{tabular}
+
+\vspace{1.5cm}
+
+\noindent\textbf{BioDreamer: World Models for Biological Design}\\[0.4em]
+\noindent ProteinDreamer is a research branch of \textbf{BioDreamer}, a broader open-source research programme that applies the world model paradigm from model-based reinforcement learning to biological systems across three scales: \textit{atomic} (MolDreamer: learned molecular dynamics simulators), \textit{protein} (ProteinDreamer: multi-step protein engineering, the subject of this proposal), and \textit{cellular} (CellDreamer: gene regulatory network dynamics and cell reprogramming). All three modules share a unified architecture based on the Joint-Embedding Predictive Architecture (JEPA): encode observations into latent states, predict transitions in latent space, and train policies on imagined trajectories. The common thesis is that learning a latent-space simulator of each biological environment and planning optimal interventions \textit{in imagination} can replace brute-force experimentation with intelligent, amortised, in-silico reasoning.
+
+\vspace{0.8em}
+\noindent The BioDreamer project, including documentation, codebase, and blog, is available at:
+
+\vspace{0.3em}
+\begin{center}
+\url{https://loqmansamani.github.io/bio_dreamer/}
+\end{center}
+
+\vspace{1.5cm}
+
+\noindent\textbf{Revision note.}\\[0.4em]
+\noindent This is a revised version of a proposal first drafted in March 2026. The revision responds to work published in the intervening months, in particular: the demonstration that predicted protein structures are largely invariant to point mutations \citep{feldman2026invariance}; the formal derivation of the SIGReg--variational-free-energy correspondence \citep{arnez2026sigregfree}, which supersedes a theoretical contribution claimed in the first draft; the arrival of flow-matching latent dynamics for JEPA world models \citep{huo2026flowjepa, porcher2026flowwm}; a critique of the machine-learning-assisted directed evolution literature on the grounds of experimental cost \citep{wittmann2026retrospective}; and the demonstration that a prominent framework's apparent epistasis learning is indistinguishable from an additive model \citep{visani2026additive}. The changes are substantive rather than cosmetic: the structural encoder stream has been removed, the latent state is now per-residue rather than pooled, Active Inference has been demoted from the central thesis to one policy class among several, the additive null has become the decisive baseline for the project's central hypothesis, and three new sections commit it to preliminary diagnostics, an explicit evaluation protocol, and a statement of limitations.
+
+\newpage
+
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════
+% ABSTRACT
+% ══════════════════════════════════════════════════════════
+\begin{abstract}
+Protein engineering today relies on two dominant strategies that each leave something on the table. Generative models such as ProteinMPNN, RFdiffusion, and ESM-3 produce candidate sequences in a single forward pass, with no mechanism for iterative refinement or multi-step planning. Directed evolution, on the other hand, performs sequential search through mutation and screening, but current computational tools do not model it as a sequential decision problem. Neither approach does what a thoughtful engineer would do: build an internal model of how mutations reshape the fitness landscape, then plan a sequence of edits by simulating their consequences before committing to the wet lab.
+
+This proposal introduces \textbf{ProteinDreamer}, a model-based reinforcement learning framework that learns a latent-space world model of the protein fitness landscape and uses it to plan multi-step mutation trajectories in imagination. A single frozen structure-aware protein language model encodes the protein state into a \textit{per-residue} latent representation; a conditional flow-matching model predicts the post-mutation latent, and an action-contrastive inverse-dynamics head forces that latent to encode the specific effect of the applied mutation. A reward head predicts folding stability and assay-normalised fitness, and a pluggable policy module plans over the learned dynamics. Because planning occurs in latent space, thousands of mutation trajectories can be evaluated without invoking a structure predictor or a wet-lab assay at each step.
+
+Three design choices distinguish this revision from the obvious construction. First, the framework takes no per-step predicted structure: recent evidence that predicted structures remain invariant to mutation of up to 40\% of residues \citep{feldman2026invariance} implies that a per-step folding call supplies almost no action-dependent signal, so structure enters once, as static context. Second, the latent state is per-residue rather than pooled, because a single substitution perturbs a mean-pooled embedding by $O(1/L)$ and epistasis is not representable in a pooled vector. Third, the project separates its three data needs, which have three different answers: latent dynamics requires no experimental labels and so is not data-limited, the reward head rests on the abundant double-mutant measurements that support higher-order extrapolation, and only path-level evaluation requires combinatorially complete landscapes. Against all of this, the project treats an \textit{additive null model} as its decisive baseline, following evidence that a prominent recent framework's apparent epistasis learning reduces to combining the largest individual mutational effects \citep{visani2026additive}.
+
+The system will be evaluated on ProteinGym, mega-scale stability data, and the combinatorially complete GB1 and TrpB landscapes, against greedy, search-based, and reinforcement-learning baselines, with uncertainty calibration and model-exploitation diagnostics reported alongside fitness.
+\end{abstract}
+\newpage
+
+% ══════════════════════════════════════════════════════════
+% 1. INTRODUCTION
+% ══════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:introduction}
+
+Proteins are the molecular machines of life. Engineering them to carry out new functions, catalyze industrial reactions, or bind therapeutic targets with high affinity is one of the central ambitions of modern biotechnology. The sequence space is enormous: for a protein of length $L = 300$, there are $20^{300}$ possible amino acid sequences. The fitness landscape over this space, the mapping from sequence to function, is rugged, epistatic, and only partially observed \citep{sandhu2025landscapes}. These properties make brute-force search impractical and demand intelligent navigation strategies.
+
+Two broad computational paradigms have emerged. \textit{Generative protein design} uses deep learning to produce candidate sequences in a single forward pass. ProteinMPNN \citep{dauparas2022proteinmpnn} designs sequences conditioned on a fixed backbone, RFdiffusion \citep{watson2023rfdiffusion} generates novel backbones through 3D denoising diffusion, and ESM-3 \citep{hayes2024esm3} provides a multimodal foundation model that jointly reasons over sequence, structure, and function. These methods are powerful, but they are fundamentally one-shot: they generate a candidate and hope it works, with no mechanism for iterative refinement or look-ahead planning over sequences of mutations. \textit{Directed evolution}, the experimental counterpart, is sequential by nature (mutate, screen, select, repeat) yet current computational tools do not model it as a sequential decision-making problem \citep{notin2024mlprotein, kyro2025review}.
+
+A parallel development in artificial intelligence has produced a class of agents that do exactly this kind of sequential planning: \textit{world model} agents. Dreamer~4 \citep{hafner2025dreamer4} learns an internal simulator of its environment and trains policies by imagining future trajectories, obtaining diamonds in Minecraft purely from an offline dataset. More recently, the Joint-Embedding Predictive Architecture (JEPA) paradigm \citep{lecun2022path}, developed into concrete world models by LeJEPA and LeWorldModel \citep{maes2026leworldmodel}, has shown that world models can operate entirely in latent space without reconstructing observations. DIAMOND \citep{alonso2024diamond} demonstrated that replacing deterministic dynamics with a generative process yields more accurate long-horizon rollouts and captures multi-modal transitions better, and Flow-JEPA \citep{huo2026flowjepa} and FlowWM \citep{porcher2026flowwm} have since shown that flow matching is the more effective and cheaper way to obtain that generative capacity in latent space.
+
+Despite these advances, the world model paradigm has not been applied to protein engineering. The closest existing work, DynaPPO \citep{angermueller2020dynappo}, uses an MLP surrogate to approximate the fitness function and trains a policy on it, but has no structured model that predicts state transitions. $\mu$Protein \citep{sun2025muprotein} combines fitness prediction with RL-based search, EvoPlay \citep{wang2023evoplay} applies self-play tree search, and StructEvo \citep{nie2026structevo} adds structure-aware features to neural-network-guided Monte Carlo tree search; all three treat the fitness predictor as a black-box oracle and search over sequences directly, with no learned dynamics and no latent-space planning. In the protein representation literature, ProteinJEPA \citep{ofer2026proteinjepa} has introduced latent prediction into protein language model \textit{pretraining}, but not as a world model and not for planning.
+
+This proposal presents \textbf{ProteinDreamer}, a framework that fills this gap. Protein design is framed as a Markov Decision Process in which an agent proposes mutations (actions), observes changes in a learned latent representation of the protein (state transitions), receives fitness predictions (rewards), and plans mutation trajectories in imagination before committing to evaluation.
+
+Three considerations shape the design, and each one is a correction to the obvious construction.
+
+\paragraph{Predicted structure is nearly invariant to mutation, so it cannot serve as a per-step observation.} A natural design encodes both sequence and predicted 3D structure at every step. \citet{feldman2026invariance} show that this is unsound: across 200 proteins, AlphaFold~3 predictions remain invariant to mutation of up to 40\% of residues, including deliberately destabilising substitutions, and to deletion of 10\%; the invariance persists even for experimentally validated fold-switching proteins. Confidence scores select the most accurate structure at most 35\% of the time and track template availability rather than biophysics. ESMFold is more mutation-sensitive than AlphaFold~3, but still imperfect. For a single substitution in a 300-residue protein --- $0.33\%$ of residues --- the predicted coordinates are unchanged within noise. ProteinDreamer therefore takes structure as \textit{static context}, encoded once, and spends no per-step folding call. Section~\ref{sec:structure_limits} develops this argument.
+
+\paragraph{A pooled latent cannot represent what the model is supposed to learn.} Mean-pooling per-residue embeddings into a single vector attenuates the effect of a single substitution to $O(1/L)$, and destroys the residue--residue interactions in which epistasis lives. Worse, if the action embedding carries the mutated position explicitly, a predictor operating on a pooled latent can learn a position-indexed offset without ever representing site-level protein state. ProteinDreamer keeps a per-residue latent and pools only at the reward head.
+
+\paragraph{The data question has three answers, and the real risk is the additive null.} It is tempting to conclude that multi-step planning is untrainable because deep mutational scanning measures single mutants against one wild type. That conflates three needs. The latent dynamics is trained against the encoder's own embeddings with a stop-gradient, and the environment transition --- applying a substitution to a string --- is deterministic and known, so transitions can be generated without limit and at any horizon from unlabelled sequences. The reward head does need labels, but double-mutant measurements are abundant \citep{olson2014gb1} and published results show that training on singles and doubles extrapolates to higher-order combinations \citep{tran2026multievolve, wang2026atlas}. Only path-level evaluation requires ground truth at every intermediate, and beyond the hand-curated four-site landscapes \citep{wu2016indirect, johnston2024trpb, podgornaia2015phoq}, hypercube extraction recovers on the order of $10^8$ combinatorially complete sub-landscapes of dimension two to twelve from a single mutagenesis experiment \citep{esteban2019hypercubeme}. Section~\ref{sec:data} sets this out in full.
+
+What remains genuinely at risk is not data volume but whether epistasis is a large enough exploitable signal to reward planning at all. \citet{visani2026additive} showed that a recent framework's multimutant predictions correlate almost perfectly with an additive model's, reducing its engineering success to stacking the largest individual effects. ProteinDreamer therefore treats the additive null as a first-class baseline and states the conditions under which its central hypothesis is falsified (Sections~\ref{sec:research_questions} and~\ref{sec:evaluation}).
+
+% ══════════════════════════════════════════════════════════
+% 2. LITERATURE REVIEW
+% ══════════════════════════════════════════════════════════
+\section{Literature Review}
+\label{sec:literature}
+
+\subsection{Protein Representation, Fitness Prediction, and Generative Design}
+
+Protein language models (PLMs) have become the foundation for computational protein engineering. ESM-2 \citep{lin2023esm2}, a 650M-parameter Transformer trained on 65 million sequences, extracts evolutionary and structural information whose attention maps converge to physical residue--residue contacts and whose masked marginals provide competitive zero-shot fitness estimates. ESMFold, built on top of ESM-2, predicts 3D structures far faster than AlphaFold2 \citep{jumper2021alphafold}.
+
+Since the first draft of this proposal, the fitness-prediction frontier has moved decisively toward \textit{structure-aware} and \textit{retrieval-augmented} models, and ESM-2 is no longer competitive at the top of the leaderboard. On the ProteinGym substitution benchmark, as reported in recent preprints, ESM-2 650M attains an average Spearman of approximately $0.414$ (and the 15B variant approximately $0.401$, so scale alone does not help), while SaProt \citep{su2024saprot}, which extends the vocabulary with Foldseek 3Di structure tokens, attains approximately $0.457$, and ProSST \citep{li2024prosst}, which quantises local structure with a GVP-based encoder and uses disentangled attention, attains approximately $0.507$. The VenusREM family \citep{tan2025venusrem} reaches approximately $0.518$, and a 2026 ensemble-and-calibration harness reports $0.556$ \citep{venusrem2harness}. The ablation in that last work is instructive for state design: adaptive MSA/family retrieval fusion accounts for roughly half of the gain over raw ProSST, with background calibration and attenuation by solvent exposure and pLDDT contributing the remainder before ensembling. Separately, ESM-C \citep{esmcambrian} has been reported in an independent transfer-learning study to outperform ESM-2 15B at every model size, with the 300M variant matching ESM-2 650M at lower memory and faster inference \citep{medium_plm_transfer}.
+
+Two lessons follow. First, no particular PLM should be load-bearing in a multi-year proposal; the encoder must be a swappable frozen backbone and its choice an ablation. Second, and more substantively, the information that drives current performance is \textit{static per protein} --- family context, conservation, solvent exposure --- and therefore free to supply at every planning step. This directly motivates the state definition in Section~\ref{sec:formulation}.
+
+On the structural side, GVP-GNN \citep{jing2021gvp} processes scalar and vector features on protein backbone atoms with rotational equivariance in a lightweight architecture, and S3F \citep{zhang2024s3f} showed that combining ESM-2 sequence embeddings, GVP-GNN structural features, and surface topology achieves strong fitness prediction with only 20M trainable parameters. It is worth noting that the apparent dichotomy between continuous geometric encoders and discrete structure tokens is false: ProSST's quantiser is itself GVP-based, so modern structure-token models inherit geometric encoding rather than replacing it. The reason ProteinDreamer does not carry a separate GVP stream is not that GVP is inadequate --- it is that per-step predicted structure carries no action signal (Section~\ref{sec:structure_limits}), and a structure-aware PLM already supplies the static structural prior in one model.
+
+For benchmarking and training, ProteinGym \citep{notin2023proteingym} standardises evaluation across 217 substitution and 66 indel deep mutational scanning (DMS) assays covering over 2.7 million variants, and the mega-scale dataset of \citet{tsuboyama2023megascale} provides over 776{,}000 folding-stability measurements across hundreds of domains. In May 2026 the Rocklin laboratory announced a substantially larger successor, reporting folding-stability measurements for approximately 1.8 million protein domains obtained by cDNA display proteolysis \citep{rocklin2026stability}; its composition and licence require verification before it can be relied upon, and its value to this project depends on whether it contains multi-mutant series or predominantly singles. \citet{chen2023dmslandscapes} showed that heterogeneous DMS data from multiple proteins can be integrated via shared biophysical representations.
+
+The dominant paradigm in generative protein design remains one-shot generation: ProteinMPNN \citep{dauparas2022proteinmpnn}, RFdiffusion \citep{watson2023rfdiffusion}, ESM-3 \citep{hayes2024esm3}, EvoDiff \citep{alamdari2023evodiff} in discrete sequence space, and ProGen2 \citep{nijkamp2023progen2} for family-specific autoregressive generation. These methods produce candidates in one pass with no mechanism for iterative planning.
+
+\subsection{Reinforcement Learning and Active Learning for Protein Engineering}
+
+DynaPPO \citep{angermueller2020dynappo} is the foundational work applying model-based RL to biological sequence design, training an MLP surrogate and using it as a simulator for PPO optimisation, with uncertainty-based safeguards against model exploitation --- safeguards that later work has frequently dropped and that this proposal reinstates (Section~\ref{sec:uncertainty}). EvoPlay \citep{wang2023evoplay} introduced Monte Carlo tree search with self-play for directed evolution. $\mu$Protein \citep{sun2025muprotein} combines $\mu$Former with $\mu$Search (PPO with Dirichlet exploration noise). StructEvo \citep{nie2026structevo} is the most recent and most directly comparable system: it guides Monte Carlo tree search with structure-aware features, and --- notably for this proposal --- avoids folding every mutant by estimating mutant structural features through a \textit{delta-structure fusion} encoder operating on feature differences, reporting improvements of $9.2\%$ and $16.3\%$ over prior state of the art on two optimisation benchmarks. ProSpero \citep{kmicikiewicz2025prospero} attacks a complementary problem, using a frozen generative model with biologically constrained sequential Monte Carlo sampling to reach beyond wild-type neighbourhoods without producing implausible sequences, and reports robustness to surrogate misspecification. All of these treat fitness prediction as a black-box reward and search in sequence space; none learns a transition model or plans in a learned latent space.
+
+\citet{lee2023latentrl} proposed protein sequence design via model-based RL in a VAE latent space, the most directly related prior work. ProteinDreamer can be understood as the full-scale realisation of that concept, replacing the VAE with a pre-trained structure-aware PLM encoder, adding learned latent dynamics with an inverse-dynamics anchor, and adding multi-step planning. \citet{renard2024backbone} applied AlphaZero-style MCTS to protein backbone design, while ProteinRL \citep{sternke2023proteinrl} and \citet{subramanian2024rl_plm} compared RL algorithms for sequence design. GFlowNets \citep{jain2022gflownets} offer a diversity-seeking alternative, sampling candidates with probability proportional to reward; within ProteinDreamer they are one of the pluggable policy classes (Section~\ref{sec:policy}).
+
+Two bodies of critical literature bear directly on the credibility of any such system.
+
+\paragraph{Offline model-based optimisation and model exploitation.} Planning entirely inside a learned reward model, with no new experimental queries, is offline model-based optimisation (MBO). The central failure mode is \textit{objective hacking}: the surrogate over-estimates the value of out-of-distribution designs and the optimiser finds precisely those points \citep{kim2025offlinembo}. The same review emphasises that uncertainty estimation matters \textit{more} in the offline setting, because the model cannot be corrected by querying. A protein-specific study reports that the proxy model ``often yields excessively good values far from the training dataset'' \citep{safembo2025}. Work on ranking-based objectives further shows that learning to rank outperforms regression for offline MBO \citep{tan2024rank}, which motivates the reward formulation in Section~\ref{sec:reward}.
+
+\paragraph{The cost critique.} \citet{wittmann2026retrospective} argues that machine-learning-assisted directed evolution (MLDE) has not transformed directed evolution practice, and attributes this to a mismatch of objectives: MLDE research optimises for ``identify an optimal protein'' while directed evolution seeks ``identify a sufficient protein given time and resource constraints''. He observes that nearly all current MLDE methods ignore the cost of DNA synthesis, which limits their practical applicability regardless of model quality, and that pretrained models learn ``sequence statistics'' --- correlates of biophysics rather than biophysics itself --- so that scaling is not the remedy. His proposed direction is \textit{distribution-focused} MLDE, which selects the parameters of a synthesis-feasible library rather than a list of individual variants. This critique applies to ProteinDreamer as originally formulated, and Section~\ref{sec:research_questions} responds to it with a fifth research question rather than deferring it to future work.
+
+\subsection{World Models, JEPA, and Latent Dynamics}
+
+The idea of learning an environment model for planning traces back to Dyna \citep{sutton1991dyna} and was revived by \citet{ha2018worldmodels}. A limitation of reconstruction-based approaches is that they spend capacity on observation details irrelevant to decision-making. The JEPA paradigm \citep{lecun2022path}, developed into concrete world models by LeWorldModel \citep{maes2026leworldmodel}, addresses this by discarding the decoder entirely and predicting future latent states conditioned on actions, regularised by SIGReg.
+
+SIGReg projects a batch of embeddings onto random unit-norm directions, tests univariate normality on each projection, and aggregates via the Cram\'{e}r--Wold theorem, thereby enforcing $z \sim \mathcal{N}(0, \mathbf{I})$ with a single scalar hyperparameter. Its significance for this proposal is threefold. First, it replaces the teacher--student machinery of earlier JEPAs: LeWorldModel trains encoder and predictor jointly end-to-end \textit{without} an EMA target network or stop-gradient tricks. The first draft of this proposal retained an EMA target encoder alongside SIGReg, which was redundant and contradicted the cited design; it has been removed. Second, there is now a theoretical account of why the Gaussian constraint in particular: \citet{klindt2026whenlejepa} prove that alignment plus Gaussian regularisation yields \textit{linear identifiability} of the underlying latent variables, that the Gaussian is the only latent distribution for which the guarantee holds, and that the guarantee degrades gracefully under approximation --- but the result is established for worlds whose latents evolve under \textit{stationary, additive-noise} transitions. Epistatic, context-dependent mutation effects are not obviously of that class, so this proposal treats stationarity as an assumption under test rather than one in hand (Section~\ref{sec:limitations}). Third, the prescription is contested: \citet{boylan2026nogaussian} argue that imposing a fixed Gaussian geometry ``prescrib[es] what [the representation] must look like, independently of the environment it models'' and becomes a bottleneck on harder tasks. Their alternative obtains anti-collapse pressure from the transition data itself, via a training-only inverse-dynamics head trained with an action-contrastive objective: each latent transition must identify its own action against the others in the batch, which a collapsed encoder cannot do. The head is discarded after training, so test-time cost is unchanged; they report $80.0 \pm 2.0\%$ versus $58.0 \pm 2.0\%$ for SIGReg on a multi-object visual benchmark, with parity on four standard pixel-control tasks. ProteinDreamer adopts both mechanisms (Section~\ref{sec:inverse}), because in the protein setting the inverse-dynamics signal is unusually strong and unusually cheap.
+
+Causal-JEPA \citep{nam2026cjepa} is relevant but was mischaracterised in the first draft of this proposal, which described it as performing object-level latent \textit{interventions} and built an architectural claim on that reading. It in fact extends masked joint-embedding prediction from image patches to object-level latents: by \textit{masking} object latents and requiring each masked state to be inferred from surrounding context, it imposes structured partial observability that creates ``counterfactual-like'' prediction queries and discourages shortcut solutions. The framing of mutations as causal interventions is this proposal's own and is not inherited from that work. The transferable idea is nevertheless valuable and better than the one previously claimed: masking \textit{residue-level} latents and requiring their reconstruction from structural and sequence context is, in the protein setting, an epistasis-learning objective. It requires per-residue latents, which the revised architecture now has.
+
+On the dynamics side, DIAMOND \citep{alonso2024diamond} replaced RSSM dynamics with a diffusion model, producing more accurate long-horizon rollouts, but operates in pixel space at high cost. Moving the generative process into latent space yields large efficiency gains, the insight behind Latent Diffusion Models \citep{rombach2022ldm}. Two 2026 results refine this further and supersede the DDPM formulation used in the first draft. Flow-JEPA \citep{huo2026flowjepa} replaces LeWorldModel's deterministic latent dynamics with conditional flow matching \citep{lipman2023flowmatching} over future latent \textit{trajectories}, moving from pointwise transition regression to stochastic trajectory-level prediction, and reports success rising from $86\%$ to $92\%$ on clean observations and from $67\%$ to $86\%$ under noise. FlowWM \citep{porcher2026flowwm} performs flow matching directly in pretrained feature space and argues explicitly that standard diffusion recipes are suboptimal in high-dimensional pretrained feature spaces --- which is exactly the regime of a frozen PLM encoder. Separately, sampling cost is a first-order concern for an imagination-based planner: Dreamer~4 \citep{hafner2025dreamer4} addresses it with \textit{shortcut forcing}, a self-consistency objective that reduces generation to $K = 4$ forward passes per frame rather than the $\sim$64 of standard diffusion at near-equivalent quality. Architecture~A is therefore a conditional flow-matching model with a shortcut objective, and DDPM is retained only as an ablation.
+
+Finally, Active Inference \citep{parr2022active} proposes that agents select actions to minimise expected free energy, decomposing into pragmatic value (reward seeking) and epistemic value (uncertainty reduction), and \citet{tschantz2020rl_active_inference} bridged this to deep RL. \citet{sajid2021demystified} formalise how the framework differs from standard reinforcement learning, treating exploration as a first-principle requirement rather than an engineering heuristic. The first draft of this proposal claimed as a contribution the formal unification of the JEPA objective with variational free energy. That contribution has since been made: \citet{arnez2026sigregfree} rank non-contrastive regularisers (VICReg, LogDet, PairDist, SIGReg) by a ``prior-miscalibration gap'', prove that SIGReg eliminates the gap so that the JEPA objective becomes an exact information bottleneck with the surprise bound preserved, extend the correspondence to multi-step expected free energy and ensemble epistemic value, and machine-check the algebra in Lean~4. Two things follow. The theoretical contribution is no longer available, and this proposal does not claim it. But that work is explicitly theoretical, with empirical validation ``left for separate work'', and it identifies one term --- a \textit{state-epistemic value}, a future-state coverage signal --- that no current JEPA world model computes. Meanwhile the empirical status of the epistemic term is genuinely unsettled: \citet{champion2023deconstructing} found that an expected-free-energy-minimising agent focused almost exclusively on a single action and performed poorly, while a reward-maximising variant of the same architecture explored and solved the task, the epistemic term being the only difference. Accordingly, Active Inference is retained in ProteinDreamer as \textit{one} pluggable policy class to be evaluated against alternatives, not as the framework's organising principle, and the hypothesis concerning it is stated so that it can fail (Section~\ref{sec:research_questions}).
+
+\subsection{Predicted Structures and the Limits of Structural State}
+\label{sec:structure_limits}
+
+Because this subsection carries the single largest architectural change, it is stated separately.
+
+\citet{feldman2026invariance} performed a systematic adversarial evaluation of AlphaFold~3 using point and deletion mutations across 200 proteins. Predicted structures remained invariant to mutation of up to $40\%$ of residues, including deliberately destabilising substitutions, and to deletion of $10\%$. The invariance held for fifteen experimentally validated fold-switching proteins that are known to adopt alternative conformations under such mutations --- small, monomeric targets, precisely the category where these models are expected to perform best. For fold-switching proteins under point mutation, TM-score correlated with mutation percentage at Pearson $-0.66$, with mean TM-score still $\approx 0.77$ at $5\%$ mutation and declining only gradually thereafter. Confidence metrics selected the most accurate structure at most $35\%$ of the time and correlated with the structural quality of the best available training-set template, suggesting that ``uncertainty estimates reflect template availability more than biophysical reasoning''. ESMFold showed greater, though still imperfect, mutational sensitivity, which the authors attribute to tighter sequence--structure coupling in its training objective. An earlier analysis reached a compatible conclusion for AlphaFold2 and single mutations \citep{pak2023alphafold_mutations}.
+
+The consequence for a mutation-level world model is direct. If the state includes $\mathbf{C}_t \in \mathbb{R}^{L \times 3}$ predicted from $\mathbf{x}_t$, then for a single substitution --- $0.33\%$ of residues at $L=300$ --- $\mathbf{C}_{t+1} = \mathbf{C}_t$ within noise. A structural encoder applied to it produces an embedding that is effectively constant along a trajectory; the structural component of the learned transition is the identity map; and pLDDT is not a reliable property signal. The per-step folding call then purchases latency and parameters, and lends an unearned impression of physical grounding, without supplying action-dependent information.
+
+Three responses are available, and this proposal takes the first while noting the others. (i) Encode structure \textit{once}, from the wild type or a reference structure, and treat it as static context --- cheap, honest, and sufficient to supply a prior on where mutations are tolerated. (ii) Estimate mutant structural \textit{features} by feature differences rather than folding each mutant, as StructEvo does \citep{nie2026structevo}. (iii) Fold only at commit points, outside the imagination loop, as part of candidate validation. What is not defensible is folding inside the rollout and describing the result as a structural state transition.
+
+% ══════════════════════════════════════════════════════════
+% 3. RESEARCH QUESTIONS AND HYPOTHESES
+% ══════════════════════════════════════════════════════════
+\section{Research Questions and Hypotheses}
+\label{sec:research_questions}
+
+\subsection{Research Questions}
+
+\begin{enumerate}
+    \item \textbf{Can a JEPA-style world model learn a useful simulator of protein fitness landscapes?} Current fitness predictors map sequences directly to scalar values. A world model predicts full latent state transitions after a mutation. The question is whether the additional structure of transition prediction buys anything that flat fitness regression does not --- and, specifically, whether a latent trained with an inverse-dynamics anchor encodes mutation effects that a pooled or regression-only latent does not.
+
+    \item \textbf{Does generative latent dynamics outperform a deterministic predictor for multi-step rollouts on epistatic landscapes?} A single mutation can lead to distinct outcomes depending on background context. Conditional flow matching produces distributional samples rather than a point estimate. The question is whether that distributional capacity reduces error compounding over multi-step rollouts and improves candidate diversity, and whether it is worth its sampling cost once few-step sampling is used.
+
+    \item \textbf{Which exploration strategy actually works best for protein design under a learned world model?} Candidates include expected-free-energy minimisation, PPO with an entropy bonus, Monte Carlo tree search, and GFlowNets. This is posed as a comparison rather than an endorsement: the epistemic term has been shown to suppress exploration in at least one careful study \citep{champion2023deconstructing}, so the question is empirical and a negative result for Active Inference is a legitimate and reportable outcome.
+
+    \item \textbf{Can latent-space planning discover multi-step mutation trajectories that greedy single-step methods cannot reach?} In protein engineering this means crossing fitness valleys: paths where intermediate steps are deleterious but the endpoint is beneficial. Combinatorially complete four-site landscapes make this question answerable with ground truth over every path of length $\leq 4$ \citep{wu2016indirect, johnston2024trpb}.
+
+    \item \textbf{Can trajectory planning be lifted from individual variants to mutation \textit{distributions}, so that synthesis cost enters the objective?} \citet{wittmann2026retrospective} argues that variant-focused MLDE cannot reach cost parity with traditional directed evolution, and that the practical formulation chooses the parameters of a synthesis-feasible library. A world model that plans trajectories maps naturally onto rounds of a campaign --- the train--propose--test--retrain loop formalised by \citet{hie2022adaptive} --- and a policy whose action is a \textit{distribution} over mutations rather than a single mutation addresses the critique within the same framework. There is precedent for the objective: \citet{ding2024cooptimization} co-optimise fitness and diversity for combinatorial library design in enzyme engineering, which is the experimental form of the same question. This research question asks whether that lift is feasible within a learned world model and whether it changes which designs are selected.
+\end{enumerate}
+
+\subsection{Hypotheses}
+
+Each hypothesis is stated with the metric that would support it and the observation that would falsify it.
+
+\begin{enumerate}
+    \item[\textbf{H1.}] A world model trained with latent prediction, SIGReg, an inverse-dynamics anchor, and a supervised reward loss will produce per-residue latents whose mutation-induced displacement is informative about fitness, yielding reward-head accuracy competitive with strong zero-shot and supervised baselines on held-out ProteinGym assays. \textit{Falsified if} the latent displacement $\lVert \mathbf{Z}_t - \mathbf{Z}_{t+1} \rVert$ carries no information about $\lvert \Delta\Delta G \rvert$ beyond what the frozen encoder already supplies, or if reward-head accuracy fails to match a regression head trained directly on the frozen encoder.
+
+    \item[\textbf{H2.}] Architecture~A (flow-matching dynamics) will produce more accurate multi-step rollouts than Architecture~B (deterministic dynamics) on epistatic landscapes, measured as reduced growth of latent prediction error and of reward error over 2--4 mutation steps on held-out paths through the GB1 and TrpB landscapes, and improved diversity among top-ranked candidates. \textit{Falsified if} error growth is statistically indistinguishable, or if B matches A at a fraction of the sampling cost.
+
+    \item[\textbf{H3.}] Among the policy classes evaluated, the ranking of sample efficiency in the low-data regime ($<100$ labelled variants) will depend on whether the model's uncertainty estimates are calibrated, and no policy class will dominate when uncertainty is miscalibrated. This is deliberately weaker than the first draft's claim that Active Inference would win. \textit{Supported if} policy ranking correlates with measured uncertainty calibration; \textit{informative either way}, and an outcome in which PPO with an entropy bonus matches or beats expected-free-energy minimisation will be reported as such.
+
+    \item[\textbf{H4.}] Multi-step planning in the learned world model will reach fitness peaks that neither greedy single-step optimisation on the same reward head \textit{nor an additive null model} can reach, measured on the combinatorially complete GB1, TrpB and PhoQ landscapes as the frequency of reaching the global optimum and the fraction of reciprocal-sign-epistasis traps escaped. The additive null is the decisive comparison, for the reason given in Section~\ref{sec:evaluation}: a planner that merely stacks the individually most beneficial substitutions is reproducing a forty-year-old heuristic, however sophisticated its machinery. \textit{Falsified if} greedy optimisation or an additive model fitted to the single mutants reaches the global optimum at a comparable rate, if the planner's predictions correlate near-perfectly with the additive model's, or if the planner's advantage disappears once candidates are filtered by the trust-region constraint of Section~\ref{sec:uncertainty}.
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════
+% 4. METHODOLOGY
+% ══════════════════════════════════════════════════════════
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Problem Formulation}
+\label{sec:formulation}
+
+Protein design is formulated as a Markov Decision Process $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \gamma)$. The state is
+\begin{equation*}
+    s_t = \big(\mathbf{x}_t,\; \Phi(\mathrm{WT}),\; \mathbf{m}_{1:t}\big),
+\end{equation*}
+comprising the current amino acid sequence $\mathbf{x}_t \in \{A, C, D, \ldots, Y\}^L$; a \textit{static context} $\Phi(\mathrm{WT})$ computed once per design campaign, containing the family MSA profile (per-position conservation and couplings), a reference structure and its derived per-residue features (solvent exposure, local structure tokens), and per-site PLM marginals; and the \textit{mutation history} $\mathbf{m}_{1:t}$, the multiset of substitutions applied so far.
+
+Three remarks on this definition. The static context is the component that current state-of-the-art fitness predictors derive roughly half of their performance from, and it costs nothing per step because it does not change as mutations accumulate. The mutation history is included because without it the process is not Markov in $\mathbf{x}_t$ alone for the purposes of a model that must represent interaction with previously applied substitutions; its omission in the first draft was a formulation error. And predicted per-step structure is absent, for the reasons given in Section~\ref{sec:structure_limits}.
+
+The action $a_t$ is a single-site substitution $(i, \mathrm{AA}_{\text{new}})$, so $\mathcal{A} = \{(i,j) : i \in \{1,\ldots,L\},\, j \in \{1,\ldots,20\}\}$, and multi-mutant designs are produced by chaining substitutions over a horizon $H$. Insertions and deletions are excluded, as they require a variable-length action space and a world model that handles changing sequence length; this remains a long-term direction. The transition function $\mathcal{T}$ is the learned world model. The reward $\mathcal{R}$ is predicted folding stability and assay-normalised fitness (Section~\ref{sec:reward}). The discount factor is $\gamma = 0.99$.
+
+For research question~5, the action space is lifted to a parameterised \textit{distribution} over mutations --- the natural computational analogue of a degenerate-oligonucleotide library --- so that an action specifies which positions are diversified and with what amino acid composition, and the objective includes a synthesis-cost term. This is developed as an extension rather than the default formulation.
+
+\subsection{System Architecture Overview}
+
+The system has six components: (1) a frozen structure-aware protein encoder producing per-residue latents; (2) an action encoder; (3) a world model predictor that forecasts the post-mutation latent, with an inverse-dynamics head that anchors the latent during training and is discarded afterwards; (4) a reward head; (5) an uncertainty and trust-region module; and (6) a pluggable policy. During planning all computation occurs in latent space: no decoder and no structure predictor is invoked. The policy imagines mutation trajectories of horizon $H$, scores them with the reward head subject to the trust-region constraint, and commits the best to evaluation.
+
+\subsection{Protein Encoder}
+\label{sec:encoder}
+
+The encoder $f_\theta$ maps a state $s_t$ to a per-residue latent $\mathbf{Z}_t \in \mathbb{R}^{L \times d}$, with $d \approx 128$--$256$. A single frozen structure-aware protein language model --- ProSST \citep{li2024prosst} as the default, with SaProt \citep{su2024saprot} and ESM-C \citep{esmcambrian} as documented alternatives --- processes the sequence together with the quantised local-structure tokens of the reference structure, producing per-residue hidden states. These are concatenated per residue with the static context features of $\Phi(\mathrm{WT})$ and with an embedding of the mutation history restricted to that residue, then projected by a lightweight trainable adapter to $\mathbf{Z}_t$. The backbone is frozen; only the adapter, predictor, inverse head, and reward head are trained. The encoder is specified as a swappable interface, and the choice of backbone is an ablation rather than a commitment of the proposal.
+
+There is deliberately no second encoder stream and no fusion MLP. Structure enters through the backbone's structure-aware vocabulary and through the static context, computed once. This answers the question of whether a single powerful foundation model could replace separate sequence and structure models in the affirmative, while declining the specific instantiation via ESM-3: its flagship model is available only through an API, which is untenable inside a training loop that requires many thousands of encoder passes per imagination batch, and the open 1.4B checkpoint carries a custom non-commercial licence that is incompatible with the open framework promised in Section~\ref{sec:contributions}. ESM-3 is retained as a swappable backend for users whose licence terms permit it.
+
+SIGReg \citep{maes2026leworldmodel} is applied to the latents, enforcing approximate isotropic Gaussianity with a single scalar $\lambda_{\text{reg}}$ by projecting the batch onto random unit directions, testing univariate normality on each projection, and aggregating via the Cram\'{e}r--Wold theorem. With per-residue latents, residue embeddings across the batch are treated as the sample, so the constraint is imposed on the marginal distribution of per-residue latents rather than on a pooled vector. The theoretical motivation is the linear-identifiability result of \citet{klindt2026whenlejepa}; its stationarity assumption is recorded as a risk in Section~\ref{sec:limitations}.
+
+\textbf{No EMA target encoder is used.} The target latent is produced by the same encoder with a stop-gradient. This follows the design of LeWorldModel \citep{maes2026leworldmodel}, whose central claim is that SIGReg removes the need for teacher--student machinery; retaining both, as the first draft did, was redundant. The attendant risk --- that pure latent prediction on protein data is collapse-prone, as ProteinJEPA found when training without a masked-language-modelling anchor \citep{ofer2026proteinjepa} --- is addressed by the inverse-dynamics head below and by the supervised reward loss, both of which act as anchors, and is monitored explicitly (Section~\ref{sec:limitations}).
+
+\subsection{Action Encoder and Inverse-Dynamics Anchor}
+\label{sec:inverse}
+
+Mutations are embedded as $a_t^{\text{emb}} = e_\alpha(a_t)$ by a small MLP combining a positional embedding with embeddings of the original and replacement amino acids.
+
+A training-only \textbf{inverse-dynamics head} $q_\nu$ recovers the applied mutation from the latent transition: given $(\mathbf{Z}_t, \mathbf{Z}_{t+1})$, it predicts the position $i$ and the replacement amino acid $j$. Because the action space here is discrete and factorises as $L \times 20$, a factorised cross-entropy over positions and amino acids is both simpler and a stronger learning signal than the batch-contrastive objective used in the vision setting \citep{boylan2026nogaussian}; the action-contrastive form is retained as an ablation. The head is discarded after training, so inference and planning cost are unaffected.
+
+This component is load-bearing for three reasons, and it is the single most important addition in this revision. It supplies anti-collapse pressure from the transition data itself rather than from a prescribed latent geometry, which is the mechanism \citet{boylan2026nogaussian} show can outperform SIGReg alone on harder tasks. It directly forces the latent to encode \textit{which} mutation occurred and therefore what it did --- precisely the signal that the removal of the structural stream and the move away from pooling were motivated by. And it provides a cheap diagnostic: if the inverse head cannot recover the mutation from the latent transition, the world model has not learned action-dependent dynamics, whatever its prediction loss reports.
+
+\subsection{World Model A: Latent Flow-Matching JEPA}
+\label{sec:archA}
+
+The primary predictor is a conditional flow-matching model \citep{lipman2023flowmatching} operating on the per-residue latent, following Flow-JEPA \citep{huo2026flowjepa} and FlowWM \citep{porcher2026flowwm} in preferring flow matching to denoising diffusion for latent dynamics. Given $\mathbf{Z}_t$ and $a_t^{\text{emb}}$, it defines a probability path from a Gaussian source to the target latent $\mathbf{Z}_{t+1}$ (produced by the encoder under stop-gradient) and learns the conditional velocity field along that path. A Transformer denoiser conditions on $\mathbf{Z}_t$ and $a_t^{\text{emb}}$ through cross-attention. Sampling integrates the learned field; a self-consistency (shortcut) objective in the manner of Dreamer~4's shortcut forcing \citep{hafner2025dreamer4} permits few-step sampling, which matters because an imagination rollout costs $N$ samples $\times$ $H$ steps $\times$ many trajectories and few-step sampling is the difference between a feasible and an infeasible planner. Full equations are in Appendix~\ref{app:equations}.
+
+Following Flow-JEPA, the model is trained to predict latent \textit{trajectories} rather than single transitions where trajectory data permits, which attacks error compounding directly rather than relying on per-step accuracy to compose. DDPM-style denoising \citep{ho2020ddpm}, as specified in the first draft, is retained as an ablation; it is worth noting that the loss given in that draft was an $x_0$-prediction regression rather than a score-matching objective, despite being described as the latter, and the present formulation names its objective correctly.
+
+Sampling $N$ latent trajectories yields a distributional estimate whose variance quantifies transition uncertainty, which feeds the exploration and trust-region machinery of Section~\ref{sec:uncertainty}.
+
+\subsection{World Model B: Deterministic Latent JEPA}
+\label{sec:archB}
+
+Architecture~B replaces the generative predictor with a deterministic Transformer mapping $(\mathbf{Z}_t, a_t^{\text{emb}})$ to $\hat{\mathbf{Z}}_{t+1}$ in one forward pass, trained against the stop-gradient target with SIGReg, the inverse-dynamics loss, and the reward loss. It is faster and suitable for rapid screening, but averages over modes. Uncertainty is obtained from a small ensemble of $M = 3$--$5$ predictors over the shared frozen encoder.
+
+The evidential (Normal-Inverse-Gamma) head proposed in the first draft has been removed. Evidential deep learning's epistemic estimates are under sustained criticism: \citet{jurgens2024edl} question whether epistemic uncertainty is faithfully represented by such methods at all, and \citet{shen2024mirage} argue the capability is ``a mirage'' and report epistemic uncertainty \textit{collapsing} as model complexity grows. Since the epistemic estimate is consumed directly by the policy, an unreliable one is worse than none. For the same reason, a shared-trunk multi-head ensemble --- the cheap variant --- is not used as the primary configuration: correlated heads systematically under-estimate epistemic uncertainty, so the efficiency saving falls precisely on the quantity that must not be wrong. Shared-trunk ensembling is evaluated as a cost-reduction ablation, reported against calibration rather than accuracy alone.
+
+The intended progression is to establish the pipeline with B, then upgrade to A for design campaigns, with H2 as the test of whether that upgrade is warranted.
+
+\subsection{Reward Head}
+\label{sec:reward}
+
+The reward head $R_\psi$ operates on the pooled latent $\bar{\mathbf{z}}_t = \mathrm{Pool}(\mathbf{Z}_t)$ --- pooling happens here and only here --- and predicts two quantities:
+
+\begin{itemize}
+    \item \textbf{Folding stability} ($\Delta\Delta G$ or $\Delta G$), regressed with a SmoothL1 loss on the mega-scale stability data of \citet{tsuboyama2023megascale}, and on the 2026 successor release \citep{rocklin2026stability} if its composition and licence permit.
+    \item \textbf{Assay-normalised DMS fitness}, trained with a pairwise ranking loss within each assay. ProteinGym fitness values are assay-specific and not comparable across assays, so a single head regressing raw values across assays is ill-posed; per-assay standardisation plus a ranking objective addresses this, and ranking objectives have been shown to outperform regression for offline model-based optimisation \citep{tan2024rank}.
+\end{itemize}
+
+Binding affinity ($K_d$) and catalytic activity ($k_{\text{cat}}$), advertised as additional heads in the first draft, are deferred to future work. The data do not support them: measurements are sparse, assay-heterogeneous, and not co-measured on the same variants, so a multi-task head with per-task weights would have no training signal for two of its three outputs. Where multiple objectives are genuinely required, they are better imposed at the planning level --- for instance constraining predicted stability while maximising predicted activity --- than by positing heads that cannot be fit.
+
+\subsection{Policy Classes}
+\label{sec:policy}
+
+The policy is a pluggable component, and comparing policy classes is research question~3 rather than a settled design choice. Four classes are implemented against a common interface:
+
+\begin{itemize}
+    \item \textbf{PPO with entropy bonus}, the standard baseline and the reference against which the others must justify themselves.
+    \item \textbf{Active Inference}, selecting actions by minimising expected free energy, which decomposes into pragmatic value (expected negative reward) and epistemic value (expected uncertainty reduction), implemented as a latent-space actor--critic trained on imagined rollouts with $\mathrm{TD}(\lambda)$ returns. The exploration weight $\eta$ is treated as an ablated hyperparameter, including $\eta = 0$, so that the contribution of the epistemic term is measured rather than assumed. This caution is warranted: \citet{champion2023deconstructing} found an expected-free-energy agent collapsing onto a single action where the reward-maximising variant of the same architecture explored successfully.
+    \item \textbf{Monte Carlo tree search} over mutation trees scored by the reward head, which is more sample-efficient at short horizons and is the mechanism used by the closest competing systems \citep{wang2023evoplay, nie2026structevo}.
+    \item \textbf{GFlowNets} \citep{jain2022gflownets}, sampling in proportion to reward where diversity is the priority.
+\end{itemize}
+
+The formal correspondence between the SIGReg-regularised JEPA objective and variational free energy, which makes the Active Inference option more than an analogy, is established by \citet{arnez2026sigregfree} and is used here rather than re-derived. Their identification of a missing \textit{state-epistemic} (future-state coverage) term, computed by no current JEPA world model, is implemented as an optional additional term in the expected free energy and evaluated as part of research question~3.
+
+\subsection{Uncertainty, Trust Region, and Model Exploitation}
+\label{sec:uncertainty}
+
+Planning inside a learned reward model with no new experimental queries is offline model-based optimisation, whose characteristic failure is that the optimiser finds exactly the out-of-distribution points where the surrogate is over-optimistic \citep{kim2025offlinembo, safembo2025}. DynaPPO included safeguards against this \citep{angermueller2020dynappo}; they are reinstated here as an explicit admissibility predicate applied to every imagined rollout:
+
+\begin{enumerate}
+    \item \textbf{Latent plausibility.} Because SIGReg enforces approximate isotropic Gaussianity on the latents, the regulariser's own test statistic provides a natural detector: an imagined latent whose projection statistics fall outside a quantile calibrated on training data is off-manifold. This is an unusually clean fit between a regulariser and a safety check, and it costs nothing additional to compute.
+    \item \textbf{Model disagreement.} Rollouts whose flow-sample variance (Architecture~A) or ensemble disagreement (Architecture~B) exceeds a threshold are rejected or penalised.
+    \item \textbf{Hard mutational budget.} Candidates more than $k$ substitutions from any training-data neighbourhood are rejected outright, regardless of predicted reward.
+\end{enumerate}
+
+Two further commitments follow. First, uncertainty is \textit{validated, not assumed}: calibration is reported as a primary result via error-versus-predicted-uncertainty curves and risk--coverage analysis on held-out assays, because an uncalibrated epistemic term in a policy objective is worse than no term. Second, a distinction elided in the first draft is made explicit: the variance of sampled $\mathbf{Z}_{t+1}$ measures uncertainty about the \textit{transition}, not about the \textit{reward}. Where the policy requires reward uncertainty, it is estimated at the reward head rather than substituted from transition variance.
+
+\subsection{Training Procedure}
+
+Training alternates two phases. In the \textit{world model phase}, batches of transitions are used to update the adapter, predictor, inverse head, and reward head via the combined loss (Appendix~\ref{app:equations}). In the \textit{policy phase}, imagined rollouts from the trained world model update the policy and critic. To mitigate the interaction identified in Section~\ref{sec:limitations} --- that the generative predictor regresses toward a target produced by an encoder being trained concurrently, and with no EMA the target moves --- the adapter is warmed up under the reward and inverse-dynamics losses alone before the dynamics loss is enabled, and the dynamics loss weight follows a ramp schedule. Algorithms are in Appendix~\ref{app:algorithms}.
+
+\subsection{Data}
+\label{sec:data}
+
+The project has three distinct data needs, with three different answers, and conflating them --- as the first draft did --- produces a misleading picture of what is and is not available. Table~\ref{tab:data} separates them.
+
+\paragraph{(i) Latent dynamics requires no experimental labels.} The dynamics target is the encoder's own embedding of $s_{t+1}$ under a stop-gradient, and the environment transition is deterministic and known: applying a substitution to a string. Transitions $(s_t, a_t, s_{t+1})$ can therefore be generated without limit, at any horizon, from any sequence database, at a cost of one structure prediction and one MSA per protein rather than per variant. This is a genuine asymmetry with the vision and control setting, where comparable world models must collect rollouts from an environment.
+
+The honest qualification is that such self-supervised transitions \textit{amortise the encoder} rather than supplying biological knowledge: the model learns to predict $f_\theta(\mathrm{mutate}(\mathbf{x}, a))$ from $f_\theta(\mathbf{x})$ and $a$ without evaluating $f_\theta$. The value is real but specific --- planning speed, and a latent shaped by the reward and inverse-dynamics losses rather than by the frozen backbone alone. Unlimited transition data does not mean unlimited learning, and the biology enters only through the pretrained encoder and the labelled reward.
+
+\paragraph{(ii) The reward head on multi-mutants is better supplied than single-mutant DMS suggests.} The critical resource is \textit{double} mutants, and they exist in bulk. \citet{olson2014gb1} measured all 1{,}045 single and 535{,}917 of 536{,}085 possible double mutants ($99.97\%$) of the 56-residue GB1 domain. ProteinGym encodes multiple substitutions natively and ships separate supervised folds for singles and multiples. Published results indicate that this is sufficient for higher-order extrapolation: \citet{wang2026atlas} train on fewer than 300 single and double mutants and reach a mean Spearman of $0.65$ on unseen higher-order combinations, against $0.62$ for Kermut \citep{groth2024kermut}, $0.61$ for MULTI-evolve \citep{tran2026multievolve} and $0.56$ for ProteinNPT \citep{notin2023proteinnpt}. Independently, \citet{barnes2026foldx} report that models trained on double mutants improve higher-order accuracy whereas models trained on singles do not --- which is precisely the distinction that matters here.
+
+\paragraph{(iii) Path-level evaluation is the real constraint, but less severe than hand-curated landscapes imply.} Testing whether a \textit{trajectory} is well predicted requires ground truth at every intermediate, which is the defining property of a combinatorially complete dataset. Beyond the hand-curated four-site landscapes, \citet{esteban2019hypercubeme} give a recursive algorithm that extracts \textit{all} such hypercubes embedded in random-mutagenesis data; applied to the HIS3 landscape \citep{pokusaeva2019his3} it recovered $199{,}847{,}053$ combinatorially complete sub-datasets of dimensionality two to twelve, of which only $12\%$ are squares and $88\%$ are of dimension three or higher. This supplies path-level ground truth well past horizon four. Its limits must be stated: it is one protein, mutagenised in twelve separate segments so the hypercubes are segment-local, the hypercubes overlap heavily so the count is not a count of independent datasets, and the growth assay has a measurement floor --- a floor that also interferes with epistasis estimation for at least $30\%$ of the GB1 doubles.
+
+\begin{table}[h]
+\centering
+\caption{Data sources by role. Dynamics needs no labels; the reward head needs labels; path evaluation needs labels at every intermediate.}
+\label{tab:data}
+\small
+\begin{tabular}{p{4.0cm} p{4.8cm} p{4.6cm}}
+\toprule
+\textbf{Source} & \textbf{Content} & \textbf{Role} \\
+\midrule
+UniRef / any sequence set & Arbitrary sequences, mutations applied in silico & \textbf{Dynamics} (self-supervised, unlimited horizon); no reward signal \\
+\addlinespace
+ProteinGym \citep{notin2023proteingym} & 217 substitution DMS assays, ${\sim}2.7$M variants; multiple substitutions supported, with separate singles and multiples folds & Reward head (per-assay ranking); multi-mutant supervised evaluation \\
+\addlinespace
+Tsuboyama mega-scale \citep{tsuboyama2023megascale} & ${>}776$k folding-stability measurements & Reward head (stability) \\
+\addlinespace
+Rocklin 2026 release \citep{rocklin2026stability} & ${\sim}1.8$M protein domains, cDNA display proteolysis & Reward head, pending verification of composition and licence \\
+\addlinespace
+GB1 all doubles \citep{olson2014gb1} & $1{,}045$ singles $+$ $535{,}917$ doubles ($99.97\%$ complete) & Reward head; \textbf{all two-step paths}; additive-null fitting \\
+\addlinespace
+GB1 four-site \citep{wu2016indirect} & Combinatorially complete, $20^4 = 160{,}000$ & \textbf{Paths} $\leq 4$; reciprocal sign epistasis blocks direct routes \\
+\addlinespace
+TrpB four-site \citep{johnston2024trpb} & Combinatorially complete, $160{,}000$, enzyme active site & \textbf{Paths} $\leq 4$; local optima defeat simulated directed evolution \\
+\addlinespace
+PhoQ four-site \citep{podgornaia2015phoq} & Combinatorially complete, protein--protein interface & \textbf{Paths} $\leq 4$; third independent landscape \\
+\addlinespace
+HIS3 via HypercubeME \citep{pokusaeva2019his3, esteban2019hypercubeme} & ${\sim}200$M extracted hypercubes, dimension 2--12 & \textbf{Paths} beyond horizon 4; one protein, segment-local \\
+\addlinespace
+FLIP GB1 split \citep{dallago2021flip} & Train on wild type, singles, doubles; test on triples and quadruples & Generalisation test for multi-mutant extrapolation \\
+\addlinespace
+SLIP tuned Potts landscapes \citep{thomas2022slip} & Synthetic, tunable epistatic horizon, unlimited queries & Planner validation under controlled ruggedness; \textit{never} biological evidence \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\citet{wu2016indirect} found that reciprocal sign epistasis blocks many direct adaptive paths in GB1 while indirect paths that gain and later lose mutations circumvent the traps, which is exactly the phenomenon H4 concerns. \citet{johnston2024trpb} report that epistasis and local optima in the TrpB active site prevent simulated directed evolution from reaching the global optimum efficiently, providing the baseline that planning must beat.
+
+TEM-1 $\beta$-lactamase resistance evolution, named in the first draft as a validation target, is retained only as a motivating illustration: it is a historical narrative rather than a densely covered combinatorial dataset, and claims of valley crossing require dense ground truth at every intermediate.
+
+\subsection{Synthetic Landscapes, and What May Not Be Simulated}
+\label{sec:synthetic}
+
+Because real path-level data is confined to a handful of proteins, synthetic landscapes are used for one specific purpose: establishing that the planner works at all, and measuring how its advantage over greedy search scales with ruggedness, at horizons no experimental dataset reaches. The instrument is SLIP \citep{thomas2022slip}, which fits a Potts model to a real alignment and exposes an \textit{epistatic horizon} as a tunable difficulty parameter, giving unlimited queries against exact ground truth with epistatic structure derived from real evolutionary data. Its predecessor, a quadratic landscape built from contact maps and pair potentials, is the oracle DynaPPO used \citep{angermueller2020dynappo}. The known limitations are recorded rather than ignored: direct-coupling models predict mutation costs quantitatively but underestimate strong long-range epistasis, Potts energies correlate only partially with measured epistasis, and Potts-based simulated evolution tends to produce non-neutral sequences.
+
+Two forms of data simulation are explicitly excluded, because each would make the project's central claims unfalsifiable.
+
+\paragraph{Biophysical $\Delta\Delta G$ predictors must not be used to label multi-mutants.} FoldX and comparable tools assume strict additivity for combined substitutions, and methods calibrated on single-point data predict additivity for two or more mutations by construction. \citet{barnes2026foldx} measure the consequence: FoldX's correlation with observed epistasis is $0.19$, rising to $0.59$ only after a learned correction. A landscape labelled this way contains no epistasis, so training a world model on it would teach additivity and ``validating'' H4 on it would confirm valley-crossing on a landscape in which valleys cannot exist.
+
+\paragraph{Pseudo-labels from existing fitness predictors must not be used as evidence.} Labelling multi-mutants with ProSST, VenusREM or a mutation atlas is distillation: the resulting ceiling is the teacher's, and any discovered fitness valley may be the teacher's artifact. Such labels are admissible for auxiliary pretraining or regularisation, and are inadmissible in any reported evaluation.
+
+\noindent The governing rule is that no biological claim in this project rests on a simulated label. Synthetic landscapes answer questions about the \textit{algorithm}; experimental landscapes answer questions about \textit{proteins}.
+
+% ══════════════════════════════════════════════════════════
+% 5. PRELIMINARY DIAGNOSTICS
+% ══════════════════════════════════════════════════════════
+\section{Preliminary Diagnostics}
+\label{sec:diagnostics}
+
+Two cheap experiments test load-bearing assumptions of the architecture before any substantial implementation. Both require no training, take days rather than months, and have explicit go/no-go criteria. Running them first is a deliberate choice: each either validates a design decision or saves the project from building on a false premise.
+
+\paragraph{D1: Does predicted structure move under single mutations?} For approximately 50 proteins spanning a range of lengths and folds, and approximately 20 single mutants each (including substitutions known to be strongly destabilising), predict structures for wild type and mutants and measure TM-score, C$\alpha$ RMSD, and the displacement of the structural embedding under a GVP-GNN and under a structure-aware PLM's structure tokens. \textit{Criterion:} if structural embeddings do not move appreciably more than the encoder's numerical noise, the removal of the per-step structural stream is confirmed empirically and the resulting figure answers the most predictable reviewer objection in advance. If they \textit{do} move for some class of mutations, that class is characterised and a conditional structural update is reconsidered.
+
+\paragraph{D2: Does the latent have room for the dynamics?} On the mega-scale stability data, measure the correlation between latent displacement $\lVert \mathbf{z}_{\mathrm{WT}} - \mathbf{z}_{\mathrm{mut}} \rVert$ and $\lvert \Delta\Delta G \rvert$ under the frozen encoder, computed both per-residue and after mean-pooling, across several latent dimensions $d$. \textit{Criterion:} this decides the pooling question empirically rather than by argument, and fixes the latent dimension. If the per-residue displacement tracks $\lvert \Delta\Delta G \rvert$ and the pooled displacement does not, the architectural change in Section~\ref{sec:encoder} is justified by measurement. If neither tracks it, the frozen-backbone strategy itself requires revision before proceeding.
+
+A third diagnostic follows from Section~\ref{sec:inverse} and is run as soon as the world model trains: can the inverse-dynamics head recover the applied mutation from the latent transition? Accuracy on this task is a more direct measure of whether action-dependent dynamics have been learned than the prediction loss is, and it is reported throughout training.
+
+% ══════════════════════════════════════════════════════════
+% 6. BASELINES AND EVALUATION
+% ══════════════════════════════════════════════════════════
+\section{Baselines and Evaluation Protocol}
+\label{sec:evaluation}
+
+In offline model-based optimisation, naive baselines are frequently stronger than they appear, and reporting against weak comparators is the characteristic way such work fails to replicate. The following are therefore committed to in advance.
+
+\paragraph{Baselines.}
+\begin{enumerate}
+    \item \textbf{Greedy single-step} optimisation on the \textit{same} reward head. This is the critical control: it isolates the contribution of planning from the contribution of the reward model, and H4 is defined against it.
+    \item \textbf{Zero-shot masked-marginal hill climbing} with the frozen backbone (ESM-2, ProSST), requiring no training at all.
+    \item \textbf{Random mutation} within the same mutational budget, and the wild type itself.
+    \item \textbf{DynaPPO} \citep{angermueller2020dynappo}, the foundational model-based RL approach.
+    \item \textbf{$\mu$Protein / $\mu$Search} \citep{sun2025muprotein}, the published state of the art in RL-guided protein engineering.
+    \item \textbf{StructEvo} \citep{nie2026structevo}, the closest contemporaneous structure-aware RL system.
+    \item \textbf{ProSpero} \citep{kmicikiewicz2025prospero}, for the beyond-wild-type-neighbourhood regime.
+    \item \textbf{PPO with entropy bonus} under this framework's own world model, isolating the policy class from the world model.
+    \item \textbf{Multi-mutant extrapolation methods}: MULTI-evolve \citep{tran2026multievolve}, the Cerebra mutation atlas \citep{wang2026atlas}, Kermut \citep{groth2024kermut} and ProteinNPT \citep{notin2023proteinnpt}, which define the current state of the art for predicting higher-order mutants from singles and doubles and are the comparison the reward head must survive.
+\end{enumerate}
+
+\paragraph{The additive null, as a first-class baseline.} Two baselines are singled out because recent evidence shows that omitting them is how work in this area fails to replicate: \textbf{(a)} an additive (linear) model fitted to the single-mutant measurements, and \textbf{(b)} the ``stack the top-$k$ individually beneficial substitutions'' heuristic. \citet{visani2026additive} re-analysed MULTI-evolve \citep{tran2026multievolve} and found its multimutant predictions to be almost perfectly correlated with an additive model's across all three reported engineering campaigns, that its networks did not outperform an additive model on held-out predictions, and that they did not represent epistasis even in their own training data; they further showed that a benchmark result presented as evidence of epistasis learning is reproduced by a null additive model through an elementary statistical artefact. Their conclusion --- that models for machine-learning-guided directed evolution must be benchmarked against additive nulls before performance is attributed to epistasis --- is adopted here as a requirement rather than a suggestion. Accordingly, every claim this project makes about epistasis or valley crossing will report (i) the additive model's performance on the same data, and (ii) the correlation between ProteinDreamer's predictions and the additive model's, on the understanding that a high correlation falsifies the claim regardless of absolute performance. The one response to that critique located at the time of writing \citep{hossain2026response} is informal and not peer reviewed; it concedes both the correlation and the absence of gain over linear baselines, arguing that additive models can absorb averaged interaction effects. That argument, whatever its merit, does not license skipping the baseline.
+
+\paragraph{Metrics.} Fitness-oriented: top-$k$ predicted and ground-truth fitness under a fixed oracle budget; frequency of reaching the global optimum on combinatorially complete landscapes; diversity of top-ranked candidates. Trajectory-oriented: growth of latent and reward prediction error over rollout length; fraction of epistatic traps escaped; path-accessibility statistics relative to the ground-truth landscape. Model-health: inverse-dynamics recovery accuracy; latent collapse diagnostics; fraction of rollouts rejected by the trust-region predicate. Uncertainty: calibration curves and risk--coverage analysis, reported as primary results and not as an appendix afterthought.
+
+\paragraph{Ablations.} Per-residue versus pooled latent; with and without the inverse-dynamics head; with and without SIGReg, and with the action-contrastive alternative of \citet{boylan2026nogaussian}; flow matching versus DDPM versus deterministic dynamics; few-step versus many-step sampling; $\eta$ in the expected free energy including $\eta = 0$; static structural context present versus absent; encoder backbone.
+
+% ══════════════════════════════════════════════════════════
+% 7. LIMITATIONS AND RISKS
+% ══════════════════════════════════════════════════════════
+\section{Limitations and Risks}
+\label{sec:limitations}
+
+\paragraph{The additive null is the binding constraint, not data volume.} An earlier draft of this section named trajectory data as the project's principal risk. That was an overstatement, for the reasons set out in Section~\ref{sec:data}: the dynamics model needs no labels, double-mutant measurements are abundant, and hypercube extraction supplies path-level ground truth beyond horizon four. The sharper risk is that \textit{epistasis may be a smaller exploitable signal than the proposal assumes}. \citet{visani2026additive} showed that a prominent recent framework's multimutant predictions reduce to an additive model's, so that its engineering success amounts to combining the largest individual effects. If the landscapes examined here behave similarly, then multi-step planning will confer little advantage over stacking beneficial singles, H4 will be falsified, and the correct report will say so. This is the most likely way for the project to fall short, and the evaluation protocol of Section~\ref{sec:evaluation} is designed so that this outcome is detected rather than disguised.
+
+\paragraph{Path-level data remains narrow.} Although hypercube extraction \citep{esteban2019hypercubeme} supplies a large number of complete sub-landscapes, they come from one protein assayed in twelve separate segments, they overlap heavily, and the assay has a measurement floor; the hand-curated landscapes add three more proteins at four positions each. Results established on these may not transfer to longer horizons on unrelated folds, and the design principle of letting the model learn without imposed physics remains necessary but not sufficient: the data must contain the structure to be learned.
+
+\paragraph{Self-supervised dynamics amortises rather than discovers.} Unlimited transition data does not imply unlimited learning. Training the dynamics on in-silico mutations teaches the model to reproduce the encoder's response to a substitution without evaluating the encoder; the biological content enters only through the pretrained backbone and the labelled reward. The benefit claimed is therefore planning speed plus a reward-shaped latent, and no claim is made that self-supervised dynamics discovers biology the encoder does not already represent.
+
+\paragraph{Predicted structure remains unreliable even as static context.} Section~\ref{sec:structure_limits} removes structure from the per-step state, but the static context still relies on a predicted reference structure, and \citet{feldman2026invariance} indicate that confidence estimates track template availability rather than biophysics. The static structural prior may therefore be systematically weaker for proteins without close templates, in exactly the novel-function regime where engineering is most valuable --- which is also \citet{wittmann2026retrospective}'s point about sequence statistics not being biophysics.
+
+\paragraph{Collapse risk without an EMA target.} Removing the EMA encoder follows the cited design, but ProteinJEPA \citep{ofer2026proteinjepa} found that latent prediction without a masked-language-modelling anchor collapses in nearly every experiment on protein data, with gains replicating inconsistently across seeds. The inverse-dynamics head and the supervised reward loss are intended as anchors; if collapse diagnostics indicate otherwise, an explicit masked-token loss at the mutated site is the first remedy and a return to an EMA target the second.
+
+\paragraph{A moving diffusion target.} The generative predictor regresses toward a target produced by the encoder being trained concurrently; without an EMA target that objective is non-stationary, and the predictor can be misled by encoder drift. No treatment of this interaction was found in the literature, so it is named as an open risk and mitigated procedurally (warm-up and loss ramp, Section~\ref{sec:methodology}) rather than solved.
+
+\paragraph{The stationarity assumption behind SIGReg.} The identifiability guarantee of \citet{klindt2026whenlejepa} holds for worlds with stationary, additive-noise transitions. Epistatic mutation effects are context-dependent by definition, so the guarantee is invoked as motivation and treated as a hypothesis under test, with \citet{boylan2026nogaussian}'s non-Gaussian alternative as the fallback.
+
+\paragraph{Model exploitation.} Despite the safeguards of Section~\ref{sec:uncertainty}, a policy optimising a learned reward will probe its weakest regions. The honest consequence is that in-silico fitness improvements are not evidence of real improvement without experimental validation, and claims will be framed accordingly.
+
+\paragraph{Experimental cost is not modelled by default.} Research question~5 addresses \citet{wittmann2026retrospective}'s critique, but the default formulation remains variant-focused and therefore inherits the limitation he identifies: strategies that ignore synthesis cost may be impractical regardless of model quality. Until question~5 is answered, the contribution should be understood as methodological.
+
+% ══════════════════════════════════════════════════════════
+% 8. EXPECTED CONTRIBUTIONS
+% ══════════════════════════════════════════════════════════
+\section{Expected Contributions}
+\label{sec:contributions}
+
+\begin{enumerate}
+    \item \textbf{A latent world model for protein engineering.} The first world model that predicts post-mutation protein states in a learned latent space and plans mutation trajectories in imagination, combining per-residue latent prediction with flow-matching dynamics \citep{lipman2023flowmatching, huo2026flowjepa} and an action-contrastive inverse-dynamics anchor \citep{boylan2026nogaussian}. The generative-latent-dynamics machinery is not new in general --- Flow-JEPA and FlowWM developed it concurrently in the vision and control setting --- and the claim here is its adaptation to, and the first demonstration of, latent world modelling for protein design, together with the architectural choices that adaptation requires: no per-step structure, per-residue latents, and an inverse-dynamics anchor in place of a prescribed latent geometry.
+
+    \item \textbf{A multi-step planning benchmark for protein design.} An evaluation protocol and reference implementation on combinatorially complete landscapes \citep{wu2016indirect, johnston2024trpb} that makes multi-step claims testable: valley-crossing frequency, escape from reciprocal-sign-epistasis traps, path-accessibility statistics relative to ground truth, and error compounding as a function of rollout length, with greedy single-step optimisation on the same reward head as the mandatory control. The protein-design literature currently lacks a shared way to test whether planning helps, which is why claims of multi-step benefit are hard to compare; supplying one is useful independently of whether ProteinDreamer wins on it.
+
+    \item \textbf{Multi-step mutation planning.} Empirical determination of whether world-model-based planning navigates epistatic landscapes better than greedy and search-based alternatives, including the conditions under which it does not.
+
+    \item \textbf{Open-source framework.} A modular library (\texttt{protein-dreamer}) in which the encoder, predictor, reward head, policy, and trust-region predicate are independently swappable, with the diagnostics of Section~\ref{sec:diagnostics} and the evaluation protocol of Section~\ref{sec:evaluation} included so that results are reproducible and negative results are reportable.
+\end{enumerate}
+
+\noindent Two contributions claimed in the first draft are withdrawn. The formal unification of the JEPA objective with the variational free energy of Active Inference has since been established by \citet{arnez2026sigregfree}, and is used here rather than claimed; what remains available is empirical, namely the first test of that correspondence in a scientific domain and an evaluation of the state-epistemic term that work identifies as uncomputed, both of which fall under research question~3. The claim of the first latent diffusion world model for biological sequences is narrowed, since latent generative dynamics for JEPA world models has been developed concurrently in other domains.
+
+
+% ══════════════════════════════════════════════════════════
+% REFERENCES
+% ══════════════════════════════════════════════════════════
+\newpage
+\bibliographystyle{unsrtnat}
+
+\begin{thebibliography}{99}
+
+\bibitem[Sandhu et al.(2025)]{sandhu2025landscapes}
+Sandhu, M., Chen, J. Z., Matthews, D. S., Spence, M. A., Pulsford, S. B., Gall, B., ... \& Jackson, C. J. (2025).
+\newblock Computational and experimental exploration of protein fitness landscapes: navigating smooth and rugged terrains.
+\newblock \textit{Biochemistry}, 64(8), 1673-1684.
+
+
+\bibitem[Dauparas et al.(2022)]{dauparas2022proteinmpnn}
+Dauparas, J., Anishchenko, I., Bennett, N., Bai, H., Ragotte, R. J., Milles, L. F., ... \& Baker, D. (2022). \newblock Robust deep learning–based protein sequence design using ProteinMPNN. \newblock \textit{Science}, 378(6615), 49-56.
+
+
+\bibitem[Watson et al.(2023)]{watson2023rfdiffusion}
+Watson, J. L., Juergens, D., Bennett, N. R., Trippe, B. L., Yim, J., Eisenach, H. E., ... \& Baker, D. (2023). \newblock De novo design of protein structure and function with RFdiffusion. \newblock \textit{Nature}, 620(7976), 1089-1100.
+
+
+\bibitem[Hayes et al.(2024)]{hayes2024esm3}
+Hayes, T., Rao, R., Akin, H., Sofroniew, N. J., Oktay, D., Lin, Z., ... \& Wiggert, M. (2024). \newblock Simulating 500 million years of evolution with a language model. \newblock \textit{bioRxiv}. (See also the \texttt{esm3-sm-open-v1} model card for the licence terms of the open 1.4B checkpoint.)
+
+
+\bibitem[Notin et al.(2024)]{notin2024mlprotein}
+Notin, P., Rollins, N., Gal, Y., Sander, C., \& Marks, D. (2024). \newblock Machine learning for functional protein design. \newblock \textit{Nature Biotechnology}, 42(2), 216-228.
+
+
+\bibitem[Kyro et al.(2025)]{kyro2025review}
+Kyro, G. W., Qiu, T., \& Batista, V. S. (2025). \newblock A model-centric review of deep learning for protein design. \newblock \textit{arXiv preprint arXiv:2502.19173}.
+
+
+\bibitem[Hafner et al.(2025)]{hafner2025dreamer4}
+Hafner, D., Yan, W., \& Lillicrap, T. (2025). \newblock Training agents inside of scalable world models. \newblock \textit{arXiv preprint arXiv:2509.24527}. (Dreamer~4; introduces the shortcut forcing objective.)
+
+
+\bibitem[LeCun(2022)]{lecun2022path}
+LeCun, Y. (2022). \newblock A path towards autonomous machine intelligence version 0.9.2. \newblock \textit{Open Review}, 62(1), 1-62.
+
+
+\bibitem[Nam et al.(2026)]{nam2026cjepa}
+Nam, H., Lidec, Q. L., Maes, L., LeCun, Y., \& Balestriero, R. (2026). \newblock Causal-JEPA: Learning World Models through Object-Level Latent Masking. \newblock \textit{arXiv preprint arXiv:2602.11389}.
+
+
+\bibitem[Maes et al.(2026)]{maes2026leworldmodel}
+Maes, L., Lidec, Q. L., Scieur, D., LeCun, Y., \& Balestriero, R. (2026). \newblock LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels. \newblock \textit{arXiv preprint arXiv:2603.19312}.
+
+
+\bibitem[Klindt et al.(2026)]{klindt2026whenlejepa}
+Klindt, D., LeCun, Y., \& Balestriero, R. (2026). \newblock When Does LeJEPA Learn a World Model? \newblock \textit{arXiv preprint arXiv:2605.26379}.
+
+
+\bibitem[Boylan and Hokamp(2026)]{boylan2026nogaussian}
+Boylan, J., \& Hokamp, C. (2026). \newblock No Gaussian Required: Contrastive Inverse Dynamics for JEPA World Models. \newblock \textit{arXiv preprint arXiv:2608.17542}.
+
+
+\bibitem[Arnez and Gomez-Villa(2026)]{arnez2026sigregfree}
+Arnez, F., \& Gomez-Villa, A. (2026). \newblock The SIGReg Objective as Variational Free Energy: A Theoretical Active-Inference Account of JEPA World Models. \newblock \textit{arXiv preprint arXiv:2607.13612}.
+
+
+\bibitem[Huo et al.(2026)]{huo2026flowjepa}
+Huo, Y., Song, Z., \& Luo, Y. (2026). \newblock Flow-JEPA: Robust Latent Dynamics for JEPA World Models via Flow Matching. \newblock \textit{arXiv preprint arXiv:2608.29029}.
+
+
+\bibitem[Porcher et al.(2026)]{porcher2026flowwm}
+Porcher, F., Carion, N., Alahari, K., \& Chen, S. (2026). \newblock Flow Matching in Feature Space for Stochastic World Modeling. \newblock \textit{arXiv preprint arXiv:2606.29059}.
+
+
+\bibitem[Lipman et al.(2023)]{lipman2023flowmatching}
+Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M., \& Le, M. (2023). \newblock Flow Matching for Generative Modeling. \newblock \textit{International Conference on Learning Representations}. \textit{arXiv:2210.02747}.
+
+
+\bibitem[Alonso et al.(2024)]{alonso2024diamond}
+Alonso, E., Jelley, A., Micheli, V., Kanervisto, A., Storkey, A., Pearce, T., \& Fleuret, F. (2024). \newblock Diffusion for world modeling: Visual details matter in Atari. \newblock \textit{Advances in Neural Information Processing Systems}, 37, 58757-58791.
+
+
+\bibitem[Angermueller et al.(2020)]{angermueller2020dynappo}
+Angermueller, C., Dohan, D., Belanger, D., Deshpande, R., Murphy, K., \& Colwell, L. (2020). \newblock Model-based reinforcement learning for biological sequence design. \newblock \textit{International Conference on Learning Representations}.
+
+
+\bibitem[Sun et al.(2025)]{sun2025muprotein}
+Sun, H., He, L., Deng, P., Liu, G., Zhao, Z., Jiang, Y., ... \& Liu, T. Y. (2025). \newblock Accelerating protein engineering with fitness landscape modelling and reinforcement learning. \newblock \textit{Nature Machine Intelligence}, 7(9), 1446-1460.
+
+
+\bibitem[Wang et al.(2023)]{wang2023evoplay}
+Wang, Y., Tang, H., Huang, L., Pan, L., Yang, L., Yang, H., ... \& Yang, M. (2023). \newblock Self-play reinforcement learning guides protein engineering. \newblock \textit{Nature Machine Intelligence}, 5(8), 845-860.
+
+
+\bibitem[Nie et al.(2026)]{nie2026structevo}
+Nie, Z., Zhao, S., Luo, Y., Fan, S., \& Nie, Z. (2026). \newblock Structure-aware Reinforcement Learning for Protein Directed Evolution. \newblock \textit{arXiv preprint arXiv:2609.39048}.
+
+
+\bibitem[Kmicikiewicz et al.(2025)]{kmicikiewicz2025prospero}
+Kmicikiewicz, M., Fortuin, V., \& Szczurek, E. (2025). \newblock ProSpero: Active Learning for Robust Protein Design Beyond Wild-Type Neighborhoods. \newblock \textit{arXiv preprint arXiv:2505.22494}.
+
+
+\bibitem[Ofer et al.(2026)]{ofer2026proteinjepa}
+Ofer, D., Shahaf, D., \& Linial, M. (2026). \newblock ProteinJEPA: Latent prediction improves protein language model pretraining. \newblock \textit{arXiv preprint arXiv:2605.07554}.
+
+
+\bibitem[Wittmann(2026)]{wittmann2026retrospective}
+Wittmann, B. J. (2026). \newblock Advances in Machine Learning for Directed Evolution: A Five-Year Retrospective. \newblock \textit{arXiv preprint arXiv:2609.03046}.
+
+
+\bibitem[Feldman et al.(2026)]{feldman2026invariance}
+Feldman, J., Brogi, M., \& Skolnick, J. (2026). \newblock Adversarial Sequence Mutations in AlphaFold and ESMFold Reveal Nonphysical Structural Invariance, Confidence Failures, and Concerns for Protein Design. \newblock \textit{bioRxiv}, 2026.02.25.708002.
+
+
+\bibitem[Pak et al.(2023)]{pak2023alphafold_mutations}
+Pak, M. A., Markhieva, K. A., Novikova, M. S., Petrov, D. S., Vorobyev, I. S., Maksimova, E. S., ... \& Ivankov, D. N. (2023). \newblock Using AlphaFold to predict the impact of single mutations on protein stability and function. \newblock \textit{PLOS ONE}, 18(3), e0282689.
+
+
+\bibitem[Parr et al.(2022)]{parr2022active}
+Parr, T., Pezzulo, G., \& Friston, K. J. (2022). \newblock Active inference: the free energy principle in mind, brain, and behavior. \newblock \textit{MIT Press}.
+
+
+\bibitem[Tschantz et al.(2020)]{tschantz2020rl_active_inference}
+Tschantz, A., Millidge, B., Seth, A. K., \& Buckley, C. L. (2020). \newblock Reinforcement learning through active inference. \newblock \textit{arXiv preprint arXiv:2002.12636}.
+
+
+\bibitem[Champion et al.(2023)]{champion2023deconstructing}
+Champion, T., Grze\'{s}, M., Bonheme, L., \& Bowman, H. (2023). \newblock Deconstructing deep active inference. \newblock \textit{arXiv preprint arXiv:2303.01618}.
+
+
+\bibitem[Lin et al.(2023)]{lin2023esm2}
+Lin, Z., Akin, H., Rao, R., Hie, B., Zhu, Z., Lu, W., ... \& Rives, A. (2023). \newblock Evolutionary-scale prediction of atomic-level protein structure with a language model. \newblock \textit{Science}, 379(6637), 1123-1130.
+
+
+\bibitem[Jumper et al.(2021)]{jumper2021alphafold}
+Jumper, J., Evans, R., Pritzel, A., Green, T., Figurnov, M., Ronneberger, O., ... \& Hassabis, D. (2021). \newblock Highly accurate protein structure prediction with AlphaFold. \newblock \textit{Nature}, 596(7873), 583-589.
+
+
+\bibitem[Jing et al.(2021)]{jing2021gvp}
+Jing, B., Eismann, S., Suriana, P., Townshend, R. J. L., \& Dror, R. (2021). \newblock Learning from protein structure with geometric vector perceptrons. \newblock \textit{International Conference on Learning Representations}. \textit{arXiv:2009.01411}.
+
+
+\bibitem[Su et al.(2024)]{su2024saprot}
+Su, J., Han, C., Zhou, Y., Shan, J., Zhou, X., \& Yuan, F. (2024). \newblock SaProt: Protein Language Modeling with Structure-aware Vocabulary. \newblock \textit{International Conference on Learning Representations}.
+
+
+\bibitem[Li et al.(2024)]{li2024prosst}
+Li, M., Tan, Y., Ma, X., Zhong, B., Yu, H., Zhou, Z., Ouyang, W., Zhou, B., Tan, P., \& Hong, L. (2024). \newblock ProSST: Protein Language Modeling with Quantized Structure and Disentangled Attention. \newblock \textit{Advances in Neural Information Processing Systems}, 37.
+
+
+\bibitem[Tan et al.(2025)]{tan2025venusrem}
+Tan, Y., et al. (2025). \newblock From high-throughput evaluation to wet-lab studies: advancing mutation effect prediction with a retrieval-enhanced model. \newblock \textit{Bioinformatics}, 41(Supplement 1), i401.
+
+
+\bibitem[VenusREM-Harness(2026)]{venusrem2harness}
+(2026). \newblock A General Harness for Protein Foundation Model Fitness Prediction. \newblock \textit{arXiv preprint arXiv:2609.34654}. (Reports ProteinGym average Spearman $0.556$ for a six-member ProSST ensemble; preprint, not peer reviewed.)
+
+
+\bibitem[EvolutionaryScale(2024)]{esmcambrian}
+EvolutionaryScale (2024). \newblock ESM Cambrian: Revealing the mysteries of proteins with unsupervised learning. \newblock Technical report / model release. \url{https://www.evolutionaryscale.ai/blog/esm-cambrian}
+
+
+\bibitem[Sch\"{u}tze et al.(2025)]{medium_plm_transfer}
+(2025). \newblock Medium-sized protein language models perform well at transfer learning on realistic datasets. \newblock \textit{Scientific Reports}, 15. \url{https://www.nature.com/articles/s41598-025-05674-x}
+
+
+\bibitem[Zhang et al.(2024)]{zhang2024s3f}
+Zhang, Z., Notin, P., Huang, Y., Lozano, A., Chenthamarakshan, V., Marks, D., ... \& Tang, J. (2024). \newblock Multi-scale representation learning for protein fitness prediction. \newblock \textit{Advances in Neural Information Processing Systems}, 37, 101456-101473.
+
+
+\bibitem[Notin et al.(2023)]{notin2023proteingym}
+Notin, P., Kollasch, A., Ritter, D., Van Niekerk, L., Paul, S., Spinner, H., ... \& Marks, D. (2023). \newblock ProteinGym: Large-scale benchmarks for protein fitness prediction and design. \newblock \textit{Advances in Neural Information Processing Systems}, 36, 64331-64379.
+
+
+\bibitem[Tsuboyama et al.(2023)]{tsuboyama2023megascale}
+Tsuboyama, K., Dauparas, J., Chen, J., Laine, E., Mohseni Behbahani, Y., Weinstein, J. J., ... \& Rocklin, G. J. (2023). \newblock Mega-scale experimental analysis of protein folding stability in biology and design. \newblock \textit{Nature}, 620(7973), 434-444.
+
+
+\bibitem[Rocklin Lab(2026)]{rocklin2026stability}
+Rocklin Laboratory (2026). \newblock Mega-scale open protein stability dataset: folding stability for ${\sim}1.8$ million protein domains by cDNA display proteolysis. \newblock Dataset release announcement, 26 May 2026. \textit{Composition and licence to be verified before use.}
+
+
+\bibitem[Wu et al.(2016)]{wu2016indirect}
+Wu, N. C., Dai, L., Olson, C. A., Lloyd-Smith, J. O., \& Sun, R. (2016). \newblock Adaptation in protein fitness landscapes is facilitated by indirect paths. \newblock \textit{eLife}, 5, e16965.
+
+
+\bibitem[Johnston et al.(2024)]{johnston2024trpb}
+Johnston, K. E., Almhjell, P. J., Watkins-Dulaney, E. J., Liu, G., Porter, N. J., Yang, J., \& Arnold, F. H. (2024). \newblock A combinatorially complete epistatic fitness landscape in an enzyme active site. \newblock \textit{Proceedings of the National Academy of Sciences}, 121(32), e2400439121.
+
+
+\bibitem[Dallago et al.(2021)]{dallago2021flip}
+Dallago, C., Mou, J., Johnston, K. E., Wittmann, B. J., Bhattacharya, N., Goldman, S., Madani, A., \& Yang, K. K. (2021). \newblock FLIP: Benchmark tasks in fitness landscape inference for proteins. \newblock \textit{Advances in Neural Information Processing Systems, Datasets and Benchmarks Track}.
+
+
+\bibitem[Chen et al.(2023)]{chen2023dmslandscapes}
+Chen, L., Zhang, Z., Li, Z., Li, R., Huo, R., Chen, L., ... \& Zheng, M. (2023). \newblock Learning protein fitness landscapes with deep mutational scanning data from multiple sources. \newblock \textit{Cell Systems}, 14(8), 706-721.
+
+
+\bibitem[Alamdari et al.(2023)]{alamdari2023evodiff}
+Alamdari, S., Thakkar, N., Van Den Berg, R., Tenenholtz, N., Strome, R., Moses, A. M., ... \& Yang, K. K. (2023). \newblock Protein generation with evolutionary diffusion: sequence is all you need. \newblock \textit{bioRxiv}, 2023-09.
+
+
+\bibitem[Nijkamp et al.(2023)]{nijkamp2023progen2}
+Nijkamp, E., Ruffolo, J. A., Weinstein, E. N., Naik, N., \& Madani, A. (2023). \newblock ProGen2: exploring the boundaries of protein language models. \newblock \textit{Cell Systems}, 14(11), 968-978.
+
+
+\bibitem[Lee et al.(2023)]{lee2023latentrl}
+Lee, M., Vecchietti, L. F., Jung, H., Ro, H., Cha, M., \& Kim, H. M. (2023). \newblock Protein sequence design in a latent space via model-based reinforcement learning.
+
+
+\bibitem[Renard et al.(2024)]{renard2024backbone}
+Renard, F., Courtot, C., Reichlin, A., \& Bent, O. (2024). \newblock Model-based reinforcement learning for protein backbone design. \newblock \textit{arXiv preprint arXiv:2405.01983}.
+
+
+\bibitem[Sternke and Karpiak(2023)]{sternke2023proteinrl}
+Sternke, M., \& Karpiak, J. (2023). \newblock ProteinRL: Reinforcement learning with generative protein language models for property-directed sequence design. \newblock \textit{NeurIPS 2023 Generative AI and Biology (GenBio) Workshop}.
+
+
+\bibitem[Subramanian et al.(2024)]{subramanian2024rl_plm}
+Subramanian, J., Sujit, S., Irtisam, N., Sain, U., Islam, R., Nowrouzezahrai, D., \& Kahou, S. E. (2024). \newblock Reinforcement learning for sequence design leveraging protein language models. \newblock \textit{arXiv preprint arXiv:2407.03154}.
+
+
+\bibitem[Jain et al.(2022)]{jain2022gflownets}
+Jain, M., Bengio, E., Hernandez-Garcia, A., Rector-Brooks, J., Dossou, B. F., Ekbote, C. A., ... \& Bengio, Y. (2022). \newblock Biological sequence design with GFlowNets. \newblock \textit{International Conference on Machine Learning} (pp. 9786-9801). PMLR.
+
+
+\bibitem[Hie and Yang(2022)]{hie2022adaptive}
+Hie, B. L., \& Yang, K. K. (2022). \newblock Adaptive machine learning for protein engineering. \newblock \textit{Current Opinion in Structural Biology}, 72, 145-152.
+
+
+\bibitem[Ding et al.(2024)]{ding2024cooptimization}
+Ding, K., Chin, M., Zhao, Y., Huang, W., Mai, B. K., Wang, H., ... \& Luo, Y. (2024). \newblock Machine learning-guided co-optimization of fitness and diversity facilitates combinatorial library design in enzyme engineering. \newblock \textit{Nature Communications}, 15(1), 6392.
+
+
+\bibitem[Kim et al.(2025)]{kim2025offlinembo}
+Kim, M., Gu, J., Yuan, Y., Yun, T., Liu, Z., Bengio, Y., \& Chen, C. (2025). \newblock Offline Model-Based Optimization: Comprehensive Review. \newblock \textit{arXiv preprint arXiv:2503.17286}. (Published in TMLR.)
+
+
+\bibitem[Tan et al.(2024)]{tan2024rank}
+Tan, R.-X., Xue, K., Lyu, S.-H., Shang, H., Wang, Y., Wang, Y., Fu, S., \& Qian, C. (2024). \newblock Offline Model-Based Optimization by Learning to Rank. \newblock \textit{arXiv preprint arXiv:2410.11502}.
+
+
+\bibitem[Safe MBO(2025)]{safembo2025}
+(2025). \newblock Safe model-based optimization balancing exploration and reliability for protein sequence design. \newblock \textit{Scientific Reports}, 15. \url{https://www.nature.com/articles/s41598-025-12568-5}
+
+
+\bibitem[J\"{u}rgens et al.(2024)]{jurgens2024edl}
+J\"{u}rgens, M., Meinert, N., Bengs, V., H\"{u}llermeier, E., \& Waegeman, W. (2024). \newblock Is Epistemic Uncertainty Faithfully Represented by Evidential Deep Learning Methods? \newblock \textit{International Conference on Machine Learning}. \textit{arXiv:2402.09056}.
+
+
+\bibitem[Shen et al.(2024)]{shen2024mirage}
+Shen, M., Ryu, J. J., Ghosh, S., Bu, Y., Sattigeri, P., Das, S., \& Wornell, G. W. (2024). \newblock Are Uncertainty Quantification Capabilities of Evidential Deep Learning a Mirage? \newblock \textit{Transactions on Machine Learning Research} (2025). \textit{arXiv:2402.06160}.
+
+
+\bibitem[Sutton(1991)]{sutton1991dyna}
+Sutton, R. S. (1991). \newblock Dyna, an integrated architecture for learning, planning, and reacting. \newblock \textit{ACM SIGART Bulletin}, 2(4), 160-163.
+
+
+\bibitem[Ha and Schmidhuber(2018)]{ha2018worldmodels}
+Ha, D., \& Schmidhuber, J. (2018). \newblock World models. \newblock \textit{arXiv preprint arXiv:1803.10122}.
+
+
+\bibitem[Rombach et al.(2022)]{rombach2022ldm}
+Rombach, R., Blattmann, A., Lorenz, D., Esser, P., \& Ommer, B. (2022). \newblock High-resolution image synthesis with latent diffusion models. \newblock \textit{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition} (pp. 10684-10695).
+
+
+\bibitem[Sajid et al.(2021)]{sajid2021demystified}
+Sajid, N., Ball, P. J., Parr, T., \& Friston, K. J. (2021). \newblock Active inference: demystified and compared. \newblock \textit{Neural Computation}, 33(3), 674-712.
+
+
+\bibitem[Ho et al.(2020)]{ho2020ddpm}
+Ho, J., Jain, A., \& Abbeel, P. (2020). \newblock Denoising diffusion probabilistic models. \newblock \textit{Advances in Neural Information Processing Systems}, 33, 6840-6851.
+
+
+\bibitem[Olson et al.(2014)]{olson2014gb1}
+Olson, C. A., Wu, N. C., \& Sun, R. (2014). \newblock A comprehensive biophysical description of pairwise epistasis throughout an entire protein domain. \newblock \textit{Current Biology}, 24(22), 2643-2651.
+
+
+\bibitem[Podgornaia and Laub(2015)]{podgornaia2015phoq}
+Podgornaia, A. I., \& Laub, M. T. (2015). \newblock Pervasive degeneracy and epistasis in a protein--protein interface. \newblock \textit{Science}, 347(6222), 673-677.
+
+
+\bibitem[Pokusaeva et al.(2019)]{pokusaeva2019his3}
+Pokusaeva, V. O., Usmanova, D. R., Putintseva, E. V., Espinar, L., Sarkisyan, K. S., Mishin, A. S., ... \& Kondrashov, F. A. (2019). \newblock An experimental assay of the interactions of amino acids from orthologous sequences shaping a complex fitness landscape. \newblock \textit{PLoS Genetics}, 15(4), e1008079.
+
+
+\bibitem[Esteban et al.(2019)]{esteban2019hypercubeme}
+Avino Esteban, L., Lonishin, L. R., Bobrovskiy, D., Leleytner, G., Bogatyreva, N. S., Kondrashov, F. A., \& Ivankov, D. N. (2019). \newblock HypercubeME: two hundred million combinatorially complete datasets from a single experiment. \newblock \textit{Bioinformatics}, btz841. \url{https://github.com/ivankovlab/HypercubeME}
+
+
+\bibitem[Thomas et al.(2022)]{thomas2022slip}
+Thomas, N., Agarwala, A., Belanger, D., Song, Y. S., \& Colwell, L. (2022). \newblock Tuned fitness landscapes for benchmarking model-guided protein design. \newblock \textit{bioRxiv}, 2022.10.28.514293. (Presented as ``Tuned Quadratic Landscapes for Benchmarking Model-Guided Protein Design'', NeurIPS 2022 workshop; framework released as SLIP.)
+
+
+\bibitem[Tran et al.(2026)]{tran2026multievolve}
+Tran, V. Q., Nemeth, M., Bartie, L. J., Chandrasekaran, S. S., Fanton, A., Moon, H. C., Hie, B. L., Konermann, S., \& Hsu, P. D. (2026). \newblock Rapid directed evolution guided by protein language models and epistatic interactions. \newblock \textit{Science}, 392. (MULTI-evolve.)
+
+
+\bibitem[Visani et al.(2026)]{visani2026additive}
+Visani, G. M., Verma, A., \& DeWitt, W. S. (2026). \newblock Additive baselines furnish no evidence for epistasis learning by MULTI-evolve. \newblock \textit{bioRxiv}, 2026.04.23.719915. \url{https://github.com/dewitt-lab/multievolve-baselines}
+
+
+\bibitem[Hossain(2026)]{hossain2026response}
+Hossain, A. (2026). \newblock A response to Visani, Verma \& DeWitt (2026) on MULTI-evolve. \newblock Informal commentary, 1 May 2026. \textit{Not peer reviewed.}
+
+
+\bibitem[Wang et al.(2026)]{wang2026atlas}
+Wang, W., Yu, Z., Yang, E., Shi, Z., Yu, S., Hu, J., Xu, Y., \& Gong, H. (2026). \newblock From single-sequence structure prediction to protein fitness landscape through a composable, epistasis-aware mutation atlas. \newblock \textit{bioRxiv}, 2026.09.24.753701.
+
+
+\bibitem[Groth et al.(2024)]{groth2024kermut}
+Groth, P. M., Kerrn, M. H., Olsen, L., Salomon, J., \& Boomsma, W. (2024). \newblock Kermut: Composite kernel regression for protein variant effects. \newblock \textit{Advances in Neural Information Processing Systems}, 37. \textit{arXiv:2407.00002}.
+
+
+\bibitem[Notin et al.(2023b)]{notin2023proteinnpt}
+Notin, P., Weitzman, R., Marks, D. S., \& Gal, Y. (2023). \newblock ProteinNPT: Improving protein property prediction and design with non-parametric transformers. \newblock \textit{Advances in Neural Information Processing Systems}, 36.
+
+
+\bibitem[Barnes et al.(2026)]{barnes2026foldx}
+Barnes, J. E., Chi, L. A., Pandey, S. K., Ytreberg, F. M., \& Patel, J. S. (2026). \newblock Leveraging neural networks to correct FoldX free energy estimates. \newblock \textit{ACS Omega}, 11, 30003-30013.
+
+\end{thebibliography}
+
+
+% ══════════════════════════════════════════════════════════
+% APPENDIX
+% ══════════════════════════════════════════════════════════
+\newpage
+\appendix
+
+\section{Mathematical Details}
+\label{app:equations}
+
+\subsection{Notation}
+
+Table~\ref{tab:notation} summarises the principal symbols.
+
+\begin{table}[h]
+\centering
+\caption{Summary of notation.}
+\label{tab:notation}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$s_t = (\mathbf{x}_t, \Phi(\mathrm{WT}), \mathbf{m}_{1:t})$ & Protein state (sequence, static context, mutation history) \\
+$\Phi(\mathrm{WT})$ & Static context: MSA profile, reference structure features, site marginals \\
+$\mathbf{m}_{1:t}$ & Mutation history (multiset of applied substitutions) \\
+$a_t = (i, \mathrm{AA}_\text{new})$ & Mutation action (position, replacement amino acid) \\
+$\mathbf{Z}_t \in \mathbb{R}^{L \times d}$ & Per-residue latent representation \\
+$\bar{\mathbf{z}}_t \in \mathbb{R}^{d}$ & Pooled latent, used only by the reward head \\
+$a_t^\text{emb} \in \mathbb{R}^{d_a}$ & Continuous mutation embedding \\
+$f_\theta$ & Encoder (frozen backbone + trainable adapter) \\
+$e_\alpha$ & Action encoder \\
+$v_{\hat{\theta}}$ & Conditional velocity field (Architecture A) \\
+$g_\phi$ & Deterministic predictor (Architecture B) \\
+$q_\nu$ & Inverse-dynamics head (training only) \\
+$R_\psi$ & Reward head \\
+$\pi_\xi$, $V_\omega$ & Policy (actor) and value function (critic) \\
+$\mathrm{sg}(\cdot)$ & Stop-gradient operator \\
+$\tau \in [0,1]$ & Flow-matching path parameter \\
+$K$ & Number of integration steps during sampling \\
+$N$ & Number of sampled latent trajectories (uncertainty) \\
+$M$ & Number of ensemble members (Architecture B) \\
+$H$ & Planning horizon (imagination rollout length) \\
+$\lambda_\text{reg}$, $\lambda_\text{inv}$ & SIGReg and inverse-dynamics loss weights \\
+$\beta_\text{flow}$, $\beta_\text{rew}$ & Dynamics and reward loss weights \\
+$\eta$ & Epistemic weight in the expected free energy \\
+$\mathcal{L}_\text{flow}$ & Conditional flow-matching (vector-field regression) loss \\
+$\mathcal{L}_\text{pred}$ & Deterministic latent prediction loss \\
+$\mathcal{L}_\text{inv}$ & Inverse-dynamics loss \\
+$\mathcal{L}_\text{rew}$ & Supervised reward loss (stability + ranking) \\
+$\mathrm{SIGReg}(\cdot)$ & Sketched-isotropic-Gaussian regulariser \\
+$G(\pi)$ & Expected free energy of policy $\pi$ \\
+$\mathcal{T}\!\mathcal{R}(\cdot)$ & Trust-region admissibility predicate \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{MDP Formulation}
+
+\begin{align}
+    s_t &= \big(\mathbf{x}_t,\; \Phi(\mathrm{WT}),\; \mathbf{m}_{1:t}\big), \qquad \mathbf{x}_t \in \{A, C, D, \ldots, Y\}^L \\
+    a_t &\in \mathcal{A} = \{(i, j) : i \in \{1,\ldots,L\},\; j \in \{1,\ldots,20\}\} \\
+    \mathbf{Z}_t &= f_\theta(s_t) \in \mathbb{R}^{L \times d}, \qquad \mathbf{Z}_{t+1}^{\text{tgt}} = \mathrm{sg}\big(f_\theta(s_{t+1})\big)
+\end{align}
+
+\noindent There is no per-step predicted structure in $s_t$, and no EMA target encoder: the prediction target is produced by the same encoder under a stop-gradient.
+
+\subsection{Encoder}
+
+\begin{align}
+    \mathbf{H}_t &= \mathrm{PLM}_{\text{frozen}}\big(\mathbf{x}_t,\; \mathbf{T}^{\text{struct}}(\mathrm{WT})\big) \in \mathbb{R}^{L \times d_h} \\
+    \mathbf{Z}_t &= \mathrm{Adapter}_\theta\Big(\big[\mathbf{H}_t \,\|\, \boldsymbol{\Phi}(\mathrm{WT}) \,\|\, \mathbf{E}(\mathbf{m}_{1:t})\big]\Big) \in \mathbb{R}^{L \times d}
+\end{align}
+
+\noindent where $\mathbf{T}^{\text{struct}}(\mathrm{WT})$ are the quantised local-structure tokens of the reference structure, $\boldsymbol{\Phi}(\mathrm{WT}) \in \mathbb{R}^{L \times d_\phi}$ collects the per-residue static context (conservation, couplings, solvent exposure, site marginals), and $\mathbf{E}(\mathbf{m}_{1:t}) \in \mathbb{R}^{L \times d_m}$ marks which residues have already been mutated and to what. All concatenation is per residue; no pooling occurs in the encoder.
+
+\subsection{SIGReg}
+
+SIGReg \citep{maes2026leworldmodel} enforces $\mathbf{Z} \sim \mathcal{N}(0, \mathbf{I})$ by sketching: for random unit directions $\{\mathbf{u}_p\}_{p=1}^{P}$, the projections $\langle \mathbf{Z}^{(b,\ell)}, \mathbf{u}_p \rangle$ over the batch--residue sample are tested for univariate normality (Epps--Pulley), and the statistics are aggregated by the Cram\'{e}r--Wold theorem:
+\begin{equation}
+    \mathrm{SIGReg}(\mathbf{Z}) = \frac{1}{P}\sum_{p=1}^{P} \mathrm{EP}\Big(\big\{\langle \mathbf{Z}^{(b,\ell)}, \mathbf{u}_p\rangle\big\}_{b,\ell}\Big).
+\end{equation}
+A single scalar $\lambda_\text{reg}$ controls its strength. The same statistic is reused as the latent-plausibility detector in Appendix~\ref{app:trust}.
+
+\subsection{Action Encoder}
+
+\begin{equation}
+    a_t^\text{emb} = e_\alpha(a_t) = \mathrm{MLP}\Big(\big[\mathrm{PosEmb}(i) \,\|\, \mathrm{AAEmb}(\mathrm{AA}_\text{old}) \,\|\, \mathrm{AAEmb}(\mathrm{AA}_\text{new})\big]\Big) \in \mathbb{R}^{d_a}
+\end{equation}
+
+\subsection{Inverse-Dynamics Anchor}
+
+The head $q_\nu$ recovers the action from the latent transition. Because the action space factorises as $L \times 20$, a factorised cross-entropy is used:
+\begin{equation}
+    \mathcal{L}_\text{inv} = -\mathbb{E}\Big[\log q_\nu^{\text{pos}}\big(i \,\big|\, \mathbf{Z}_t, \mathbf{Z}_{t+1}\big) + \log q_\nu^{\text{aa}}\big(j \,\big|\, \mathbf{Z}_t, \mathbf{Z}_{t+1}, i\big)\Big].
+\end{equation}
+
+\noindent The action-contrastive alternative of \citet{boylan2026nogaussian}, retained as an ablation, scores the true action against the other actions in the batch $\mathcal{B}$ with temperature $\kappa$:
+\begin{equation}
+    \mathcal{L}_\text{inv}^{\text{NCE}} = -\mathbb{E}\left[\log \frac{\exp\big(\langle h_\nu(\mathbf{Z}_t, \mathbf{Z}_{t+1}),\, e_\alpha(a_t)\rangle / \kappa\big)}{\sum_{a' \in \mathcal{B}} \exp\big(\langle h_\nu(\mathbf{Z}_t, \mathbf{Z}_{t+1}),\, e_\alpha(a')\rangle / \kappa\big)}\right].
+\end{equation}
+
+\noindent $q_\nu$ is discarded after training; it affects neither planning nor inference cost.
+
+\subsection{Architecture A: Latent Flow-Matching JEPA}
+
+\noindent \textbf{Probability path.} With source $\mathbf{Z}^{(0)} \sim \mathcal{N}(0, \mathbf{I})$, target $\mathbf{Z}^{(1)} = \mathbf{Z}_{t+1}^{\text{tgt}}$, and $\tau \sim \mathcal{U}(0,1)$, the conditional path and its velocity are
+\begin{equation}
+    \mathbf{Z}^{(\tau)} = (1-\tau)\,\mathbf{Z}^{(0)} + \tau\,\mathbf{Z}^{(1)}, \qquad \mathbf{u}^{(\tau)} = \mathbf{Z}^{(1)} - \mathbf{Z}^{(0)}.
+\end{equation}
+
+\noindent \textbf{Vector-field regression loss} (not a score-matching objective):
+\begin{equation}
+    \mathcal{L}_\text{flow} = \mathbb{E}_{\tau,\,\mathbf{Z}^{(0)}}\Big[\big\lVert v_{\hat{\theta}}\big(\mathbf{Z}^{(\tau)},\, \tau,\, \mathbf{Z}_t,\, a_t^\text{emb}\big) - \big(\mathbf{Z}^{(1)} - \mathbf{Z}^{(0)}\big)\big\rVert_2^2\Big]
+\end{equation}
+
+\noindent \textbf{Sampling} integrates the field from $\tau = 0$ to $\tau = 1$ in $K$ steps; with step size $h = 1/K$ and Euler integration,
+\begin{equation}
+    \hat{\mathbf{Z}}^{(\tau + h)} = \hat{\mathbf{Z}}^{(\tau)} + h \cdot v_{\hat{\theta}}\big(\hat{\mathbf{Z}}^{(\tau)},\, \tau,\, \mathbf{Z}_t,\, a_t^\text{emb}\big).
+\end{equation}
+
+\noindent \textbf{Shortcut (self-consistency) objective} for few-step sampling, in the manner of Dreamer~4's shortcut forcing \citep{hafner2025dreamer4}. Conditioning the field additionally on the step size $h$ and enforcing that one double-length step matches two single steps,
+\begin{equation}
+    \mathcal{L}_\text{sc} = \mathbb{E}\left[\left\lVert v_{\hat{\theta}}\big(\mathbf{Z}^{(\tau)}, \tau, 2h\big) - \tfrac{1}{2}\Big(\mathrm{sg}\big[v_{\hat{\theta}}(\mathbf{Z}^{(\tau)}, \tau, h)\big] + \mathrm{sg}\big[v_{\hat{\theta}}(\mathbf{Z}^{(\tau+h)}, \tau+h, h)\big]\Big)\right\rVert_2^2\right],
+\end{equation}
+which permits $K$ of order a few rather than of order tens, the conditioning on $\mathbf{Z}_t$ and $a_t^\text{emb}$ being suppressed for readability.
+
+\noindent \textbf{Total loss:}
+\begin{equation}
+    \boxed{\mathcal{L}_A = \beta_\text{flow}\big(\mathcal{L}_\text{flow} + \mathcal{L}_\text{sc}\big) + \lambda_\text{inv}\,\mathcal{L}_\text{inv} + \lambda_\text{reg}\,\mathrm{SIGReg}(\mathbf{Z}_t) + \beta_\text{rew}\,\mathcal{L}_\text{rew}}
+\end{equation}
+
+\noindent For the DDPM ablation, the forward process is $\mathbf{Z}^\tau = \sqrt{\bar{\alpha}_\tau}\,\mathbf{Z}_{t+1}^{\text{tgt}} + \sqrt{1-\bar{\alpha}_\tau}\,\varepsilon$ under a cosine schedule, and the objective is $x_0$-prediction regression \citep{ho2020ddpm}, named as such rather than as score matching.
+
+\subsection{Architecture B: Deterministic Latent JEPA}
+
+\begin{equation}
+    \hat{\mathbf{Z}}_{t+1} = g_\phi\big(\mathbf{Z}_t,\, a_t^\text{emb}\big), \qquad
+    \mathcal{L}_\text{pred} = \frac{1}{B}\sum_{b=1}^{B} \big\lVert g_\phi\big(\mathbf{Z}_t^{(b)}, a_t^{(b)\text{emb}}\big) - \mathrm{sg}\big(\mathbf{Z}_{t+1}^{\text{tgt},(b)}\big)\big\rVert_2^2
+\end{equation}
+\begin{equation}
+    \boxed{\mathcal{L}_B = \beta_\text{jepa}\,\mathcal{L}_\text{pred} + \lambda_\text{inv}\,\mathcal{L}_\text{inv} + \lambda_\text{reg}\,\mathrm{SIGReg}(\mathbf{Z}_t) + \beta_\text{rew}\,\mathcal{L}_\text{rew}}
+\end{equation}
+
+\subsection{Reward Head}
+
+With $\bar{\mathbf{z}}_t = \mathrm{Pool}(\mathbf{Z}_t)$ and a shared trunk,
+\begin{equation}
+    \big[\hat{y}^\text{stab}_t,\; \hat{y}^\text{fit}_t\big] = R_\psi(\bar{\mathbf{z}}_t),
+\end{equation}
+\begin{equation}
+    \mathcal{L}_\text{rew} = w_\text{stab}\,\mathrm{SmoothL1}\big(\hat{y}^\text{stab}_t,\, y^\text{stab}_t\big) \;+\; w_\text{fit} \!\!\sum_{\substack{(u,v)\,\in\,\mathcal{P}_\mathcal{E} \\ y_u > y_v}} \!\! \log\Big(1 + \exp\big(-(\hat{y}^\text{fit}_u - \hat{y}^\text{fit}_v)\big)\Big),
+\end{equation}
+where $\mathcal{P}_\mathcal{E}$ ranges over variant pairs \textit{within} a single assay $\mathcal{E}$, making the fitness objective a ranking loss that is invariant to the assay's arbitrary scale \citep{tan2024rank}. Binding affinity and catalytic activity heads are omitted for lack of training data.
+
+\subsection{Uncertainty and Trust Region}
+\label{app:trust}
+
+\noindent \textbf{Transition uncertainty, Architecture A} ($N$ sampled latents):
+\begin{equation}
+    \mathrm{Unc}_A(\mathbf{Z}_t, a_t) = \frac{1}{N}\sum_{n=1}^{N} \big\lVert \hat{\mathbf{Z}}_{t+1}^{(n)} - \bar{\hat{\mathbf{Z}}}_{t+1} \big\rVert_2^2, \qquad \bar{\hat{\mathbf{Z}}}_{t+1} = \frac{1}{N}\sum_{n=1}^{N} \hat{\mathbf{Z}}_{t+1}^{(n)}
+\end{equation}
+
+\noindent \textbf{Transition uncertainty, Architecture B} ($M$ ensemble members):
+\begin{equation}
+    \mathrm{Unc}_B(\mathbf{Z}_t, a_t) = \frac{1}{M}\sum_{m=1}^{M} \big\lVert g_{\phi_m}(\mathbf{Z}_t, a_t^\text{emb}) - \bar{g}(\mathbf{Z}_t, a_t^\text{emb}) \big\rVert_2^2
+\end{equation}
+
+\noindent \textbf{Reward uncertainty} is estimated at the reward head (ensemble or dropout over $R_\psi$) and is \textit{not} substituted by transition variance.
+
+\noindent \textbf{Trust-region predicate.} A rollout state is admissible only if all three conditions hold:
+\begin{equation}
+    \mathcal{T}\!\mathcal{R}(\hat{\mathbf{Z}}) = \mathbb{1}\Big[\underbrace{\mathrm{SIGReg}(\hat{\mathbf{Z}}) \leq c_\text{plaus}}_{\text{on-manifold}} \;\wedge\; \underbrace{\mathrm{Unc}(\cdot) \leq c_\text{unc}}_{\text{model agreement}} \;\wedge\; \underbrace{d_\text{Ham}(\mathbf{x}, \mathcal{D}) \leq k}_{\text{mutational budget}}\Big]
+\end{equation}
+where $c_\text{plaus}$ and $c_\text{unc}$ are quantiles calibrated on training data and $d_\text{Ham}(\mathbf{x}, \mathcal{D})$ is the Hamming distance to the nearest training sequence. Inadmissible actions are masked in the policy and inadmissible candidates are discarded at inference.
+
+\subsection{Policy Objectives}
+
+\noindent \textbf{Expected free energy} (Active Inference option), over an imagined horizon $H$:
+\begin{equation}
+    G(\pi) = \underbrace{\mathbb{E}_{q}\Big[\textstyle\sum_{t=1}^{H} -\hat{r}_t\Big]}_{\text{pragmatic}} \;+\; \underbrace{\mathbb{E}_{q}\Big[\textstyle\sum_{t=1}^{H} -\eta\,\mathrm{Unc}(\mathbf{Z}_t, a_t)\Big]}_{\text{epistemic}} \;+\; \underbrace{\mathbb{E}_{q}\Big[-\eta_s\,\mathcal{C}\big(\{\mathbf{Z}_t\}\big)\Big]}_{\text{state-epistemic (optional)}}
+\end{equation}
+where $\mathcal{C}$ is a future-state coverage term, included because \citet{arnez2026sigregfree} identify it as the one Active-Inference term that no current JEPA world model computes; $\eta$ and $\eta_s$ are ablated, including to zero. The policy is $\pi^* = \arg\min_\pi G(\pi)$.
+
+\noindent \textbf{Actor and critic} updates on imagined trajectories, with $g_t$ the per-step free energy:
+\begin{equation}
+    \nabla_\xi J = \mathbb{E}\Big[\nabla_\xi \log \pi_\xi(a_t \mid \mathbf{Z}_t)\,\big(-g_t - V_\omega(\mathbf{Z}_t)\big)\Big], \qquad
+    \mathcal{L}_\text{critic} = \mathbb{E}\Big[\big(V_\omega(\mathbf{Z}_t) - V_t^{\lambda}\big)^2\Big]
+\end{equation}
+\begin{equation}
+    V_t^{\lambda} = (1-\lambda)\sum_{n=1}^{H-t} \lambda^{n-1} V_t^{(n)}, \qquad V_t^{(n)} = \sum_{k=0}^{n-1} \gamma^k g_{t+k} + \gamma^n V_\omega(\mathbf{Z}_{t+n})
+\end{equation}
+
+\noindent For the PPO baseline, $g_t$ is replaced by $-\hat{r}_t$ with an entropy bonus, giving the reference against which the epistemic terms are judged.
+
+\subsection{Library-Distribution Extension (Research Question 5)}
+
+For the distribution-focused formulation, an action is a library specification $\boldsymbol{\psi}$ --- a set of diversified positions with per-position amino acid composition --- and the objective trades expected best-in-library fitness against synthesis cost:
+\begin{equation}
+    \max_{\boldsymbol{\psi}} \;\; \mathbb{E}_{\mathbf{x} \sim p(\cdot \mid \boldsymbol{\psi})}\Big[\max_{\mathbf{x} \in \mathcal{L}(\boldsymbol{\psi})} \hat{r}(\mathbf{x})\Big] \;-\; \lambda_\text{cost}\, c_\text{syn}(\boldsymbol{\psi}),
+\end{equation}
+which is the computational form of \citet{wittmann2026retrospective}'s question of which synthesis-feasible distribution maximises the probability of drawing a sufficiently fit variant.
+
+
+\section{Training and Inference Algorithms}
+\label{app:algorithms}
+
+\begin{algorithm}[H]
+\caption{ProteinDreamer -- World Model Training (Architecture A)}
+\label{alg:world_model}
+\begin{algorithmic}[1]
+\REQUIRE Replay buffer $\mathcal{D}$ of $(s_t, a_t, r_t, s_{t+1})$ from DMS and combinatorial landscape data
+\ENSURE Trained adapter $f_\theta$, velocity field $v_{\hat{\theta}}$, action encoder $e_\alpha$, reward head $R_\psi$
+\STATE \textit{Warm-up:} train $f_\theta$, $e_\alpha$, $q_\nu$, $R_\psi$ under $\lambda_\text{inv}\mathcal{L}_\text{inv} + \lambda_\text{reg}\mathrm{SIGReg} + \beta_\text{rew}\mathcal{L}_\text{rew}$ only
+\REPEAT
+    \STATE Sample batch $\{(s_t, a_t, r_t, s_{t+1})\}$ from $\mathcal{D}$
+    \STATE $\mathbf{Z}_t \leftarrow f_\theta(s_t)$, \quad $\mathbf{Z}_{t+1}^\text{tgt} \leftarrow \mathrm{sg}\big(f_\theta(s_{t+1})\big)$ \quad [\textit{no EMA encoder}]
+    \STATE $a_t^\text{emb} \leftarrow e_\alpha(a_t)$
+    \STATE Sample $\tau \sim \mathcal{U}(0,1)$, \quad $\mathbf{Z}^{(0)} \sim \mathcal{N}(0, \mathbf{I})$
+    \STATE $\mathbf{Z}^{(\tau)} \leftarrow (1-\tau)\mathbf{Z}^{(0)} + \tau \mathbf{Z}_{t+1}^\text{tgt}$
+    \STATE $\mathcal{L}_\text{flow} \leftarrow \lVert v_{\hat{\theta}}(\mathbf{Z}^{(\tau)}, \tau, \mathbf{Z}_t, a_t^\text{emb}) - (\mathbf{Z}_{t+1}^\text{tgt} - \mathbf{Z}^{(0)}) \rVert^2$
+    \STATE $\mathcal{L}_\text{sc} \leftarrow$ shortcut self-consistency term \quad [\textit{enables few-step sampling}]
+    \STATE $\mathcal{L}_\text{inv} \leftarrow$ factorised cross-entropy of $q_\nu(a_t \mid \mathbf{Z}_t, \mathbf{Z}_{t+1}^\text{tgt})$
+    \STATE $\mathcal{L}_A \leftarrow \beta_\text{flow}(\mathcal{L}_\text{flow} + \mathcal{L}_\text{sc}) + \lambda_\text{inv}\mathcal{L}_\text{inv} + \lambda_\text{reg}\mathrm{SIGReg}(\mathbf{Z}_t) + \beta_\text{rew}\mathcal{L}_\text{rew}$
+    \STATE Update $\theta, \hat{\theta}, \alpha, \nu, \psi$ via $\nabla \mathcal{L}_A$, with $\beta_\text{flow}$ following a ramp schedule
+    \STATE Log inverse-dynamics recovery accuracy and collapse diagnostics
+\UNTIL{convergence}
+\STATE Discard $q_\nu$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{ProteinDreamer -- Imagination-Based Policy Training}
+\label{alg:policy}
+\begin{algorithmic}[1]
+\REQUIRE Trained world model $(f_\theta, v_{\hat{\theta}}, R_\psi)$, horizon $H$, samples $N$, policy class
+\ENSURE Trained actor $\pi_\xi$, critic $V_\omega$
+\REPEAT
+    \STATE Sample initial $\mathbf{Z}_0$ from encoded replay-buffer states
+    \FOR{$t = 0$ \textbf{to} $H - 1$}
+        \STATE Mask actions $a$ with $\mathcal{T}\!\mathcal{R}$ inadmissible; \quad $a_t \sim \pi_\xi(\cdot \mid \mathbf{Z}_t)$
+        \STATE Sample $\{\hat{\mathbf{Z}}_{t+1}^{(n)}\}_{n=1}^{N}$ by $K$-step integration of $v_{\hat{\theta}}(\cdot, \cdot, \mathbf{Z}_t, a_t^\text{emb})$
+        \STATE $\hat{\mathbf{Z}}_{t+1} \leftarrow \mathrm{mean}\big(\{\hat{\mathbf{Z}}_{t+1}^{(n)}\}\big)$, \quad $u_t \leftarrow \mathrm{Unc}_A(\mathbf{Z}_t, a_t)$
+        \IF{$\mathcal{T}\!\mathcal{R}(\hat{\mathbf{Z}}_{t+1})$ is false}
+            \STATE Terminate rollout with a penalty \quad [\textit{off-manifold: do not trust $R_\psi$}]
+        \ENDIF
+        \STATE $\hat{r}_t \leftarrow R_\psi\big(\mathrm{Pool}(\hat{\mathbf{Z}}_{t+1})\big)$
+        \STATE $g_t \leftarrow -\hat{r}_t - \eta\,u_t$ \quad [\textit{or $-\hat{r}_t$ with entropy bonus for the PPO baseline}]
+        \STATE $\mathbf{Z}_{t+1} \leftarrow \hat{\mathbf{Z}}_{t+1}$
+    \ENDFOR
+    \STATE Compute $\lambda$-returns $V_t^{\lambda}$ from $\{g_t\}$; update critic and actor
+\UNTIL{convergence}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{ProteinDreamer -- Inference (Protein Design)}
+\label{alg:inference}
+\begin{algorithmic}[1]
+\REQUIRE Wild type $s_0$, trained world model and policy, budget $T$, candidates $C$
+\ENSURE Ranked set of designed sequences with admissibility flags
+\STATE Compute static context $\Phi(\mathrm{WT})$ once \quad [\textit{one structure prediction for the campaign}]
+\STATE $\mathbf{Z}_0 \leftarrow f_\theta(s_0)$, \quad $\mathcal{C} \leftarrow \emptyset$
+\FOR{$c = 1$ \textbf{to} $C$}
+    \STATE $\mathbf{Z} \leftarrow \mathbf{Z}_0$; \quad admissible $\leftarrow$ true
+    \FOR{$t = 0$ \textbf{to} $T - 1$}
+        \STATE $a_t \sim \pi_\xi(\cdot \mid \mathbf{Z})$ over $\mathcal{T}\!\mathcal{R}$-admissible actions
+        \STATE $\mathbf{Z} \leftarrow \mathrm{mean}\big(\{\hat{\mathbf{Z}}^{(n)}\}_{n=1}^{N}\big)$ by $K$-step integration
+        \STATE \textbf{if} $\mathcal{T}\!\mathcal{R}(\mathbf{Z})$ is false \textbf{then} admissible $\leftarrow$ false; \textbf{break}
+    \ENDFOR
+    \STATE $\hat{r} \leftarrow R_\psi(\mathrm{Pool}(\mathbf{Z}))$; apply $\{a_0, \ldots\}$ to the wild-type sequence
+    \STATE $\mathcal{C} \leftarrow \mathcal{C} \cup \{(\text{designed\_seq},\, \hat{r},\, \text{admissible},\, \text{reward uncertainty})\}$
+\ENDFOR
+\STATE \textbf{return} admissible candidates ranked by $\hat{r}$, reporting uncertainty alongside every score
+\STATE \quad [\textit{optionally fold top-$k$ for validation --- outside the imagination loop}]
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{document}
