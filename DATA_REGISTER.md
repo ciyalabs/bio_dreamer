@@ -354,13 +354,35 @@ At `d_h = 1280` ProteinGym alone needs 1.7 TiB, against 521 GiB free on this mac
 At `d = 128` the same corpus is ~174 GiB, which fits. `Cache.budget_report()` prints this
 for a planned workload and flags an over-budget fill before it starts.
 
-Cache behaviour measured on 64 GB1 single mutants:
+### Throughput, and what it means for scheduling
+
+Measured on 512 GB1 single mutants, batch 32:
 
 | | |
 |---|---|
-| Cold pass | 13.6 s → **4.7 seq/s** |
-| Warm pass | 0.017 s → 3,733 seq/s |
-| **Speedup** | **792×** |
+| Cold pass | 244 s → **2.1 seq/s** |
+| Warm pass | 0.17 s → 3,036 seq/s |
+| **Cache speedup** | **1,449×** |
+
+**The bottleneck is GPU compute, not the code.** Profiling puts 98% of the time in the
+forward pass; GPU→CPU transfer is 2%. The hardware is a **laptop GTX 1650 with a 50 W
+limit** (chassis type 10, PCIe gen 1), which sustains **0.27 TFLOP/s** on fp16 matmul at
+1860 MHz and 100% utilisation with no throttle flags. SaProt 650M at batch 32 needs about
+2.4 TFLOP per batch, which predicts ~3 seq/s — matching what is observed.
+
+Practical consequence, at 2–3.4 seq/s:
+
+| Encoding job | Sequences | Time |
+|---|---:|---|
+| D1/D2/D4 diagnostics (Phase 1) | ~1,000–5,000 | **5–25 min — fine** |
+| GB1 all-doubles | 536,000 | ~50 hours |
+| ProteinGym full corpus | 2,465,767 | **~9.5 days** |
+
+So **the near-term plan is unaffected**: Step 1.1 needs no encoder at all, and the Phase 1
+diagnostics need only a few thousand sequences. The constraint bites at Phase 2, where the
+reward head wants the full corpus. Options at that point, in order of preference: encode once
+and rely on the cache (the 1,449× speedup is why the cache exists); use a smaller backbone for
+development iterations; or rent a GPU for the one-off full-corpus pass.
 
 The cache pays for itself on the first repeat, which matters because Phase 1's diagnostics
 make several passes over the same sequences.

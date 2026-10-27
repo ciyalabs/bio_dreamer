@@ -2,8 +2,8 @@
 
 _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate with `bdtrack export`._
 
-- Steps complete: **3/31**
-- Runs recorded: **25** (0 failed, 25 from a dirty tree)
+- Steps complete: **4/31**
+- Runs recorded: **27** (0 failed, 27 from a dirty tree)
 - Gates open: **7** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
@@ -49,11 +49,12 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 |---|---|---|---|---|
 | `84f2ee03` | firewall_poison_test | scope=ProteinGym+FLIP2, threshold=0.7 | clean_cases_passed=2, firewall_tests_passing=1, leaks_found=7, leaks_unanticipated=3, poison_cases_blocked=6, proteingym_excluded=7, proteingym_train_assays=210, residual_sequence_leaks=0 | 4b2db6f ⚠dirty |
 
-### 0.4 — Encoder harness and embedding cache · `partial`
-- Pending: `cache_throughput`, `per_residue_rank_test`
+### 0.4 — Encoder harness and embedding cache · `complete`
 
 | Run | Experiment | Variant | Metrics | Code |
 |---|---|---|---|---|
+| `db237201` | cache_throughput | L=56, backbone=saprot, batch_size=32 | backbone_dim=1280, bytes_per_sequence=1.435e+05, cache_speedup=1449, cold_seq_per_s=2.1, forward_pass_frac_of_time=0.98, gpu_power_limit_w=50, sustained_tflops=0.27, warm_seq_per_s=3036 | d4a37c1 ⚠dirty |
+| `04ef48db` | per_residue_rank_test | backbone=saprot, guard=Cache.put + encode | backbone_dim=1280, per_residue_enforced=1, tests_passing=22, tests_total=22 | eb28191 ⚠dirty |
 | `0f8e4ca3` | tooling_verified | host=local | tools_required=3, tools_working=3 | 69d9b9d ⚠dirty |
 
 ### 0.5 — Evaluation harness and the additive null **[GATE]** · `not-started`

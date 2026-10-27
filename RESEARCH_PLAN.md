@@ -262,6 +262,25 @@ accidentally pooled anywhere (unit test on tensor rank).
 
 **Go / no-go.** Proceed when a full pass over the smallest dataset runs from cache.
 
+**✅ DONE (2026-10-27).** SaProt fits comfortably — 1,243 MiB of weights, 1,363 MiB peak even
+for T7 at 883 aa, against 3,707 MiB. Per-residue output enforced in both `encode` and
+`Cache.put`. Cache gives a **1,449× speedup** on a warm pass.
+
+**⚠ Hardware constraint discovered, and it changes Phase 2 scheduling.** The GPU is a
+**laptop GTX 1650 with a 50 W limit** sustaining **0.27 TFLOP/s**; profiling puts 98% of
+encode time in the forward pass, so this is compute, not code. At **2–3.4 seq/s**:
+
+| Job | Sequences | Time |
+|---|---:|---|
+| Phase 1 diagnostics (D1/D2/D4) | ~1,000–5,000 | **5–25 min — fine** |
+| GB1 all-doubles | 536,000 | ~50 h |
+| ProteinGym full corpus | 2,465,767 | **~9.5 days** |
+
+Phase 0 and Phase 1 are unaffected — **Step 1.1 needs no encoder at all**. The constraint
+bites at **Step 2.1**, where the reward head wants the full corpus. Decide then between
+encoding once into the cache, using a smaller backbone for iteration, or renting a GPU for
+the one-off pass. Do not discover this at Step 2.1.
+
 **Outputs.** `encoder/` module; cache; storage budget table in `DATA_REGISTER.md`.
 
 ---

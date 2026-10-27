@@ -3,20 +3,20 @@
     "project": "ProteinDreamer",
     "plan_hash": "d8cf8a531d85",
     "steps_total": 31,
-    "steps_complete": 3,
+    "steps_complete": 4,
     "steps_running": 0,
-    "steps_partial": 1,
+    "steps_partial": 0,
     "steps_not_started": 27,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 25,
+    "runs_total": 27,
     "runs_failed": 0,
-    "runs_dirty": 25,
+    "runs_dirty": 27,
     "runs_stale_plan": 22,
     "gates_open": 7,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T02:17:04+00:00",
+  "generated_at": "2026-10-27T02:47:48+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -816,14 +816,83 @@
       "name": "Encoder harness and embedding cache",
       "phase": "0",
       "gate": false,
-      "state": "partial",
+      "state": "complete",
       "verdict": null,
       "thresholds": [],
-      "missing_experiments": [
-        "cache_throughput",
-        "per_residue_rank_test"
-      ],
+      "missing_experiments": [],
       "runs": [
+        {
+          "id": "db237201c44546adae28f4de3f6c4e9e",
+          "experiment": "cache_throughput",
+          "variant": {
+            "L": 56,
+            "backbone": "saprot",
+            "batch_size": 32
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T02:47:47.911642+00:00",
+          "duration_s": 0.030417,
+          "git_sha": "d4a37c11deac193f62a8c6d123e0085990474a19",
+          "git_dirty": true,
+          "config_hash": "38cd373e3ab7",
+          "dataset_hash": null,
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "backbone_dim": 1280.0,
+            "bytes_per_sequence": 143488.0,
+            "cache_speedup": 1448.8,
+            "cold_seq_per_s": 2.1,
+            "forward_pass_frac_of_time": 0.98,
+            "gpu_power_limit_w": 50.0,
+            "sustained_tflops": 0.27,
+            "warm_seq_per_s": 3036.3
+          },
+          "artifacts": [
+            {
+              "path": "data/processed/encoder_bench.json",
+              "kind": "table",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
+        {
+          "id": "04ef48db437e4198b903c542d426af57",
+          "experiment": "per_residue_rank_test",
+          "variant": {
+            "backbone": "saprot",
+            "guard": "Cache.put + encode"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T02:40:18.332737+00:00",
+          "duration_s": 0.020646,
+          "git_sha": "eb2819106484c36f56d8d1513f0712121a45b73e",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": null,
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "backbone_dim": 1280.0,
+            "per_residue_enforced": 1.0,
+            "tests_passing": 22.0,
+            "tests_total": 22.0
+          },
+          "artifacts": [
+            {
+              "path": "biodreamer/protein_dreamer/encoder.py",
+              "kind": "code",
+              "description": ""
+            },
+            {
+              "path": "tests/unit/test_encoder_cache.py",
+              "kind": "test",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
         {
           "id": "0f8e4ca33e0a4a9db1781bcc5c578f7e",
           "experiment": "tooling_verified",
