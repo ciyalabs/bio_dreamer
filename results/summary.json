@@ -3,20 +3,20 @@
     "project": "ProteinDreamer",
     "plan_hash": "d8cf8a531d85",
     "steps_total": 31,
-    "steps_complete": 1,
+    "steps_complete": 2,
     "steps_running": 0,
     "steps_partial": 2,
-    "steps_not_started": 28,
+    "steps_not_started": 27,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 23,
+    "runs_total": 24,
     "runs_failed": 0,
-    "runs_dirty": 23,
+    "runs_dirty": 24,
     "runs_stale_plan": 22,
-    "gates_open": 8,
+    "gates_open": 7,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T01:53:06+00:00",
+  "generated_at": "2026-10-27T02:07:14+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -712,22 +712,71 @@
       "name": "Leakage firewall",
       "phase": "0",
       "gate": true,
-      "state": "not-started",
-      "verdict": null,
+      "state": "complete",
+      "verdict": {
+        "decision": "go",
+        "rationale": "7 leaks found and excluded (3 unanticipated); 23 firewall tests pass; every poison case blocked; 0 residual sequence-level leaks in the 210-assay training split",
+        "decided_at": "2026-10-27T02:06:58+00:00",
+        "decided_by": "samani"
+      },
       "thresholds": [
         {
           "condition": "firewall_tests_passing == 1",
           "hypothesis": "hard-gate",
-          "observed": null,
-          "outcome": "no-data",
+          "observed": 1.0,
+          "outcome": "pass",
           "aggregate": "latest",
-          "per_variant": []
+          "per_variant": [
+            {
+              "value": 1.0,
+              "variant": "scope=ProteinGym+FLIP2, threshold=0.7"
+            }
+          ]
         }
       ],
-      "missing_experiments": [
-        "firewall_poison_test"
-      ],
-      "runs": []
+      "missing_experiments": [],
+      "runs": [
+        {
+          "id": "84f2ee03018e4858a3b531fc18f918eb",
+          "experiment": "firewall_poison_test",
+          "variant": {
+            "scope": "ProteinGym+FLIP2",
+            "threshold": 0.7
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T02:06:58.328533+00:00",
+          "duration_s": 0.036297,
+          "git_sha": "4b2db6f56c3ccfbf206fdf6b61550144e823d347",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "e37deb71ddf3",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "clean_cases_passed": 2.0,
+            "firewall_tests_passing": 1.0,
+            "leaks_found": 7.0,
+            "leaks_unanticipated": 3.0,
+            "poison_cases_blocked": 6.0,
+            "proteingym_excluded": 7.0,
+            "proteingym_train_assays": 210.0,
+            "residual_sequence_leaks": 0.0
+          },
+          "artifacts": [
+            {
+              "path": "splits/heldout.yaml",
+              "kind": "config",
+              "description": "held-out registry"
+            },
+            {
+              "path": "splits/manifest.json",
+              "kind": "table",
+              "description": "split hashes"
+            }
+          ],
+          "error": null
+        }
+      ]
     },
     {
       "id": "0.4",

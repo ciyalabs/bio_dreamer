@@ -252,3 +252,6 @@ data/processed/hypercubeme/*.txt
 # Transient per-chunk working files written during a run (bare N.txt).
 data/processed/hypercubeme/out_*/[0-9]*.txt
 !data/processed/hypercubeme/out_*/hypercubes_*.txt
+
+# Firewall working files (fasta + mmseqs tmp): regenerable
+splits/work/

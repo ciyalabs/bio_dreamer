@@ -1,0 +1,35 @@
+{
+  "generated": "2026-10-27",
+  "registry_sha256": "2d616d5b9d1113b7",
+  "identity_threshold": 0.7,
+  "proteingym": {
+    "total_assays": 217,
+    "train_assays": 210,
+    "excluded_assays": [
+      "DYR_ECOLI_Nguyen_2023",
+      "DYR_ECOLI_Thompson_2019",
+      "F7YBW8_MESOW_Aakre_2015",
+      "F7YBW8_MESOW_Ding_2023",
+      "SPG1_STRSG_Olson_2014",
+      "SPG1_STRSG_Wu_2016",
+      "SPG2_STRSG_Tsuboyama_2023_5UBS"
+    ],
+    "train_hash": "8985b5fd1cf49514",
+    "excluded_hash": "a35a181064e0e5d7"
+  },
+  "flip2": {
+    "excluded_datasets": [
+      "gb1",
+      "trpb"
+    ]
+  },
+  "held_out_landscapes": [
+    "TrpB4",
+    "TEV",
+    "GB1",
+    "ParD2",
+    "ParD3",
+    "DHFR",
+    "T7"
+  ]
+}

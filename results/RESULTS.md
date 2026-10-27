@@ -2,9 +2,9 @@
 
 _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate with `bdtrack export`._
 
-- Steps complete: **1/31**
-- Runs recorded: **23** (0 failed, 23 from a dirty tree)
-- Gates open: **8** · steps missing pre-registration: **2**
+- Steps complete: **2/31**
+- Runs recorded: **24** (0 failed, 24 from a dirty tree)
+- Gates open: **7** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
 
@@ -41,9 +41,13 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 | `8757bcf0` | mutation_order_histogram | landscape=DHFR, source=SSMuLA | additive_r2=0.2771, completeness_vs_20=0, frac_above_wild_type=0.5699, frac_dead=0, n_genotypes=2.613e+05, n_sites=9, nonadditive_variance_fraction=0.7229 | d1884c4 ⚠dirty |
 | `d1dfd021` | mutation_order_histogram | source=ProteinGym, version=v1.3 | assays_ge_10k_multimutants=14, assays_with_multimutants=69, frac_multiple=0.7176, multiple_mutants=1.769e+06, n_assays=217, single_mutants=6.963e+05, total_mutants=2.466e+06 | d1884c4 ⚠dirty |
 
-### 0.3 — Leakage firewall **[GATE]** · `not-started`
-- ⬜ `firewall_tests_passing == 1` → observed `—`
-- Pending: `firewall_poison_test`
+### 0.3 — Leakage firewall **[GATE]** · `complete`
+- Verdict: **go** (2026-10-27T02:06:58+00:00) 7 leaks found and excluded (3 unanticipated); 23 firewall tests pass; every poison case blocked; 0 residual sequence-level leaks in the 210-assay training split
+- ✅ `firewall_tests_passing == 1` → observed `1`
+
+| Run | Experiment | Variant | Metrics | Code |
+|---|---|---|---|---|
+| `84f2ee03` | firewall_poison_test | scope=ProteinGym+FLIP2, threshold=0.7 | clean_cases_passed=2, firewall_tests_passing=1, leaks_found=7, leaks_unanticipated=3, poison_cases_blocked=6, proteingym_excluded=7, proteingym_train_assays=210, residual_sequence_leaks=0 | 4b2db6f ⚠dirty |
 
 ### 0.4 — Encoder harness and embedding cache · `partial`
 - Pending: `cache_throughput`, `per_residue_rank_test`

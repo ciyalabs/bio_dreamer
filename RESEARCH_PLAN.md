@@ -204,6 +204,31 @@ poisoned split before being trusted.
 
 **Outputs.** `splits/*.json` + hashes; two CI tests; a one-paragraph statement in the paper's methods.
 
+**✅ DONE (2026-10-27) — verdict: go.** The leakage surface was larger than this step assumed.
+mmseqs found **7 leaks, 3 of them unanticipated**:
+
+| Held-out | Leaks into | Identity | Anticipated? |
+|---|---|---|---|
+| GB1 | `SPG1_STRSG_Olson_2014`, `SPG1_STRSG_Wu_2016` | 100% | yes |
+| GB1 | `SPG2_STRSG_Tsuboyama_2023_5UBS` | 89.2% | **no — homolog** |
+| GB1, TrpB4 | FLIP2 `gb1`, `trpb` | 100%, 99.2% | **no — a source this plan added** |
+| ParD3 | `F7YBW8_MESOW_Aakre_2015`, `..._Ding_2023` | 100% | **no — UniProt name matches neither landscape** |
+| ParD2 | `F7YBW8_MESOW_*` | 71.2% | **no — homolog** |
+| DHFR | `DYR_ECOLI_Nguyen_2023`, `..._Thompson_2019` | 100% | **no — only matched after translation** |
+
+Three lessons worth carrying forward:
+
+1. **Name matching would have missed four of seven.** `F7YBW8_MESOW` resembles neither
+   "ParD2" nor "ParD3". Conversely `TRPC_SACS2` *looks* like TrpB and is unrelated.
+2. **FLIP2, which this plan added as a training source, contains two held-out landscapes.**
+   Adding a dataset is adding leakage surface.
+3. **A protein-level search silently misses a nucleotide-coded landscape.** SSMuLA's DHFR is
+   DNA; it only matched `DYR_ECOLI` once translated. The firewall translates before checking.
+
+Result: 217 ProteinGym assays → **210 trainable, 7 excluded**; 0 residual sequence-level
+leaks. 23 tests in `tests/unit/test_firewall.py`, every poison case blocked. Registry in
+`splits/heldout.yaml`, hashes in `splits/manifest.json`.
+
 ---
 
 ## Step 0.4 — Encoder harness and embedding cache `M`

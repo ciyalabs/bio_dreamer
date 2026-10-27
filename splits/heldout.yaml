@@ -1,0 +1,100 @@
+# Held-out registry — Step 0.3 leakage firewall.
+#
+# Every entry here is excluded from BOTH reward-head and dynamics training.
+# The `leaks_into` lists were produced by mmseqs homology search, not by name
+# matching, and are reproduced by scripts/check_firewall.py. Three of them were
+# not anticipated when the plan was written:
+#
+#   - SPG2_STRSG_Tsuboyama_2023_5UBS is an 89% GB1 homolog
+#   - ParD2 and ParD3 appear in ProteinGym under the UniProt id F7YBW8_MESOW,
+#     a name that matches neither landscape
+#   - SSMuLA's DHFR is a NUCLEOTIDE sequence; it only matched DYR_ECOLI after
+#     translation, so a protein-level search alone misses it
+#
+# FLIP2 was added to the plan as a training source for higher-order splits and
+# turns out to contain GB1 and TrpB outright. Its gb1 and trpb subsets are
+# therefore excluded too.
+
+identity_threshold: 0.70   # ParD2 leaks at 71.2%; anything at or above this is a leak
+
+held_out:
+  - name: TrpB4
+    role: primary H4 landscape
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/TrpB/TrpB.fasta
+    leaks_into:
+      - {source: FLIP2, id: trpb, identity: 0.992}
+
+  - name: TEV
+    role: primary H4 landscape
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/TEV/TEV.fasta
+    leaks_into: []          # the 50% hit to POLG_CXB3N spans 26 aa at qcov 0.11; spurious
+
+  - name: GB1
+    role: third H4 landscape (92% dead — see DATA_REGISTER.md)
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/GB1/GB1.fasta
+    leaks_into:
+      - {source: ProteinGym, id: SPG1_STRSG_Olson_2014, identity: 1.000}
+      - {source: ProteinGym, id: SPG1_STRSG_Wu_2016, identity: 1.000}
+      - {source: ProteinGym, id: SPG2_STRSG_Tsuboyama_2023_5UBS, identity: 0.892}
+      - {source: FLIP2, id: gb1, identity: 1.000}
+
+  - name: ParD2
+    role: negative control (near-additive, 0.158)
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/ParD2/ParD2.fasta
+    leaks_into:
+      - {source: ProteinGym, id: F7YBW8_MESOW_Aakre_2015, identity: 0.712}
+      - {source: ProteinGym, id: F7YBW8_MESOW_Ding_2023, identity: 0.712}
+
+  - name: ParD3
+    role: negative control (near-additive, 0.148)
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/ParD3/ParD3.fasta
+    leaks_into:
+      - {source: ProteinGym, id: F7YBW8_MESOW_Aakre_2015, identity: 1.000}
+      - {source: ProteinGym, id: F7YBW8_MESOW_Ding_2023, identity: 1.000}
+
+  - name: DHFR
+    role: secondary landscape (nucleotide-level; 9 nt sites = 3 codons)
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/DHFR/DHFR.fasta
+    nucleotide: true        # must be translated before any homology check
+    leaks_into:
+      - {source: ProteinGym, id: DYR_ECOLI_Nguyen_2023, identity: 1.000}
+      - {source: ProteinGym, id: DYR_ECOLI_Thompson_2019, identity: 1.000}
+
+  - name: T7
+    role: secondary landscape
+    source: SSMuLA
+    parent_fasta: data/raw/ssmula/extracted/data/T7/T7.fasta
+    leaks_into: []
+
+# Everything above, flattened: these must never appear in a training split.
+banned_proteingym_assays:
+  - SPG1_STRSG_Olson_2014
+  - SPG1_STRSG_Wu_2016
+  - SPG2_STRSG_Tsuboyama_2023_5UBS
+  - F7YBW8_MESOW_Aakre_2015
+  - F7YBW8_MESOW_Ding_2023
+  - DYR_ECOLI_Nguyen_2023
+  - DYR_ECOLI_Thompson_2019
+
+banned_flip2_datasets:
+  - gb1
+  - trpb
+
+# The two-instance rule (RESEARCH_PLAN.md step 0.3). A `benchmark` model may
+# train on anything, including the banned list, for literature comparability.
+# A `planning` model may not. The two must never be cross-reported, and no
+# Phase 6 result may come from a benchmark checkpoint.
+instances:
+  benchmark:
+    may_train_on_banned: true
+    usable_for: [literature comparison, FLIP protocol reproduction]
+    forbidden_for: [H3, H4, any Phase 6 result]
+  planning:
+    may_train_on_banned: false
+    usable_for: [everything]
