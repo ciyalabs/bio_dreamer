@@ -1,10 +1,10 @@
 # ProteinDreamer — results summary
 
-_Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate with `bdtrack export`._
+_Generated from `plan.yaml` (`f9585ee5523c`). Do not edit by hand; regenerate with `bdtrack export`._
 
-- Steps complete: **5/31**
-- Runs recorded: **33** (0 failed, 33 from a dirty tree)
-- Gates open: **6** · steps missing pre-registration: **2**
+- Steps complete: **6/31**
+- Runs recorded: **34** (0 failed, 34 from a dirty tree)
+- Gates open: **5** · steps missing pre-registration: **0**
 
 ## Phase 0 — Groundwork
 
@@ -69,13 +69,18 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 | `d18f3324` | additive_null_impl | landscape=TEV | additive_r2_full=0.048, additive_spearman_higher_order=-0.005, greedy_hit_restarts_1=0, greedy_hit_restarts_100=0.4, greedy_hit_restarts_20=0, greedy_hit_restarts_5=0 | 90ba0e8 ⚠dirty |
 | `6a2443a0` | additive_null_impl | landscape=TrpB4 | additive_r2_full=0.2568, additive_spearman_higher_order=0.0696, greedy_hit_restarts_1=0, greedy_hit_restarts_100=1, greedy_hit_restarts_20=1, greedy_hit_restarts_5=1 | 90ba0e8 ⚠dirty |
 
-### 0.6 — Pre-register thresholds for H1-H4 **[GATE]** · `not-started`
+### 0.6 — Pre-register thresholds for H1-H4 **[GATE]** · `complete`
+- Verdict: **go** (2026-10-27T03:32:13+00:00) H1-H4 registered with measurement-grounded thresholds; 4.2 and 6.2 had none before; greedy/baseline/budget ambiguities fixed in advance; 19 drift tests tie the document to plan.yaml
+
+| Run | Experiment | Variant | Metrics | Code |
+|---|---|---|---|---|
+| `8811276a` | preregistration | scope=H1-H4 | amendments_after_phase1=0, hypotheses_registered=4, integrity_tests=19, pre_phase1_revisions_logged=6, steps_missing_thresholds=0, steps_with_thresholds=9 | 719b349 ⚠dirty |
 
 ## Phase 1 — Kill-shot diagnostics
 
 ### 1.1 — D3: Epistasis headroom audit **[GATE]** · `not-started`
-- ⬜ `nonadditive_variance_fraction >= 0.15 [all]` → observed `—`
-- ⬜ `greedy_optimum_hit_rate <= 0.8 [all]` → observed `—`
+- ⬜ `nonadditive_variance_fraction >= 0.15 [max]` → observed `—`
+- ⬜ `greedy_optimum_hit_rate <= 0.8 [min]` → observed `—`
 - Pending: `additive_fit`, `greedy_reachability`, `negative_control`, `pairwise_fit`, `rse_count`, `stack_topk_headroom`
 
 ### 1.2 — D1: Structure invariance under point mutation · `not-started`
@@ -93,8 +98,10 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 - Pending: `censoring_decision`, `reward_training`
 
 ### 2.2 — H1: Benchmark against the literature and the null **[GATE]** · `not-started`
-- ⬜ `spearman_mean >= 0.5` → observed `—`
-- ⬜ `margin_over_additive_null > 0` → observed `—`
+- ⬜ `spearman_mean >= 0.55` → observed `—`
+- ⬜ `margin_over_additive_null > 0.05` → observed `—`
+- ⬜ `frac_assays_beating_null >= 0.7` → observed `—`
+- ⬜ `spearman_mean_vs_frozen_regression > 0` → observed `—`
 - Pending: `higher_order_extrapolation`, `vs_additive_null`, `vs_frozen_regression`, `vs_literature`, `vs_zeroshot`
 
 ### 2.3 — Uncertainty calibration · `not-started`
@@ -122,6 +129,10 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 - Pending: `few_step_equivalence`, `flow_training`
 
 ### 4.2 — H2: A versus B · `not-started`
+- ⬜ `error_growth_slope_ratio <= 0.75` → observed `—`
+- ⬜ `error_growth_gap_over_seed_sd >= 2` → observed `—`
+- ⬜ `candidate_diversity_ratio >= 1.1` → observed `—`
+- ⬜ `n_seeds >= 3 [min]` → observed `—`
 - Pending: `candidate_diversity`, `error_compounding_3arm`, `sampling_cost`, `uncertainty_quality`
 
 ## Phase 5 — Planner validation on synthetic landscapes
@@ -138,12 +149,18 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 - Pending: `admissibility_calibration`, `rejection_rates`, `trust_region_ablation`
 
 ### 6.2 — H3: Policy comparison · `not-started`
+- ⬜ `policy_gap_over_seed_sd >= 2` → observed `—`
+- ⬜ `n_seeds >= 5 [min]` → observed `—`
+- ⬜ `spearman_calibration_vs_policy_rank >= 0.5` → observed `—`
+- ⬜ `eta_zero_reported == 1` → observed `—`
 - Pending: `active_inference`, `gflownet`, `low_data_regime`, `mcts`, `policy_vs_calibration`, `ppo_entropy`
 
 ### 6.3 — H4: Multi-step planning **[GATE]** · `not-started`
-- ⬜ `optimum_hit_rate_margin_over_additive > 0.1 [all]` → observed `—`
+- ⬜ `optimum_hit_rate_margin_over_best_baseline > 0.1` → observed `—`
+- ⬜ `best_fitness_margin_over_best_baseline > 0.05` → observed `—`
 - ⬜ `correlation_with_additive <= 0.95 [max]` → observed `—`
-- ⬜ `n_seeds >= 3 [min]` → observed `—`
+- ⬜ `margin_on_negative_controls <= 0.05 [max]` → observed `—`
+- ⬜ `n_seeds >= 5 [min]` → observed `—`
 - Pending: `h4_additive_correlation`, `h4_vs_additive_null`, `h4_vs_greedy_same_reward`, `h4_vs_published`, `h4_vs_random`, `h4_vs_stack_topk`
 
 ### 6.4 — Longer horizon · `not-started`

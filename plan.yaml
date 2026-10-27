@@ -117,15 +117,19 @@ phases:
           - id: negative_control
             name: ParD2/ParD3 near-additive controls - planner should show no advantage
         thresholds:
+          # existential, not universal: the project needs ONE landscape with
+          # headroom, not all of them. 'all' would fail on ParD2/ParD3 by design.
           - metric: nonadditive_variance_fraction
             op: ">="
             value: 0.15
-            aggregate: all          # every landscape must show headroom, not just the last one
+            aggregate: max
             hypothesis: H4-precondition
+          # greedy = 5 random restarts on the true oracle (PREREGISTRATION.md).
+          # Single-step greedy scores 0 everywhere and would pass vacuously.
           - metric: greedy_optimum_hit_rate
             op: "<="
             value: 0.8
-            aggregate: all
+            aggregate: min
             hypothesis: H4-precondition
         outputs: [diagnostics/epistasis_audit.md, frozen additive-null reference numbers]
 
@@ -201,11 +205,21 @@ phases:
           - id: higher_order_extrapolation
             name: Train on <300 singles+doubles, test on unseen 3+ mutants
         thresholds:
+          # published band on the same protocol: ProteinNPT 0.56, MULTI-evolve
+          # 0.61, Kermut 0.62, Cerebra 0.65
           - metric: spearman_mean
             op: ">="
-            value: 0.5
+            value: 0.55
             hypothesis: H1
           - metric: margin_over_additive_null
+            op: ">"
+            value: 0.05
+            hypothesis: H1
+          - metric: frac_assays_beating_null
+            op: ">="
+            value: 0.70
+            hypothesis: H1
+          - metric: spearman_mean_vs_frozen_regression
             op: ">"
             value: 0.0
             hypothesis: H1
@@ -304,6 +318,24 @@ phases:
         name: "H2: A versus B"
         size: M
         prereg_required: true
+        thresholds:
+          - metric: error_growth_slope_ratio      # A / B; A must cut compounding by >=25%
+            op: "<="
+            value: 0.75
+            hypothesis: H2
+          - metric: error_growth_gap_over_seed_sd
+            op: ">="
+            value: 2.0
+            hypothesis: H2
+          - metric: candidate_diversity_ratio
+            op: ">="
+            value: 1.10
+            hypothesis: H2
+          - metric: n_seeds
+            op: ">="
+            value: 3
+            aggregate: min
+            hypothesis: H2
         why: Three arms - flow matching, DDPM, deterministic. If B matches A at a fraction of the cost, report that.
         experiments:
           - id: error_compounding_3arm
@@ -363,6 +395,24 @@ phases:
         name: "H3: Policy comparison"
         size: M
         prereg_required: true
+        thresholds:
+          - metric: policy_gap_over_seed_sd       # below this, a "difference" is seed noise
+            op: ">="
+            value: 2.0
+            hypothesis: H3
+          - metric: n_seeds
+            op: ">="
+            value: 5
+            aggregate: min
+            hypothesis: H3
+          - metric: spearman_calibration_vs_policy_rank
+            op: ">="
+            value: 0.5
+            hypothesis: H3
+          - metric: eta_zero_reported             # the eta=0 ablation is mandatory
+            op: "=="
+            value: 1
+            hypothesis: H3
         why: Expect a possible negative result for Active Inference; H3 is phrased so this is reportable.
         experiments:
           - id: ppo_entropy
@@ -399,19 +449,32 @@ phases:
           - id: h4_additive_correlation
             name: Correlation between model and additive-null predictions
         thresholds:
-          - metric: optimum_hit_rate_margin_over_additive
+          # reframed 2026-10-27 per PREREGISTRATION.md: stated per oracle call
+          # (B=100) against the STRONGEST baseline, because step 0.5 measured
+          # greedy-with-5-restarts solving 4 of 5 landscapes outright.
+          - metric: optimum_hit_rate_margin_over_best_baseline
             op: ">"
-            value: 0.1
-            aggregate: all          # must beat the null on every held-out landscape
+            value: 0.10
+            hypothesis: H4
+          - metric: best_fitness_margin_over_best_baseline
+            op: ">"
+            value: 0.05
             hypothesis: H4
           - metric: correlation_with_additive
             op: "<="
             value: 0.95
             aggregate: max          # the most additive-looking landscape decides
             hypothesis: H4-falsification
+          # a planner that also wins on the near-additive controls is suspect,
+          # not impressive: the likely cause is reward-model exploitation
+          - metric: margin_on_negative_controls
+            op: "<="
+            value: 0.05
+            aggregate: max
+            hypothesis: H4-falsification
           - metric: n_seeds
             op: ">="
-            value: 3
+            value: 5
             aggregate: min
             hypothesis: H4
         outputs: [results/h4_planning.md, H4 verdict]

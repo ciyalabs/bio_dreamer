@@ -372,6 +372,26 @@ the edit is logged with a reason and the original kept visible.
 
 **Outputs.** `PREREGISTRATION.md`.
 
+**✅ DONE (2026-10-27) — verdict: go.** `PREREGISTRATION.md` registers H1–H4 with every number
+grounded in a Step 0.2–0.5 measurement rather than chosen for convenience, and `plan.yaml`
+carries the machine-checked form. 4.2 and 6.2 had **no thresholds at all** before this step.
+
+Ambiguities that would have let a threshold be reinterpreted later are now fixed in advance:
+**"greedy" means 5 random restarts** (single-step finds the optimum on 0/5 landscapes and
+would pass vacuously), **"strongest baseline" means the maximum** over all four, and the
+**oracle budget is B=100** swept over {30, 100, 300}.
+
+Six pre-Phase-1 revisions are logged in the document, the largest being H4's reframing and
+the TrpB4 → TEV switch. An amendment table is in place for anything after Phase 1 begins.
+
+`tests/unit/test_preregistration.py` (19 tests) ties the document to `plan.yaml` so the two
+cannot drift apart silently — verified by renaming one threshold and watching three tests fail.
+
+Step 1.1's gate was corrected here too: its aggregates were `all`, which would have **failed
+by design** on the near-additive ParD controls. The gate is existential — one landscape with
+headroom suffices — so they are now `max`/`min`. Checked against measured data: it passes on
+TEV alone (non-additive 0.952, greedy 0/5), exactly as predicted.
+
 ---
 
 # Phase 1 — Kill-shot diagnostics

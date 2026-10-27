@@ -1,22 +1,22 @@
 {
   "summary": {
     "project": "ProteinDreamer",
-    "plan_hash": "d8cf8a531d85",
+    "plan_hash": "f9585ee5523c",
     "steps_total": 31,
-    "steps_complete": 5,
+    "steps_complete": 6,
     "steps_running": 0,
     "steps_partial": 0,
-    "steps_not_started": 26,
+    "steps_not_started": 25,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 33,
+    "runs_total": 34,
     "runs_failed": 0,
-    "runs_dirty": 33,
-    "runs_stale_plan": 22,
-    "gates_open": 6,
-    "steps_missing_prereg": 2
+    "runs_dirty": 34,
+    "runs_stale_plan": 33,
+    "gates_open": 5,
+    "steps_missing_prereg": 0
   },
-  "generated_at": "2026-10-27T03:22:09+00:00",
+  "generated_at": "2026-10-27T03:32:14+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -1105,11 +1105,49 @@
       "name": "Pre-register thresholds for H1-H4",
       "phase": "0",
       "gate": true,
-      "state": "not-started",
-      "verdict": null,
+      "state": "complete",
+      "verdict": {
+        "decision": "go",
+        "rationale": "H1-H4 registered with measurement-grounded thresholds; 4.2 and 6.2 had none before; greedy/baseline/budget ambiguities fixed in advance; 19 drift tests tie the document to plan.yaml",
+        "decided_at": "2026-10-27T03:32:13+00:00",
+        "decided_by": "samani"
+      },
       "thresholds": [],
       "missing_experiments": [],
-      "runs": []
+      "runs": [
+        {
+          "id": "8811276aec614059b289d47f190e1fac",
+          "experiment": "preregistration",
+          "variant": {
+            "scope": "H1-H4"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:32:00.345163+00:00",
+          "duration_s": 0.023723,
+          "git_sha": "719b349118a2f06b289c33f1011ab03372f990af",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "cbece112edb6",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "amendments_after_phase1": 0.0,
+            "hypotheses_registered": 4.0,
+            "integrity_tests": 19.0,
+            "pre_phase1_revisions_logged": 6.0,
+            "steps_missing_thresholds": 0.0,
+            "steps_with_thresholds": 9.0
+          },
+          "artifacts": [
+            {
+              "path": "PREREGISTRATION.md",
+              "kind": "report",
+              "description": ""
+            }
+          ],
+          "error": null
+        }
+      ]
     },
     {
       "id": "1.1",
@@ -1120,19 +1158,19 @@
       "verdict": null,
       "thresholds": [
         {
-          "condition": "nonadditive_variance_fraction >= 0.15 [all]",
+          "condition": "nonadditive_variance_fraction >= 0.15 [max]",
           "hypothesis": "H4-precondition",
           "observed": null,
           "outcome": "no-data",
-          "aggregate": "all",
+          "aggregate": "max",
           "per_variant": []
         },
         {
-          "condition": "greedy_optimum_hit_rate <= 0.8 [all]",
+          "condition": "greedy_optimum_hit_rate <= 0.8 [min]",
           "hypothesis": "H4-precondition",
           "observed": null,
           "outcome": "no-data",
-          "aggregate": "all",
+          "aggregate": "min",
           "per_variant": []
         }
       ],
@@ -1214,7 +1252,7 @@
       "verdict": null,
       "thresholds": [
         {
-          "condition": "spearman_mean >= 0.5",
+          "condition": "spearman_mean >= 0.55",
           "hypothesis": "H1",
           "observed": null,
           "outcome": "no-data",
@@ -1222,7 +1260,23 @@
           "per_variant": []
         },
         {
-          "condition": "margin_over_additive_null > 0",
+          "condition": "margin_over_additive_null > 0.05",
+          "hypothesis": "H1",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "frac_assays_beating_null >= 0.7",
+          "hypothesis": "H1",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "spearman_mean_vs_frozen_regression > 0",
           "hypothesis": "H1",
           "observed": null,
           "outcome": "no-data",
@@ -1350,7 +1404,40 @@
       "gate": false,
       "state": "not-started",
       "verdict": null,
-      "thresholds": [],
+      "thresholds": [
+        {
+          "condition": "error_growth_slope_ratio <= 0.75",
+          "hypothesis": "H2",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "error_growth_gap_over_seed_sd >= 2",
+          "hypothesis": "H2",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "candidate_diversity_ratio >= 1.1",
+          "hypothesis": "H2",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "n_seeds >= 3 [min]",
+          "hypothesis": "H2",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "min",
+          "per_variant": []
+        }
+      ],
       "missing_experiments": [
         "candidate_diversity",
         "error_compounding_3arm",
@@ -1409,7 +1496,40 @@
       "gate": false,
       "state": "not-started",
       "verdict": null,
-      "thresholds": [],
+      "thresholds": [
+        {
+          "condition": "policy_gap_over_seed_sd >= 2",
+          "hypothesis": "H3",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "n_seeds >= 5 [min]",
+          "hypothesis": "H3",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "min",
+          "per_variant": []
+        },
+        {
+          "condition": "spearman_calibration_vs_policy_rank >= 0.5",
+          "hypothesis": "H3",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "eta_zero_reported == 1",
+          "hypothesis": "H3",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        }
+      ],
       "missing_experiments": [
         "active_inference",
         "gflownet",
@@ -1429,11 +1549,19 @@
       "verdict": null,
       "thresholds": [
         {
-          "condition": "optimum_hit_rate_margin_over_additive > 0.1 [all]",
+          "condition": "optimum_hit_rate_margin_over_best_baseline > 0.1",
           "hypothesis": "H4",
           "observed": null,
           "outcome": "no-data",
-          "aggregate": "all",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "best_fitness_margin_over_best_baseline > 0.05",
+          "hypothesis": "H4",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
           "per_variant": []
         },
         {
@@ -1445,7 +1573,15 @@
           "per_variant": []
         },
         {
-          "condition": "n_seeds >= 3 [min]",
+          "condition": "margin_on_negative_controls <= 0.05 [max]",
+          "hypothesis": "H4-falsification",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "max",
+          "per_variant": []
+        },
+        {
+          "condition": "n_seeds >= 5 [min]",
           "hypothesis": "H4",
           "observed": null,
           "outcome": "no-data",
