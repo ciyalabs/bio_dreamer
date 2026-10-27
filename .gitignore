@@ -247,5 +247,8 @@ models/
 tools/
 
 # HypercubeME genotype inputs: regenerable from ProteinGym via
-# scripts/to_hypercubeme.py. The hypercube OUTPUTS are kept.
+# scripts/to_hypercubeme.py. The hypercube OUTPUTS (hypercubes_N.txt) are kept.
 data/processed/hypercubeme/*.txt
+# Transient per-chunk working files written during a run (bare N.txt).
+data/processed/hypercubeme/out_*/[0-9]*.txt
+!data/processed/hypercubeme/out_*/hypercubes_*.txt
