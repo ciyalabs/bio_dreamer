@@ -255,3 +255,6 @@ data/processed/hypercubeme/out_*/[0-9]*.txt
 
 # Firewall working files (fasta + mmseqs tmp): regenerable
 splits/work/
+
+# Embedding caches (large, regenerable)
+models/cache*/

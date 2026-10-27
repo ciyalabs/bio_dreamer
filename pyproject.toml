@@ -90,6 +90,9 @@ include = ["biodreamer*", "server*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "gpu: needs CUDA and downloaded model weights",
+]
 
 [tool.ruff]
 line-length = 100

@@ -333,6 +333,38 @@ The `*_DMS_list.csv` files are lists of **experiments**, not variants:
 a calibrated biophysical readout. `Double_DMS_list.csv` even carries a `max_ep_dG` column
 (maximum epistasis in ΔG), which is directly usable in Step 1.1.
 
+---
+
+## Embedding storage budget (Step 0.4)
+
+Measured with `scripts/bench_encoder.py` against SaProt 650M (`d_h = 1280`).
+A cached per-residue embedding costs **140.1 KiB per sequence at L=56**, and cost
+scales with both length and dimension.
+
+| Workload | n | L | d | Size |
+|---|---:|---:|---:|---:|
+| GB1 doubles, raw backbone dim | 536,000 | 56 | 1280 | **71.6 GiB** |
+| GB1 doubles, after adapter | 536,000 | 56 | 128 | 7.2 GiB |
+| TrpB4, raw backbone dim | 159,129 | 390 | 1280 | **148.0 GiB** |
+| TrpB4, after adapter | 159,129 | 390 | 128 | 14.8 GiB |
+| ProteinGym all, raw (L≈300) | 2,465,767 | 300 | 1280 | **1.7 TiB** |
+
+**Rule that follows: cache `Z_t` after the adapter, never the raw backbone output.**
+At `d_h = 1280` ProteinGym alone needs 1.7 TiB, against 521 GiB free on this machine.
+At `d = 128` the same corpus is ~174 GiB, which fits. `Cache.budget_report()` prints this
+for a planned workload and flags an over-budget fill before it starts.
+
+Cache behaviour measured on 64 GB1 single mutants:
+
+| | |
+|---|---|
+| Cold pass | 13.6 s → **4.7 seq/s** |
+| Warm pass | 0.017 s → 3,733 seq/s |
+| **Speedup** | **792×** |
+
+The cache pays for itself on the first repeat, which matters because Phase 1's diagnostics
+make several passes over the same sequences.
+
 ## Licence summary
 
 | Licence | Sources | Redistribution |

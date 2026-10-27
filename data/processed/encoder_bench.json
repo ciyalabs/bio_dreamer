@@ -1,0 +1,18 @@
+{
+  "backbone": "westlake-repl/SaProt_650M_AF2",
+  "n_sequences": 64,
+  "length": 56,
+  "dim": 1280,
+  "batch_size": 8,
+  "model_load_s": 5.82,
+  "cold_s": 13.574,
+  "warm_s": 0.017,
+  "cold_seq_per_s": 4.7,
+  "warm_seq_per_s": 3733.1,
+  "speedup": 791.8,
+  "cold_hits": 0,
+  "cold_misses": 64,
+  "cache_entries": 64,
+  "cache_bytes": 9183232,
+  "bytes_per_sequence": 143488
+}
