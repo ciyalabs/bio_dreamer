@@ -1,0 +1,2 @@
+diagonal first_genotype last_genotype
+A60Z:F62Z:I77Z:L79Z:N76Z:R78Z	60A:62F:76N:77I:78R:79L	0Z

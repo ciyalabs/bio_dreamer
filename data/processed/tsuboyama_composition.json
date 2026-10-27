@@ -1,0 +1,35 @@
+{
+  "single": {
+    "rows": 983,
+    "columns": [
+      "name",
+      "aa_seq",
+      "frac_NA",
+      "raw_corr",
+      "dg_corr",
+      "slope"
+    ]
+  },
+  "double": {
+    "rows": 725,
+    "columns": [
+      "K50_corr",
+      "dg_corr",
+      "recon_corr",
+      "NA_num",
+      "max_ep_dG",
+      "wt_ep_dG"
+    ]
+  },
+  "triple": {
+    "rows": 36,
+    "columns": [
+      "triple_mut_name",
+      "pdb_name",
+      "pos1",
+      "pos2",
+      "pos3",
+      "aa1"
+    ]
+  }
+}

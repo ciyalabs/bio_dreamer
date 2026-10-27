@@ -2,8 +2,8 @@
 
 _Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate with `bdtrack export`._
 
-- Steps complete: **0/31**
-- Runs recorded: **18** (0 failed, 18 from a dirty tree)
+- Steps complete: **1/31**
+- Runs recorded: **22** (0 failed, 22 from a dirty tree)
 - Gates open: **8** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
@@ -15,11 +15,14 @@ _Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate wi
 |---|---|---|---|---|
 | `47f9d1c1` | env_bootstrap | cuda=13.0, python=3.12 | cuda_available=1, tests_passing=26, vram_gib=3.62 | 4a7f3b3 ⚠dirty |
 
-### 0.2 — Data acquisition and licence register · `partial`
-- Pending: `hypercube_index`
+### 0.2 — Data acquisition and licence register · `complete`
 
 | Run | Experiment | Variant | Metrics | Code |
 |---|---|---|---|---|
+| `b2a28cdd` | hypercube_index | dataset=HIS3, segment=80_100 | dim_1=1196, dim_2=2003, dim_3=1209, dim_4=238, genotypes=242, hypercubes_total=4646, max_dimension=4, multiplication_factor=19.2 | b63ad0f ⚠dirty |
+| `25655521` | hypercube_index | dataset=HIS3, segment=60_80 | dim_1=1211, dim_2=1954, dim_3=1266, dim_4=241, dim_5=30, dim_6=1, genotypes=264, hypercubes_total=4703, max_dimension=6, multiplication_factor=17.81 | b63ad0f ⚠dirty |
+| `659042b4` | hypercube_index | dataset=HIS3, segment=160_180 | dim_1=4185, dim_2=8085, dim_3=7324, dim_4=3241, dim_5=682, dim_6=51, genotypes=799, hypercubes_total=2.357e+04, max_dimension=6, multiplication_factor=29.5 | b63ad0f ⚠dirty |
+| `b5d4ab20` | hypercube_index | dataset=HIS3, segment=140_160 | dim_1=4681, dim_2=9191, dim_3=8190, dim_4=3154, dim_5=446, dim_6=18, genotypes=916, hypercubes_total=2.568e+04, max_dimension=6, multiplication_factor=28.03 | b63ad0f ⚠dirty |
 | `cbafeb86` | mutation_order_histogram | landscape=TrpB4, source=SSMuLA | additive_r2=0.2568, completeness_vs_20=0.9946, frac_above_wild_type=0.5676, frac_dead=0, n_genotypes=1.591e+05, n_sites=4, nonadditive_variance_fraction=0.7432 | d1884c4 ⚠dirty |
 | `83fe4372` | mutation_order_histogram | landscape=TrpB3I, source=SSMuLA | additive_r2=0.5349, completeness_vs_20=0.973, frac_above_wild_type=0.0084, frac_dead=0.0001, n_genotypes=7784, n_sites=3, nonadditive_variance_fraction=0.4651 | d1884c4 ⚠dirty |
 | `7da894f7` | mutation_order_histogram | landscape=TrpB3H, source=SSMuLA | additive_r2=0.0277, completeness_vs_20=0.9645, frac_above_wild_type=0.6109, frac_dead=0.0001, n_genotypes=7716, n_sites=3, nonadditive_variance_fraction=0.9723 | d1884c4 ⚠dirty |

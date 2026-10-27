@@ -205,13 +205,144 @@ Potts landscapes, Step 5). Recorded in the `pyproject.toml` header.
 
 ---
 
+---
+
+## Model weights and tooling (added 2026-10-27)
+
+### Encoder weights — **a licence problem with the proposed default**
+
+| Model | HF repo | Gated | Licence | Verdict |
+|---|---|---|---|---|
+| **SaProt 650M** | `westlake-repl/SaProt_650M_AF2` | No | **MIT** (HF card and GitHub) | **Use as default** |
+| ESM-2 650M | `facebook/esm2_t33_650M_UR50D` | No | **MIT** | Baseline, fine |
+| **ProSST-2048** | `AI4Protein/ProSST-2048` | No | **NONE** — no LICENSE file on HF; GitHub reports `NOASSERTION`, `LICENSE` is 404 | **Do not make it the default** |
+| ESM-C 600M / 300M | `biohub/esmc-600m-2024-12` | No | `mit, other` (dual) | Usable; read the "other" (Cambrian) terms before commercial use |
+| ESM-3 open 1.4B | `biohub/esm3-sm-open-v1` | No | unspecified on card | Read terms before use |
+
+**`proposal.tex` §4.3 names ProSST as the default encoder.** It has no licence at all,
+which is incompatible with the open-source framework promised as Contribution 4. SaProt is
+MIT, clean, and only modestly behind on ProteinGym (0.457 vs 0.507 average Spearman).
+
+Recommendation: **make SaProt the documented default**, keep ProSST as an optional backend
+with the licence gap stated, and re-check whether ProSST adds a licence later.
+
+Note: EvolutionaryScale's HuggingFace org now redirects to **`biohub`**. Neither ESM-C nor
+the open ESM-3 is gated any more, so no account or terms acceptance is needed to download
+them — this supersedes the "API-only / non-commercial" caution in the proposal, which should
+be softened to "dual-licensed; read the terms".
+
+Downloaded to `models/hf` (gitignored): SaProt 650M, ESM-2 650M. ProSST deliberately skipped.
+
+### SLIP — synthetic landscapes (Step 5)
+
+| | |
+|---|---|
+| Source | [google-research/slip](https://github.com/google-research/slip) |
+| **Licence** | **Apache-2.0** |
+| Status | Cloned, 135 KB |
+| Note | Ships `epistasis_selection.py`, directly relevant to Step 1.1 and Step 5 |
+
+### Non-pip tools — **not installed, and blocked**
+
+`foldseek`, `hmmer` (`jackhmmer`), `mmseqs` are all absent. I attempted the foldseek static
+binary and the sandbox refused: downloading and executing an external binary is outside what
+I may do, regardless of permission granted in chat.
+
+**These need a human.** The simplest route on Ubuntu 26.04:
+
+```bash
+sudo apt install hmmer mmseqs2          # MSA retrieval for Φ(WT)
+# foldseek: conda install -c conda-forge -c bioconda foldseek
+#       or: download the static build from https://github.com/steineggerlab/foldseek/releases
+```
+
+Needed for Step 0.4 (structure tokens, MSA profile), not before.
+
+---
+
+## Decision: Rocklin 2026 is **not needed** — do not register
+
+The question was whether to register and download the 8 GB record. Having read its README
+in full, the answer is no, and the reasoning is worth recording so it is not revisited:
+
+- The record's **only new measurements** are MGnify wild-type domain stability (ΔG of ~1.8M
+  distinct domains, each measured once) and MGnify insertion/deletion benchmarks. The plan
+  excludes indels.
+- The files named "Megascale point mutants" are **predictions**, i.e. model outputs
+  evaluated on the existing Tsuboyama 2023 measurements. No new mutant data.
+- The reward head needs ΔΔG **of mutations**. Tsuboyama 2023 (already downloaded) is that
+  source. Rocklin 2026 adds breadth across unrelated domains, which the architecture has no
+  current use for.
+
+**No registration is required of you.** The only item with any future pull is
+`S1724_thermomutdb_cleaned_withseq.csv` — a curated ThermoMutDB set that would make a decent
+*independent* stability benchmark for Step 2.2, since it is not Tsuboyama-derived. But it
+sits inside an 871 MB archive and **ThermoMutDB is freely available on its own**, so fetch it
+directly if Step 2.2 wants it.
+
+Revisit only if a wild-type stability prior becomes useful for the static context Φ(WT).
+
+---
+
+## HypercubeME run (2026-10-27)
+
+**Validated first:** reproduced the shipped `test_expected` output exactly (the apparent diff
+was CRLF line endings only).
+
+**Method note.** HIS3 was mutagenised in ~12 **separate segments**; variants span 25–30
+positions within one window. A combined run over all 496,138 genotypes was started, reached
+7 GB RSS, and was abandoned after ~10 minutes still on dimension 1 — genotypes from different
+segments cannot form a hypercube together, so nearly all of that work was wasted. The
+published method is per-segment, and that is what is reported here.
+
+| HIS3 segment | genotypes | hypercubes | × | max dim |
+|---|---:|---:|---:|---:|
+| 140–160 | 915 | 25,680 | 28.1 | **6** |
+| 160–180 | 799 | 23,568 | 29.5 | **6** |
+| 60–80 | 264 | 4,703 | 17.8 | **6** |
+| 80–100 | 242 | 4,646 | 19.2 | 4 |
+| **Total (4 segments)** | **2,221** | **58,597** | **26.4** | **6** |
+| 6–40 | 58,008 | *running* (~2 h expected) | | |
+
+Dimension breakdown for segment 140–160: d1 4,681 · d2 9,191 · d3 8,190 · d4 3,154 ·
+d5 446 · **d6 18**.
+
+**What this means for the plan.** 2,221 genotypes yield 58,597 combinatorially complete
+sub-landscapes, a ~26× multiplication, **reaching dimension 6**. Path-level ground truth
+beyond horizon 4 exists in quantity even in small segments — the "path-level data remains
+narrow" caution in the proposal's limitations is too strong as written.
+
+Outputs: `data/processed/hypercube_index.json`; per-segment files under
+`data/processed/hypercubeme/`. Recorded in the tracker as `0.2 / hypercube_index`.
+
+---
+
+## Tsuboyama 2023 — acquired and characterised
+
+Downloaded `Processed_K50_dG_datasets.zip`, 1,013,678,473 bytes, valid, 18 entries.
+
+The `*_DMS_list.csv` files are lists of **experiments**, not variants:
+
+| File | Rows | Meaning |
+|---|---:|---|
+| `Single_DMS_list.csv` | 983 | domains with a single-mutant scan |
+| `Double_DMS_list.csv` | 725 | **domains with a double-mutant scan** |
+| `Triple_DMS_list.csv` | 36 | domains with a triple-mutant scan |
+
+725 domains carry systematic double-mutant ΔG data — substantial 2-step transition data with
+a calibrated biophysical readout. `Double_DMS_list.csv` even carries a `max_ep_dG` column
+(maximum epistasis in ΔG), which is directly usable in Step 1.1.
+
 ## Licence summary
 
 | Licence | Sources | Redistribution |
 |---|---|---|
-| MIT | ProteinGym | Yes |
-| CC-BY-4.0 | SSMuLA, FLIP2, Tsuboyama, Rocklin 2026, Wu 2016 | Yes, with attribution |
+| MIT | ProteinGym, SaProt, ESM-2 | Yes |
+| CC-BY-4.0 | SSMuLA, FLIP2, Tsuboyama, Wu 2016 | Yes, with attribution |
+| Apache-2.0 | SLIP | Yes |
 | GPL-3.0 | HypercubeME (code) | Code only; copyleft if modified and distributed |
+| Dual (mit, other) | ESM-C | Read the "other" terms before commercial use |
+| **None stated** | **ProSST** | **Not safe to depend on; use SaProt** |
 | Unclear / restricted | PhoQ (AAAS), HIS3 repo (no licence) | **Do not redistribute** |
 
 Nothing acquired so far blocks the open-source framework promised as Contribution 4.
@@ -231,4 +362,8 @@ The two unclear items are both avoidable via ProteinGym equivalents.
    `SPG1_STRSG_Olson_2014`, `SPG1_STRSG_Wu_2016`, `HIS7_YEAST_Pokusaeva_2019`, since they
    are inside the training corpus rather than separate files. This makes the firewall more
    necessary, not less.
-5. **Register use of the Rocklin 2026 data** before downloading it.
+5. **Rocklin 2026: decided against.** No registration needed; see the decision section.
+6. **`proposal.tex` §4.3** — change the default encoder from ProSST (no licence) to SaProt
+   (MIT), and soften the ESM-3 "API-only / non-commercial" caution, since the open
+   checkpoint is now ungated under `biohub`.
+7. **Install `foldseek`, `hmmer`, `mmseqs2`** before Step 0.4 — needs a human with sudo.

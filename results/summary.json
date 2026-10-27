@@ -3,20 +3,20 @@
     "project": "ProteinDreamer",
     "plan_hash": "ff022d6d97d8",
     "steps_total": 31,
-    "steps_complete": 0,
+    "steps_complete": 1,
     "steps_running": 0,
-    "steps_partial": 2,
+    "steps_partial": 1,
     "steps_not_started": 29,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 18,
+    "runs_total": 22,
     "runs_failed": 0,
-    "runs_dirty": 18,
+    "runs_dirty": 22,
     "runs_stale_plan": 0,
     "gates_open": 8,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T00:38:05+00:00",
+  "generated_at": "2026-10-27T01:27:28+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -67,13 +67,157 @@
       "name": "Data acquisition and licence register",
       "phase": "0",
       "gate": false,
-      "state": "partial",
+      "state": "complete",
       "verdict": null,
       "thresholds": [],
-      "missing_experiments": [
-        "hypercube_index"
-      ],
+      "missing_experiments": [],
       "runs": [
+        {
+          "id": "b2a28cdd8a8349ddb354405c99bd03f8",
+          "experiment": "hypercube_index",
+          "variant": {
+            "dataset": "HIS3",
+            "segment": "80_100"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T01:27:08.653008+00:00",
+          "duration_s": 0.045354,
+          "git_sha": "b63ad0f7a2fea13bbbb7f5349c569d454c259853",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "5f8034f24f28",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "dim_1": 1196.0,
+            "dim_2": 2003.0,
+            "dim_3": 1209.0,
+            "dim_4": 238.0,
+            "genotypes": 242.0,
+            "hypercubes_total": 4646.0,
+            "max_dimension": 4.0,
+            "multiplication_factor": 19.2
+          },
+          "artifacts": [
+            {
+              "path": "data/processed/hypercube_index.json",
+              "kind": "table",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
+        {
+          "id": "256555216a5d4276a2357c6e7c69760c",
+          "experiment": "hypercube_index",
+          "variant": {
+            "dataset": "HIS3",
+            "segment": "60_80"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T01:27:08.416324+00:00",
+          "duration_s": 0.063889,
+          "git_sha": "b63ad0f7a2fea13bbbb7f5349c569d454c259853",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "baec0e510af7",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "dim_1": 1211.0,
+            "dim_2": 1954.0,
+            "dim_3": 1266.0,
+            "dim_4": 241.0,
+            "dim_5": 30.0,
+            "dim_6": 1.0,
+            "genotypes": 264.0,
+            "hypercubes_total": 4703.0,
+            "max_dimension": 6.0,
+            "multiplication_factor": 17.81
+          },
+          "artifacts": [
+            {
+              "path": "data/processed/hypercube_index.json",
+              "kind": "table",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
+        {
+          "id": "659042b45a214920a8e98174a99c20f6",
+          "experiment": "hypercube_index",
+          "variant": {
+            "dataset": "HIS3",
+            "segment": "160_180"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T01:27:08.194206+00:00",
+          "duration_s": 0.058859,
+          "git_sha": "b63ad0f7a2fea13bbbb7f5349c569d454c259853",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "be71730b64f7",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "dim_1": 4185.0,
+            "dim_2": 8085.0,
+            "dim_3": 7324.0,
+            "dim_4": 3241.0,
+            "dim_5": 682.0,
+            "dim_6": 51.0,
+            "genotypes": 799.0,
+            "hypercubes_total": 23568.0,
+            "max_dimension": 6.0,
+            "multiplication_factor": 29.5
+          },
+          "artifacts": [
+            {
+              "path": "data/processed/hypercube_index.json",
+              "kind": "table",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
+        {
+          "id": "b5d4ab2043234f0682efe84de46e029f",
+          "experiment": "hypercube_index",
+          "variant": {
+            "dataset": "HIS3",
+            "segment": "140_160"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T01:27:07.966258+00:00",
+          "duration_s": 0.03635,
+          "git_sha": "b63ad0f7a2fea13bbbb7f5349c569d454c259853",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "d4248af246f8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "dim_1": 4681.0,
+            "dim_2": 9191.0,
+            "dim_3": 8190.0,
+            "dim_4": 3154.0,
+            "dim_5": 446.0,
+            "dim_6": 18.0,
+            "genotypes": 916.0,
+            "hypercubes_total": 25680.0,
+            "max_dimension": 6.0,
+            "multiplication_factor": 28.03
+          },
+          "artifacts": [
+            {
+              "path": "data/processed/hypercube_index.json",
+              "kind": "table",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
         {
           "id": "cbafeb865b9c4cc297b06963d06730bd",
           "experiment": "mutation_order_histogram",

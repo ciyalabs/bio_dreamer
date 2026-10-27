@@ -241,3 +241,11 @@ results/tracker.html
 # DATA_REGISTER.md records provenance; data/processed/*.json holds the audits.
 data/raw/
 data/processed/*.csv
+
+# Model weights (large, externally licensed; see DATA_REGISTER.md)
+models/
+tools/
+
+# HypercubeME genotype inputs: regenerable from ProteinGym via
+# scripts/to_hypercubeme.py. The hypercube OUTPUTS are kept.
+data/processed/hypercubeme/*.txt
