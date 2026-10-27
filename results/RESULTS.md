@@ -2,17 +2,17 @@
 
 _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate with `bdtrack export`._
 
-- Steps complete: **2/31**
-- Runs recorded: **24** (0 failed, 24 from a dirty tree)
+- Steps complete: **3/31**
+- Runs recorded: **25** (0 failed, 25 from a dirty tree)
 - Gates open: **7** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
 
-### 0.1 — Project bootstrap and code triage · `partial`
-- Pending: `module_triage`
+### 0.1 — Project bootstrap and code triage · `complete`
 
 | Run | Experiment | Variant | Metrics | Code |
 |---|---|---|---|---|
+| `e5ff3848` | module_triage | scope=protein_dreamer/legacy | delete=3, earlier_triage_errors=3, extend=3, frac_surviving=0.4, lines_total=5998, modules_total=19, new_components=3, reuse=9, rewrite=4 | 804b0cf ⚠dirty |
 | `47f9d1c1` | env_bootstrap | cuda=13.0, python=3.12 | cuda_available=1, tests_passing=26, vram_gib=3.62 | 4a7f3b3 ⚠dirty |
 
 ### 0.2 — Data acquisition and licence register · `complete`

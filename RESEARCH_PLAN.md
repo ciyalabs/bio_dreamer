@@ -99,14 +99,23 @@ deliberately instead of letting `git checkout` make the decision.
 | `model_loader.py` (258), `utils.py` (128) | **Reuse, audit** | Backbone loading needs ProSST/SaProt/ESM-C |
 | `blocks.py` (1210), `tokenizers.py` (757) | **Partial reuse** | Keep generic blocks; drop GVP blocks |
 | `environment.py` (660) | **Partial reuse** | MDP mechanics survive; state definition changed |
-| `encoder.py` (271) | **Rewrite** | Mean-pool + GVP → per-residue, single PLM |
-| `dynamics.py` (250) | **Rewrite** | DDPM → conditional flow matching |
+| `encoder.py` (271) | **Rewrite** | Mean-pool + GVP → per-residue, single PLM. The largest single piece of work |
+| `dynamics.py` (250) | **Extend** | *Correction:* flow matching already exists in `blocks.py::FlowMatching` (real, Euler/Heun). Needs the inverse-dynamics head; DDPM demotes to an ablation |
 | `reward.py` (116) | **Rewrite** | 3 heads → 2 targets + ranking loss |
 | `world_model.py` (71), `policy.py` (99) | **Rewrite** | Thin; policy becomes pluggable |
 | `uncertainty.py` (279) | **Delete evidential path** | Keep ensemble machinery only |
 | `decoder.py` (198) | **Delete** | No decoder in a JEPA world model |
 
-- [ ] Write `ARCHITECTURE_DELTA.md`: what changed from the deleted code and why, one line each.
+- [x] Write `ARCHITECTURE_DELTA.md`: what changed from the deleted code and why, one line each.
+
+**✅ DONE (2026-10-27).** See `ARCHITECTURE_DELTA.md`. The table above was written from
+`git show` line counts without reading the code, and was **wrong in three places**:
+`blocks.py` already has a real `FlowMatching` implementation, `utils.py` already has a real
+`SIGReg`, and `utils.py` already records the EMA-or-SIGReg-but-not-both conclusion that the
+proposal revision reached independently months later. Roughly **40% of the legacy code
+survives unchanged**. Consequences: Step 4.1 is smaller than scheduled, Step 3.1 is larger
+(the inverse-dynamics head and per-residue plumbing are entirely new), and the GVP blocks
+must be kept until D1 has used them.
 
 **Experiments.** None.
 

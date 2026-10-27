@@ -3,33 +3,66 @@
     "project": "ProteinDreamer",
     "plan_hash": "d8cf8a531d85",
     "steps_total": 31,
-    "steps_complete": 2,
+    "steps_complete": 3,
     "steps_running": 0,
-    "steps_partial": 2,
+    "steps_partial": 1,
     "steps_not_started": 27,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 24,
+    "runs_total": 25,
     "runs_failed": 0,
-    "runs_dirty": 24,
+    "runs_dirty": 25,
     "runs_stale_plan": 22,
     "gates_open": 7,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T02:07:14+00:00",
+  "generated_at": "2026-10-27T02:17:04+00:00",
   "steps": [
     {
       "id": "0.1",
       "name": "Project bootstrap and code triage",
       "phase": "0",
       "gate": false,
-      "state": "partial",
+      "state": "complete",
       "verdict": null,
       "thresholds": [],
-      "missing_experiments": [
-        "module_triage"
-      ],
+      "missing_experiments": [],
       "runs": [
+        {
+          "id": "e5ff384816ef497ebd0aeac50afadcdd",
+          "experiment": "module_triage",
+          "variant": {
+            "scope": "protein_dreamer/legacy"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T02:17:03.796001+00:00",
+          "duration_s": 0.039249,
+          "git_sha": "804b0cf17417ef89c6acfa1c18434f7038d83e8d",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "ca6cccc89e45",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "delete": 3.0,
+            "earlier_triage_errors": 3.0,
+            "extend": 3.0,
+            "frac_surviving": 0.4,
+            "lines_total": 5998.0,
+            "modules_total": 19.0,
+            "new_components": 3.0,
+            "reuse": 9.0,
+            "rewrite": 4.0
+          },
+          "artifacts": [
+            {
+              "path": "ARCHITECTURE_DELTA.md",
+              "kind": "report",
+              "description": "Step 0.1 module triage"
+            }
+          ],
+          "error": null
+        },
         {
           "id": "47f9d1c1113b4b39b1e198ba483206b0",
           "experiment": "env_bootstrap",
