@@ -2,9 +2,9 @@
 
 _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate with `bdtrack export`._
 
-- Steps complete: **4/31**
-- Runs recorded: **27** (0 failed, 27 from a dirty tree)
-- Gates open: **7** · steps missing pre-registration: **2**
+- Steps complete: **5/31**
+- Runs recorded: **33** (0 failed, 33 from a dirty tree)
+- Gates open: **6** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
 
@@ -57,8 +57,17 @@ _Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate wi
 | `04ef48db` | per_residue_rank_test | backbone=saprot, guard=Cache.put + encode | backbone_dim=1280, per_residue_enforced=1, tests_passing=22, tests_total=22 | eb28191 ⚠dirty |
 | `0f8e4ca3` | tooling_verified | host=local | tools_required=3, tools_working=3 | 69d9b9d ⚠dirty |
 
-### 0.5 — Evaluation harness and the additive null **[GATE]** · `not-started`
-- Pending: `additive_null_impl`, `metric_validation`
+### 0.5 — Evaluation harness and the additive null **[GATE]** · `complete`
+- Verdict: **go** (2026-10-27T03:22:09+00:00) eval harness and additive null built before any model; 34 metric tests against analytic cases; measuring baselines on real landscapes showed greedy-with-restarts solves 4/5, which reframed H4 around oracle budget and made TEV primary
+
+| Run | Experiment | Variant | Metrics | Code |
+|---|---|---|---|---|
+| `92aac288` | metric_validation | scope=synthetic cases with analytic answers | additive_null_r2_on_additive_landscape=1, disguised_additive_model_caught=1, greedy_trapped_by_constructed_valley=1, tests_passing=34, tests_total=34 | 90ba0e8 ⚠dirty |
+| `f6872bcd` | additive_null_impl | landscape=ParD3 | additive_r2_full=0.8517, additive_spearman_higher_order=0.8902, greedy_hit_restarts_1=0, greedy_hit_restarts_100=1, greedy_hit_restarts_20=1, greedy_hit_restarts_5=1 | 90ba0e8 ⚠dirty |
+| `82e4de28` | additive_null_impl | landscape=ParD2 | additive_r2_full=0.8419, additive_spearman_higher_order=0.8439, greedy_hit_restarts_1=1, greedy_hit_restarts_100=1, greedy_hit_restarts_20=1, greedy_hit_restarts_5=1 | 90ba0e8 ⚠dirty |
+| `b8d21899` | additive_null_impl | landscape=GB1 | additive_r2_full=0.1944, additive_spearman_higher_order=0.476, greedy_hit_restarts_1=0, greedy_hit_restarts_100=1, greedy_hit_restarts_20=1, greedy_hit_restarts_5=1 | 90ba0e8 ⚠dirty |
+| `d18f3324` | additive_null_impl | landscape=TEV | additive_r2_full=0.048, additive_spearman_higher_order=-0.005, greedy_hit_restarts_1=0, greedy_hit_restarts_100=0.4, greedy_hit_restarts_20=0, greedy_hit_restarts_5=0 | 90ba0e8 ⚠dirty |
+| `6a2443a0` | additive_null_impl | landscape=TrpB4 | additive_r2_full=0.2568, additive_spearman_higher_order=0.0696, greedy_hit_restarts_1=0, greedy_hit_restarts_100=1, greedy_hit_restarts_20=1, greedy_hit_restarts_5=1 | 90ba0e8 ⚠dirty |
 
 ### 0.6 — Pre-register thresholds for H1-H4 **[GATE]** · `not-started`
 

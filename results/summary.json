@@ -3,20 +3,20 @@
     "project": "ProteinDreamer",
     "plan_hash": "d8cf8a531d85",
     "steps_total": 31,
-    "steps_complete": 4,
+    "steps_complete": 5,
     "steps_running": 0,
     "steps_partial": 0,
-    "steps_not_started": 27,
+    "steps_not_started": 26,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 27,
+    "runs_total": 33,
     "runs_failed": 0,
-    "runs_dirty": 27,
+    "runs_dirty": 33,
     "runs_stale_plan": 22,
-    "gates_open": 7,
+    "gates_open": 6,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T02:47:48+00:00",
+  "generated_at": "2026-10-27T03:22:09+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -922,14 +922,183 @@
       "name": "Evaluation harness and the additive null",
       "phase": "0",
       "gate": true,
-      "state": "not-started",
-      "verdict": null,
+      "state": "complete",
+      "verdict": {
+        "decision": "go",
+        "rationale": "eval harness and additive null built before any model; 34 metric tests against analytic cases; measuring baselines on real landscapes showed greedy-with-restarts solves 4/5, which reframed H4 around oracle budget and made TEV primary",
+        "decided_at": "2026-10-27T03:22:09+00:00",
+        "decided_by": "samani"
+      },
       "thresholds": [],
-      "missing_experiments": [
-        "additive_null_impl",
-        "metric_validation"
-      ],
-      "runs": []
+      "missing_experiments": [],
+      "runs": [
+        {
+          "id": "92aac288846c439289b70dce5bd98c3e",
+          "experiment": "metric_validation",
+          "variant": {
+            "scope": "synthetic cases with analytic answers"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:19:55.804845+00:00",
+          "duration_s": 0.028211,
+          "git_sha": "90ba0e88e4232a166cbe35d63fa21ca3c15d1679",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": null,
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_null_r2_on_additive_landscape": 1.0,
+            "disguised_additive_model_caught": 1.0,
+            "greedy_trapped_by_constructed_valley": 1.0,
+            "tests_passing": 34.0,
+            "tests_total": 34.0
+          },
+          "artifacts": [
+            {
+              "path": "data/processed/baseline_strength.json",
+              "kind": "table",
+              "description": ""
+            },
+            {
+              "path": "tests/unit/test_eval.py",
+              "kind": "test",
+              "description": ""
+            }
+          ],
+          "error": null
+        },
+        {
+          "id": "f6872bcdbdef411992077399c107c2ff",
+          "experiment": "additive_null_impl",
+          "variant": {
+            "landscape": "ParD3"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:19:49.173410+00:00",
+          "duration_s": 0.021753,
+          "git_sha": "90ba0e88e4232a166cbe35d63fa21ca3c15d1679",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "3b9b0f6cc21e",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2_full": 0.8517,
+            "additive_spearman_higher_order": 0.8902,
+            "greedy_hit_restarts_1": 0.0,
+            "greedy_hit_restarts_100": 1.0,
+            "greedy_hit_restarts_20": 1.0,
+            "greedy_hit_restarts_5": 1.0
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "82e4de28f5e6441b98710bfc023ab325",
+          "experiment": "additive_null_impl",
+          "variant": {
+            "landscape": "ParD2"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:19:48.700033+00:00",
+          "duration_s": 0.020925,
+          "git_sha": "90ba0e88e4232a166cbe35d63fa21ca3c15d1679",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "5ef22089890f",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2_full": 0.8419,
+            "additive_spearman_higher_order": 0.8439,
+            "greedy_hit_restarts_1": 1.0,
+            "greedy_hit_restarts_100": 1.0,
+            "greedy_hit_restarts_20": 1.0,
+            "greedy_hit_restarts_5": 1.0
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "b8d21899c6ad4e5f95469f5ffe8fdc3b",
+          "experiment": "additive_null_impl",
+          "variant": {
+            "landscape": "GB1"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:19:48.203841+00:00",
+          "duration_s": 0.020968,
+          "git_sha": "90ba0e88e4232a166cbe35d63fa21ca3c15d1679",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "17dc20775def",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2_full": 0.1944,
+            "additive_spearman_higher_order": 0.476,
+            "greedy_hit_restarts_1": 0.0,
+            "greedy_hit_restarts_100": 1.0,
+            "greedy_hit_restarts_20": 1.0,
+            "greedy_hit_restarts_5": 1.0
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "d18f3324055d4f53b2a0a6850d95f7ca",
+          "experiment": "additive_null_impl",
+          "variant": {
+            "landscape": "TEV"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:19:42.041012+00:00",
+          "duration_s": 0.021928,
+          "git_sha": "90ba0e88e4232a166cbe35d63fa21ca3c15d1679",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "59cc4fbafd74",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2_full": 0.048,
+            "additive_spearman_higher_order": -0.005,
+            "greedy_hit_restarts_1": 0.0,
+            "greedy_hit_restarts_100": 0.4,
+            "greedy_hit_restarts_20": 0.0,
+            "greedy_hit_restarts_5": 0.0
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "6a2443a0d0bd4926b0c9b13014c91e45",
+          "experiment": "additive_null_impl",
+          "variant": {
+            "landscape": "TrpB4"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T03:19:35.519483+00:00",
+          "duration_s": 0.021505,
+          "git_sha": "90ba0e88e4232a166cbe35d63fa21ca3c15d1679",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2011af81f409",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2_full": 0.2568,
+            "additive_spearman_higher_order": 0.0696,
+            "greedy_hit_restarts_1": 0.0,
+            "greedy_hit_restarts_100": 1.0,
+            "greedy_hit_restarts_20": 1.0,
+            "greedy_hit_restarts_5": 1.0
+          },
+          "artifacts": [],
+          "error": null
+        }
+      ]
     },
     {
       "id": "0.6",

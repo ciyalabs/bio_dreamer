@@ -311,6 +311,43 @@ is additive by construction must give the null ~perfect score).
 
 **Outputs.** `eval/` module; additive null implementation; tracking configured.
 
+**✅ DONE (2026-10-27) — and it already changed H4.** This is the payoff of building the
+judge first: running the baselines against the real landscapes, before any model exists,
+showed that **H4 as written is close to unfalsifiable in the wrong direction**.
+
+**Greedy hill-climbing with 5 random restarts, given the true oracle, reaches the global
+optimum in 5/5 seeds on TrpB4, GB1, ParD2 and ParD3.** Only TEV resists — 100 restarts finds
+it in 2/5 seeds, reaching 87% of maximum.
+
+| Landscape | additive R² | null Spearman on order ≥2 | greedy@1 | greedy@5 | greedy@100 |
+|---|---:|---:|---:|---:|---:|
+| **TEV** | 0.048 | **−0.005** | 0/5 | **0/5** | 2/5 |
+| TrpB4 | 0.257 | 0.070 | 0/5 | 5/5 | 5/5 |
+| GB1 | 0.194 | 0.476 | 0/5 | 5/5 | 5/5 |
+| ParD2 | 0.842 | 0.844 | 0/5 | 5/5 | 5/5 |
+| ParD3 | 0.852 | 0.890 | 0/5 | 5/5 | 5/5 |
+
+Three consequences:
+
+1. **H4 must be stated under a fixed oracle budget**, not as "peaks greedy cannot reach".
+   Greedy needs only ~30 true evaluations to solve TrpB4. The honest question is whether
+   planning finds better variants *per oracle call*, which is also the question a real
+   campaign asks.
+2. **The baseline is greedy-with-restarts, not greedy single-step.** A single greedy walk
+   never finds the optimum anywhere (0/5 on every landscape); restarts are what make it
+   strong, and omitting them would have produced a flattering comparison.
+3. **TEV should be the primary landscape, not TrpB4.** It is the only one where planning has
+   visible room: near-zero additive signal (null Spearman −0.005 on higher orders) *and*
+   greedy fails. TrpB4 and GB1 become secondary, ParD2/ParD3 stay as near-additive controls
+   where greedy succeeding is the expected result.
+
+Also measured: fitting the additive null on singles alone and extrapolating gives Spearman
+**0.07 on TrpB4** and **−0.005 on TEV**, so single-mutant effects carry almost no information
+about higher-order fitness there — genuine epistatic headroom. On ParD2/ParD3 the same
+procedure gives 0.84–0.89, confirming them as additive controls.
+
+34 tests, every metric validated against a case with an analytic answer.
+
 ---
 
 ## Step 0.6 — Pre-register thresholds for H1–H4 `S`
