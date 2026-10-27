@@ -32,6 +32,48 @@ Two rules that govern the whole plan:
 
 ---
 
+## Tracking this plan
+
+`plan.yaml` is the machine-readable version of everything below; `bdtrack` reads it
+and the result ledger together. Step ids are identical in both files.
+
+```bash
+pip install -e .                 # installs the bdtrack entry point
+bdtrack init                     # create results/tracking.db, validate plan.yaml
+bdtrack status                   # plan tree: gates, thresholds, flags, next steps
+bdtrack show 1.1                 # every run and variant for one step
+bdtrack compare 1.1 -m nonadditive_variance_fraction
+bdtrack verdict 1.1 go -m "..."  # record a gate decision (refuses 'go' over a failing threshold)
+bdtrack export                   # results/summary.json + results/RESULTS.md  <- committed
+bdtrack report --open            # results/tracker.html dashboard             <- ignored
+```
+
+Record a run from experiment code. Provenance (git SHA, dirty flag, config hash,
+dataset hash, seed, plan version) is captured automatically, and a run that crashes
+is still written with its traceback rather than vanishing:
+
+```python
+from biodreamer import tracking
+
+with tracking.run("1.1", "additive_fit",
+                  variant={"landscape": "GB1-4site"},
+                  config=cfg, seed=0,
+                  datasets=["data/gb1_4site.csv"]) as r:
+    r.log_metric("nonadditive_variance_fraction", 0.31)
+    r.log_artifact("figures/gb1_epistasis.png", kind="figure")
+    r.attach_wandb()     # links the W&B training curves, if a run is active
+```
+
+W&B still owns per-step training curves. The ledger owns the plan, the variants,
+the provenance, the summary metrics, the threshold outcomes and the decisions —
+so "what did step 3.4 conclude, and on which variant" is one command, not a search.
+
+A step's `thresholds` in `plan.yaml` are the pre-registration from Step 0.6 in
+executable form. Set `aggregate: all` on any step that sweeps landscapes or seeds,
+or the check silently reflects whichever variant ran last.
+
+---
+
 # Phase 0 — Groundwork
 
 Nothing is learned in this phase. Its purpose is to make the later phases interpretable.

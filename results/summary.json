@@ -1,0 +1,597 @@
+{
+  "summary": {
+    "project": "ProteinDreamer",
+    "plan_hash": "ff022d6d97d8",
+    "steps_total": 31,
+    "steps_complete": 0,
+    "steps_running": 0,
+    "steps_partial": 1,
+    "steps_not_started": 30,
+    "steps_thresholds_failed": 0,
+    "steps_blocked": 0,
+    "runs_total": 1,
+    "runs_failed": 0,
+    "runs_dirty": 1,
+    "runs_stale_plan": 0,
+    "gates_open": 8,
+    "steps_missing_prereg": 2
+  },
+  "generated_at": "2026-10-27T00:23:11+00:00",
+  "steps": [
+    {
+      "id": "0.1",
+      "name": "Project bootstrap and code triage",
+      "phase": "0",
+      "gate": false,
+      "state": "partial",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "module_triage"
+      ],
+      "runs": [
+        {
+          "id": "47f9d1c1113b4b39b1e198ba483206b0",
+          "experiment": "env_bootstrap",
+          "variant": {
+            "cuda": "13.0",
+            "python": "3.12"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:23:06.120600+00:00",
+          "duration_s": 0.232171,
+          "git_sha": "4a7f3b360f9d77a6775c86aa8bca52e9849fc2a5",
+          "git_dirty": true,
+          "config_hash": "01ef572a2391",
+          "dataset_hash": null,
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "cuda_available": 1.0,
+            "tests_passing": 26.0,
+            "vram_gib": 3.62
+          },
+          "artifacts": [
+            {
+              "path": "pyproject.toml",
+              "kind": "config",
+              "description": "dependency groups"
+            }
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "0.2",
+      "name": "Data acquisition and licence register",
+      "phase": "0",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "hypercube_index",
+        "mutation_order_histogram"
+      ],
+      "runs": []
+    },
+    {
+      "id": "0.3",
+      "name": "Leakage firewall",
+      "phase": "0",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "firewall_tests_passing == 1",
+          "hypothesis": "hard-gate",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "firewall_poison_test"
+      ],
+      "runs": []
+    },
+    {
+      "id": "0.4",
+      "name": "Encoder harness and embedding cache",
+      "phase": "0",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "cache_throughput",
+        "per_residue_rank_test"
+      ],
+      "runs": []
+    },
+    {
+      "id": "0.5",
+      "name": "Evaluation harness and the additive null",
+      "phase": "0",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "additive_null_impl",
+        "metric_validation"
+      ],
+      "runs": []
+    },
+    {
+      "id": "0.6",
+      "name": "Pre-register thresholds for H1-H4",
+      "phase": "0",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [],
+      "runs": []
+    },
+    {
+      "id": "1.1",
+      "name": "D3: Epistasis headroom audit",
+      "phase": "1",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "nonadditive_variance_fraction >= 0.15 [all]",
+          "hypothesis": "H4-precondition",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "all",
+          "per_variant": []
+        },
+        {
+          "condition": "greedy_optimum_hit_rate <= 0.8 [all]",
+          "hypothesis": "H4-precondition",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "all",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "additive_fit",
+        "greedy_reachability",
+        "pairwise_fit",
+        "rse_count",
+        "stack_topk_headroom"
+      ],
+      "runs": []
+    },
+    {
+      "id": "1.2",
+      "name": "D1: Structure invariance under point mutation",
+      "phase": "1",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "noise_floor",
+        "struct_displacement",
+        "substitution_stratified"
+      ],
+      "runs": []
+    },
+    {
+      "id": "1.3",
+      "name": "D2: Latent capacity and dimension",
+      "phase": "1",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "backbone_sweep",
+        "dim_sweep",
+        "displacement_vs_ddg"
+      ],
+      "runs": []
+    },
+    {
+      "id": "1.4",
+      "name": "D4: Inverse-dynamics feasibility probe",
+      "phase": "1",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "mutation_recovery",
+        "recovery_pooled_vs_residue",
+        "recovery_vs_length"
+      ],
+      "runs": []
+    },
+    {
+      "id": "2.1",
+      "name": "Implement and train the reward head",
+      "phase": "2",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "censoring_decision",
+        "reward_training"
+      ],
+      "runs": []
+    },
+    {
+      "id": "2.2",
+      "name": "H1: Benchmark against the literature and the null",
+      "phase": "2",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "spearman_mean >= 0.5",
+          "hypothesis": "H1",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        },
+        {
+          "condition": "margin_over_additive_null > 0",
+          "hypothesis": "H1",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "higher_order_extrapolation",
+        "vs_additive_null",
+        "vs_frozen_regression",
+        "vs_literature",
+        "vs_zeroshot"
+      ],
+      "runs": []
+    },
+    {
+      "id": "2.3",
+      "name": "Uncertainty calibration",
+      "phase": "2",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "calibration_curves",
+        "risk_coverage",
+        "shared_vs_independent_trunk"
+      ],
+      "runs": []
+    },
+    {
+      "id": "3.1",
+      "name": "Implement World Model B",
+      "phase": "3",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "wm_b_training"
+      ],
+      "runs": []
+    },
+    {
+      "id": "3.2",
+      "name": "Collapse monitoring",
+      "phase": "3",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "latent_effective_rank_ratio >= 0.5",
+          "hypothesis": "no-collapse",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "inverse_recovery_during_training",
+        "latent_rank",
+        "sigreg_stat"
+      ],
+      "runs": []
+    },
+    {
+      "id": "3.3",
+      "name": "One-step accuracy",
+      "phase": "3",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "latent_one_step_error",
+        "reward_through_predicted"
+      ],
+      "runs": []
+    },
+    {
+      "id": "3.4",
+      "name": "Multi-step rollout accuracy",
+      "phase": "3",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "reward_error_growth",
+        "rollout_2step_gb1",
+        "rollout_his3"
+      ],
+      "runs": []
+    },
+    {
+      "id": "4.1",
+      "name": "Implement World Model A",
+      "phase": "4",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "few_step_fidelity >= 0.95",
+          "hypothesis": "H2-precondition",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "few_step_equivalence",
+        "flow_training"
+      ],
+      "runs": []
+    },
+    {
+      "id": "4.2",
+      "name": "H2: A versus B",
+      "phase": "4",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "candidate_diversity",
+        "error_compounding_3arm",
+        "sampling_cost",
+        "uncertainty_quality"
+      ],
+      "runs": []
+    },
+    {
+      "id": "5.1",
+      "name": "Stand up SLIP",
+      "phase": "5",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "planner_correctness",
+        "slip_setup"
+      ],
+      "runs": []
+    },
+    {
+      "id": "5.2",
+      "name": "Planning advantage versus ruggedness",
+      "phase": "5",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "horizon_sweep",
+        "ruggedness_sweep"
+      ],
+      "runs": []
+    },
+    {
+      "id": "6.1",
+      "name": "Trust region and model exploitation",
+      "phase": "6",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "admissibility_calibration",
+        "rejection_rates",
+        "trust_region_ablation"
+      ],
+      "runs": []
+    },
+    {
+      "id": "6.2",
+      "name": "H3: Policy comparison",
+      "phase": "6",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "active_inference",
+        "gflownet",
+        "low_data_regime",
+        "mcts",
+        "policy_vs_calibration",
+        "ppo_entropy"
+      ],
+      "runs": []
+    },
+    {
+      "id": "6.3",
+      "name": "H4: Multi-step planning",
+      "phase": "6",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "optimum_hit_rate_margin_over_additive > 0.1 [all]",
+          "hypothesis": "H4",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "all",
+          "per_variant": []
+        },
+        {
+          "condition": "correlation_with_additive <= 0.95 [max]",
+          "hypothesis": "H4-falsification",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "max",
+          "per_variant": []
+        },
+        {
+          "condition": "n_seeds >= 3 [min]",
+          "hypothesis": "H4",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "min",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "h4_additive_correlation",
+        "h4_vs_additive_null",
+        "h4_vs_greedy_same_reward",
+        "h4_vs_published",
+        "h4_vs_random",
+        "h4_vs_stack_topk"
+      ],
+      "runs": []
+    },
+    {
+      "id": "6.4",
+      "name": "Longer horizon",
+      "phase": "6",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "his3_dim5_8"
+      ],
+      "runs": []
+    },
+    {
+      "id": "7.1",
+      "name": "Required ablations",
+      "phase": "7",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "abl_backbone",
+        "abl_dynamics",
+        "abl_ema",
+        "abl_eta",
+        "abl_inverse_head",
+        "abl_pooling",
+        "abl_sampling_steps",
+        "abl_sigreg",
+        "abl_static_context",
+        "abl_trust_region"
+      ],
+      "runs": []
+    },
+    {
+      "id": "7.2",
+      "name": "Seeds and variance",
+      "phase": "7",
+      "gate": true,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [
+        {
+          "condition": "min_seeds_on_headline >= 3",
+          "hypothesis": "robustness",
+          "observed": null,
+          "outcome": "no-data",
+          "aggregate": "latest",
+          "per_variant": []
+        }
+      ],
+      "missing_experiments": [
+        "reproducibility_check",
+        "seed_replication"
+      ],
+      "runs": []
+    },
+    {
+      "id": "8.1",
+      "name": "Decide the claim from the outcomes",
+      "phase": "8",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [],
+      "runs": []
+    },
+    {
+      "id": "8.2",
+      "name": "Venue",
+      "phase": "8",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [],
+      "runs": []
+    },
+    {
+      "id": "8.3",
+      "name": "Rescope options",
+      "phase": "8",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [],
+      "runs": []
+    },
+    {
+      "id": "8.4",
+      "name": "Reproducibility package",
+      "phase": "8",
+      "gate": false,
+      "state": "not-started",
+      "verdict": null,
+      "thresholds": [],
+      "missing_experiments": [
+        "licence_clearance",
+        "repro_package"
+      ],
+      "runs": []
+    }
+  ]
+}

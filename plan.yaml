@@ -1,0 +1,541 @@
+# ProteinDreamer research plan — machine-readable structure.
+#
+# RESEARCH_PLAN.md is the narrative (Why / Work / Experiments / Go-no-go / Outputs).
+# This file is what the tracker reads. Keep the step ids identical between the two.
+#
+#   gate: true            this step can stop or redirect the project
+#   prereg_required: true thresholds must be fixed in PREREGISTRATION.md before the step runs
+#   thresholds:           machine-checked against logged metrics by `bdtrack status`
+#       metric / op / value / hypothesis / aggregate
+#       aggregate: how to combine the metric across a step's variants --
+#         latest (default) | min | max | mean | all (every variant must pass).
+#         for a step that sweeps landscapes or seeds, 'all' is usually correct;
+#         'latest' would judge the step on whichever variant ran last.
+#
+# ops: ">=" "<=" ">" "<" "==" "!="
+
+project: ProteinDreamer
+spec: proposal.tex
+narrative: RESEARCH_PLAN.md
+
+phases:
+  - id: "0"
+    name: Groundwork
+    goal: Make the later phases interpretable. Nothing is learned here.
+    steps:
+      - id: "0.1"
+        name: Project bootstrap and code triage
+        size: S
+        why: 8k LOC at HEAD was written against the pre-revision architecture; resurrecting it wholesale reintroduces mean-pooling, the GVP stream and DDPM. The environment is declared here too so the stack a result was produced with is on the record.
+        experiments:
+          - id: env_bootstrap
+            name: Python environment and dependency stack built and verified
+          - id: module_triage
+            name: Every legacy module classified reuse / rewrite / delete
+        outputs: [legacy/, ARCHITECTURE_DELTA.md, protein_dreamer skeleton, .venv]
+
+      - id: "0.2"
+        name: Data acquisition and licence register
+        size: M
+        why: Licences may block open release; and the mutation-order histogram per assay is the number the project's feasibility rests on.
+        experiments:
+          - id: mutation_order_histogram
+            name: Mutation-order histogram per assay
+          - id: hypercube_index
+            name: HypercubeME run on HIS3, counted by dimension
+        outputs: [DATA_REGISTER.md, hypercube index by dimension]
+
+      - id: "0.3"
+        name: Leakage firewall
+        size: S
+        gate: true
+        why: GB1 is both training data and the H4 benchmark; nothing in the pipeline warns you. Also resolves the FLIP-vs-holdout conflict via two model instances.
+        experiments:
+          - id: firewall_poison_test
+            name: CI test must fail on a deliberately poisoned split
+        thresholds:
+          - metric: firewall_tests_passing
+            op: "=="
+            value: 1
+            hypothesis: hard-gate
+        outputs: [splits/*.json + hashes, 2 CI tests, methods paragraph]
+
+      - id: "0.4"
+        name: Encoder harness and embedding cache
+        size: M
+        why: Everything downstream reads from this; without a cache, backbone forward passes dominate runtime.
+        experiments:
+          - id: cache_throughput
+            name: Throughput and cache-hit benchmark
+          - id: per_residue_rank_test
+            name: Unit test that latents are never silently pooled
+        outputs: [encoder module, cache, storage budget table]
+
+      - id: "0.5"
+        name: Evaluation harness and the additive null
+        size: M
+        gate: true
+        why: Build the judge before the defendant. If the model comes first it gets tuned against baselines that do not exist yet.
+        experiments:
+          - id: metric_validation
+            name: Metrics validated on synthetic cases with known answers
+          - id: additive_null_impl
+            name: Additive null fit and verified on an additive-by-construction landscape
+        outputs: [eval module, additive null, tracking configured]
+
+      - id: "0.6"
+        name: Pre-register thresholds for H1-H4
+        size: S
+        gate: true
+        why: The thing researchers forget is what they said in advance would count as failure. This is what makes a later negative result publishable.
+        experiments: []
+        outputs: [PREREGISTRATION.md]
+
+  - id: "1"
+    name: Kill-shot diagnostics
+    goal: Days of work, no training, each capable of redirecting the project.
+    steps:
+      - id: "1.1"
+        name: "D3: Epistasis headroom audit"
+        size: S
+        gate: true
+        prereg_required: true
+        why: If the landscapes are near-additive there is no valley to cross and H4 is vacuous. Run this before everything else.
+        experiments:
+          - id: additive_fit
+            name: Additive model variance explained, per landscape
+          - id: pairwise_fit
+            name: Pairwise and higher-order variance explained
+          - id: greedy_reachability
+            name: Fraction of global optima reachable by greedy from wild type
+          - id: stack_topk_headroom
+            name: Gain already captured by stacking top-k singles
+          - id: rse_count
+            name: Reciprocal-sign-epistasis pair count
+        thresholds:
+          - metric: nonadditive_variance_fraction
+            op: ">="
+            value: 0.15
+            aggregate: all          # every landscape must show headroom, not just the last one
+            hypothesis: H4-precondition
+          - metric: greedy_optimum_hit_rate
+            op: "<="
+            value: 0.8
+            aggregate: all
+            hypothesis: H4-precondition
+        outputs: [diagnostics/epistasis_audit.md, frozen additive-null reference numbers]
+
+      - id: "1.2"
+        name: "D1: Structure invariance under point mutation"
+        size: S
+        why: Confirms or refutes removing the per-step structure stream, the largest architectural change in the revision.
+        experiments:
+          - id: noise_floor
+            name: Encoder numerical noise floor, repeated passes
+          - id: struct_displacement
+            name: TM-score, RMSD and structural-embedding displacement vs noise floor
+          - id: substitution_stratified
+            name: Stratified by substitution type, looking for a class that does move
+        outputs: [diagnostics/d1_structure.md, paper figure]
+
+      - id: "1.3"
+        name: "D2: Latent capacity and dimension"
+        size: S
+        why: Decides the pooling question by measurement rather than argument, and fixes d.
+        experiments:
+          - id: displacement_vs_ddg
+            name: Latent displacement vs |ddG|, per-residue versus pooled
+          - id: dim_sweep
+            name: Sweep latent dimension
+          - id: backbone_sweep
+            name: Sweep encoder backbone
+        outputs: [diagnostics/d2_latent.md, chosen d and backbone]
+
+      - id: "1.4"
+        name: "D4: Inverse-dynamics feasibility probe"
+        size: S
+        why: The inverse-dynamics anchor is the most load-bearing new component; check the mutation is recoverable from frozen embeddings before building it into a training loop.
+        experiments:
+          - id: mutation_recovery
+            name: Top-1/top-5 recovery of position and amino acid
+          - id: recovery_pooled_vs_residue
+            name: Per-residue versus pooled latents
+          - id: recovery_vs_length
+            name: Recovery accuracy as a function of L
+        outputs: [diagnostics/d4_inverse.md]
+
+  - id: "2"
+    name: Reward head
+    goal: A planner on a weak reward model is a machine for generating confident nonsense.
+    steps:
+      - id: "2.1"
+        name: Implement and train the reward head
+        size: M
+        why: Grounds the latent in experimental measurement and supplies the signal every later phase optimises.
+        experiments:
+          - id: reward_training
+            name: Training runs, per-assay performance distribution
+          - id: censoring_decision
+            name: Censored regression versus exclusion for floored measurements
+        outputs: [reward module, benchmark and planning instances]
+
+      - id: "2.2"
+        name: "H1: Benchmark against the literature and the null"
+        size: M
+        gate: true
+        prereg_required: true
+        why: Establishes whether the reward head is competitive, and whether it beats the additive null.
+        experiments:
+          - id: vs_additive_null
+            name: Versus additive null
+          - id: vs_literature
+            name: Versus Kermut, ProteinNPT, MULTI-evolve, Cerebra atlas
+          - id: vs_zeroshot
+            name: Versus ProSST / VenusREM zero-shot
+          - id: vs_frozen_regression
+            name: Versus regression head on the frozen encoder
+          - id: higher_order_extrapolation
+            name: Train on <300 singles+doubles, test on unseen 3+ mutants
+        thresholds:
+          - metric: spearman_mean
+            op: ">="
+            value: 0.5
+            hypothesis: H1
+          - metric: margin_over_additive_null
+            op: ">"
+            value: 0.0
+            hypothesis: H1
+        outputs: [results/reward_benchmark.md, H1 verdict]
+
+      - id: "2.3"
+        name: Uncertainty calibration
+        size: S
+        why: The policy consumes uncertainty directly; an uncalibrated epistemic estimate is worse than none.
+        experiments:
+          - id: calibration_curves
+            name: Error-vs-predicted-uncertainty curves
+          - id: risk_coverage
+            name: Risk-coverage analysis
+          - id: shared_vs_independent_trunk
+            name: Shared versus independent trunk ensembles
+        outputs: [results/calibration.md]
+
+  - id: "3"
+    name: World model B (deterministic)
+    goal: Establish the pipeline, collapse diagnostics and multi-step evaluation machinery.
+    steps:
+      - id: "3.1"
+        name: Implement World Model B
+        size: M
+        why: Simpler of the two architectures; per-residue latents, SIGReg, inverse-dynamics head, no EMA, warm-up ramp.
+        experiments:
+          - id: wm_b_training
+            name: Training runs
+        outputs: [world model B module]
+
+      - id: "3.2"
+        name: Collapse monitoring
+        size: S
+        gate: true
+        why: ProteinJEPA found latent prediction without an MLM anchor collapses in nearly every experiment on protein data.
+        experiments:
+          - id: latent_rank
+            name: Latent rank and eigenspectrum over training
+          - id: sigreg_stat
+            name: SIGReg statistic over training
+          - id: inverse_recovery_during_training
+            name: Inverse-dynamics recovery accuracy over training
+        thresholds:
+          - metric: latent_effective_rank_ratio
+            op: ">="
+            value: 0.5
+            hypothesis: no-collapse
+        outputs: [collapse dashboard, remedy applied if needed]
+
+      - id: "3.3"
+        name: One-step accuracy
+        size: S
+        why: Reward error through the predicted latent versus the true latent is what actually matters for planning.
+        experiments:
+          - id: latent_one_step_error
+            name: Latent prediction error against encoder ground truth
+          - id: reward_through_predicted
+            name: Reward error, predicted versus true latent
+        outputs: [one-step accuracy table]
+
+      - id: "3.4"
+        name: Multi-step rollout accuracy
+        size: M
+        why: First real test of whether multi-step planning is viable at all.
+        experiments:
+          - id: rollout_2step_gb1
+            name: Error growth over 2 steps on held-out GB1 all-doubles
+          - id: rollout_his3
+            name: Error growth over 3-8 steps on HIS3 hypercubes by dimension
+          - id: reward_error_growth
+            name: Reward-error growth alongside latent-error growth
+        outputs: [results/rollout_B.md]
+
+  - id: "4"
+    name: World model A (flow matching)
+    goal: Decide whether generative latent dynamics earns its cost.
+    steps:
+      - id: "4.1"
+        name: Implement World Model A
+        size: M
+        why: Few-step sampling is the whole feasibility argument for an imagination planner; a rollout costs N x H x K passes.
+        experiments:
+          - id: flow_training
+            name: Conditional flow matching training runs
+          - id: few_step_equivalence
+            name: Verify K=4 sampling matches many-step sampling
+        thresholds:
+          - metric: few_step_fidelity
+            op: ">="
+            value: 0.95
+            hypothesis: H2-precondition
+        outputs: [world model A module]
+
+      - id: "4.2"
+        name: "H2: A versus B"
+        size: M
+        prereg_required: true
+        why: Three arms - flow matching, DDPM, deterministic. If B matches A at a fraction of the cost, report that.
+        experiments:
+          - id: error_compounding_3arm
+            name: Multi-step error compounding, three arms
+          - id: candidate_diversity
+            name: Diversity among top-ranked candidates
+          - id: sampling_cost
+            name: Wall-clock and sampling cost per rollout
+          - id: uncertainty_quality
+            name: Flow-sample variance versus ensemble disagreement
+        outputs: [results/h2_dynamics.md, H2 verdict]
+
+  - id: "5"
+    name: Planner validation on synthetic landscapes
+    goal: Know the planner works before spending the held-out real landscapes.
+    steps:
+      - id: "5.1"
+        name: Stand up SLIP
+        size: M
+        why: Exact ground truth and unlimited queries separate planner bugs from model error.
+        experiments:
+          - id: slip_setup
+            name: Potts landscape behind the reward-head interface
+          - id: planner_correctness
+            name: Planner finds known optima where they are known
+        outputs: [SLIP oracle]
+
+      - id: "5.2"
+        name: Planning advantage versus ruggedness
+        size: M
+        why: The cleanest available statement of when planning helps. No biological claim from this phase.
+        experiments:
+          - id: ruggedness_sweep
+            name: Planning margin over greedy and additive null versus epistatic horizon
+          - id: horizon_sweep
+            name: Horizon sweep well past 4
+        outputs: [results/synthetic_planner.md]
+
+  - id: "6"
+    name: Policy and planning on real landscapes
+    goal: Where the central claim is won or lost. The held-out landscapes are spent here.
+    steps:
+      - id: "6.1"
+        name: Trust region and model exploitation
+        size: M
+        why: Offline MBO's characteristic failure is the optimiser finding exactly the points where the surrogate is over-optimistic.
+        experiments:
+          - id: admissibility_calibration
+            name: Calibrate the three-part predicate thresholds
+          - id: rejection_rates
+            name: Rejection rates and where rejected candidates lie
+          - id: trust_region_ablation
+            name: Predicted fitness inflation and true fitness drop without the trust region
+        outputs: [results/trust_region.md]
+
+      - id: "6.2"
+        name: "H3: Policy comparison"
+        size: M
+        prereg_required: true
+        why: Expect a possible negative result for Active Inference; H3 is phrased so this is reportable.
+        experiments:
+          - id: ppo_entropy
+            name: PPO with entropy bonus (the reference)
+          - id: active_inference
+            name: Expected free energy, eta swept including 0
+          - id: mcts
+            name: Monte Carlo tree search
+          - id: gflownet
+            name: GFlowNet
+          - id: low_data_regime
+            name: Low-data regime under 100 labelled variants
+          - id: policy_vs_calibration
+            name: Policy ranking correlated with uncertainty calibration
+        outputs: [results/h3_policy.md, H3 verdict]
+
+      - id: "6.3"
+        name: "H4: Multi-step planning"
+        size: L
+        gate: true
+        prereg_required: true
+        why: The project's central claim, and the one the additive-null critique is aimed squarely at.
+        experiments:
+          - id: h4_vs_additive_null
+            name: Versus additive null (decisive)
+          - id: h4_vs_stack_topk
+            name: Versus stack top-k beneficial singles
+          - id: h4_vs_greedy_same_reward
+            name: Versus greedy single-step on the same reward head
+          - id: h4_vs_random
+            name: Versus random within budget, and wild type
+          - id: h4_vs_published
+            name: Versus DynaPPO, muProtein, StructEvo, ProSpero
+          - id: h4_additive_correlation
+            name: Correlation between model and additive-null predictions
+        thresholds:
+          - metric: optimum_hit_rate_margin_over_additive
+            op: ">"
+            value: 0.1
+            aggregate: all          # must beat the null on every held-out landscape
+            hypothesis: H4
+          - metric: correlation_with_additive
+            op: "<="
+            value: 0.95
+            aggregate: max          # the most additive-looking landscape decides
+            hypothesis: H4-falsification
+          - metric: n_seeds
+            op: ">="
+            value: 3
+            aggregate: min
+            hypothesis: H4
+        outputs: [results/h4_planning.md, H4 verdict]
+
+      - id: "6.4"
+        name: Longer horizon
+        size: M
+        why: Does the planner's advantage persist past the four-site regime?
+        experiments:
+          - id: his3_dim5_8
+            name: HIS3 hypercubes at dimension 5-8
+        outputs: [longer-horizon table with caveats]
+
+  - id: "7"
+    name: Ablations and robustness
+    goal: An unablated decision is an assertion.
+    steps:
+      - id: "7.1"
+        name: Required ablations
+        size: M
+        why: Each ablation corresponds to a decision the revision made.
+        experiments:
+          - id: abl_pooling
+            name: Per-residue versus pooled latent
+          - id: abl_inverse_head
+            name: With / without inverse-dynamics head
+          - id: abl_sigreg
+            name: With / without SIGReg, and action-contrastive alternative
+          - id: abl_dynamics
+            name: Flow matching vs DDPM vs deterministic
+          - id: abl_sampling_steps
+            name: Few-step versus many-step sampling
+          - id: abl_eta
+            name: Eta in expected free energy, including 0
+          - id: abl_static_context
+            name: Static structural context present versus absent
+          - id: abl_backbone
+            name: Encoder backbone swap
+          - id: abl_ema
+            name: EMA target reinstated
+          - id: abl_trust_region
+            name: Trust region on / off
+        outputs: [ablation tables]
+
+      - id: "7.2"
+        name: Seeds and variance
+        size: S
+        gate: true
+        why: ProteinJEPA's gains replicated inconsistently across seeds; single-seed results are not evidence.
+        experiments:
+          - id: seed_replication
+            name: 3-5 seeds on every headline number
+          - id: reproducibility_check
+            name: End-to-end reproduction from committed config + manifest hash
+        thresholds:
+          - metric: min_seeds_on_headline
+            op: ">="
+            value: 3
+            hypothesis: robustness
+        outputs: [variance-reported results]
+
+  - id: "8"
+    name: Paper
+    goal: The paper is written after the results decide what it says.
+    steps:
+      - id: "8.1"
+        name: Decide the claim from the outcomes
+        size: S
+        why: Five outcome branches, including do-not-write. The trajectory benchmark stands in every branch.
+        experiments: []
+        outputs: [chosen claim, outline]
+
+      - id: "8.2"
+        name: Venue
+        size: S
+        why: No wet lab means Nature-family is out of reach; know that now rather than at submission.
+        experiments: []
+        outputs: [venue decision, deadline]
+
+      - id: "8.3"
+        name: Rescope options
+        size: S
+        why: Decided in advance so a bad Phase-1 result produces a pivot rather than a stall.
+        experiments: []
+        outputs: [pivot decision if triggered]
+
+      - id: "8.4"
+        name: Reproducibility package
+        size: M
+        why: Licence clearance is not optional - the open framework is Contribution 4.
+        experiments:
+          - id: licence_clearance
+            name: ESM3/Cambrian and Rocklin redistribution terms cleared
+          - id: repro_package
+            name: Code, configs, seeds, manifests, PREREGISTRATION.md published
+        outputs: [release artifact, model card]
+
+# Cross-cutting checks surfaced by `bdtrack status` regardless of phase.
+reminders:
+  - id: leakage
+    text: Leakage firewall and the two-instance rule - GB1 is both training data and benchmark.
+  - id: additive_null
+    text: Additive null reported on every epistasis or planning claim.
+  - id: additive_correlation
+    text: Model-null prediction correlation reported, not just scores.
+  - id: censoring
+    text: Measurement floors - >=30% of GB1 doubles, and HIS3.
+  - id: per_assay_norm
+    text: Per-assay normalisation; never pool raw fitness across assays.
+  - id: seeds
+    text: 3-5 seeds, variance reported.
+  - id: calibration
+    text: Uncertainty calibration is a primary result.
+  - id: licences
+    text: Licences cleared before training, not before release.
+  - id: storage
+    text: Storage budget before every cache fill.
+  - id: no_sim_claims
+    text: No biological claim from synthetic labels.
+  - id: no_foldx_labels
+    text: Never label multi-mutants with FoldX/Rosetta-style tools.
+  - id: no_pseudo_eval
+    text: Pseudo-labels from other predictors are distillation, inadmissible in evaluation.
+  - id: decision_log
+    text: Decision log maintained continuously.
+  - id: plan_sync
+    text: Keep proposal.tex and RESEARCH_PLAN.md in sync.
+  - id: prereg
+    text: Negative results are publishable here - if pre-registered.
+  - id: lit_check
+    text: Re-check the literature quarterly.

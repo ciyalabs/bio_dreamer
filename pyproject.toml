@@ -12,14 +12,22 @@
 #   - `server/`      — FastAPI backend serving the web interface
 #   - `frontend/`    — Next.js/React web application
 #
-# Key dependencies:
-#   - PyTorch (core ML framework)
-#   - Hugging Face Hub (model hosting, sharing, versioning)
-#   - FastAPI (backend API)
-#   - ESM-2 / transformers (protein language models)
-#   - torch-geometric (graph neural networks for molecules/proteins)
-#   - torchdiffeq (neural ODE/SDE for dynamics models)
-#   - wandb (experiment tracking)
+# Dependency groups:
+#   (core)  tracker + analysis. Enough for RESEARCH_PLAN.md step 1.1,
+#           the epistasis audit, which needs no neural network.
+#   [ml]    PyTorch and the protein model stack, for steps 1.2 onward.
+#   [dev]   tests and linting.
+#   [docs]  mkdocs site.
+#   [server] FastAPI backend.
+#
+# Install everything for research work:
+#   uv venv --python 3.12 .venv && uv pip install -e ".[ml,dev]"
+#
+# Not installable via pip — see RESEARCH_PLAN.md step 0.2:
+#   foldseek            3Di structure tokens
+#   hmmer / MMseqs2     MSA retrieval for the static context Φ(WT)
+#   HypercubeME         github.com/ivankovlab/HypercubeME (clone)
+#   SLIP                synthetic Potts landscapes (clone)
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
@@ -33,12 +41,55 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 
+dependencies = [
+    "pyyaml>=6.0",        # plan.yaml
+    "numpy>=1.26",
+    "scipy>=1.11",        # Spearman, statistics
+    "pandas>=2.1",        # DMS assay tables
+    "scikit-learn>=1.4",  # the additive null (step 0.5) and ridge fits
+    "matplotlib>=3.8",
+    "tqdm>=4.66",
+]
+
+[project.scripts]
+bdtrack = "biodreamer.tracking.cli:main"
+
 [project.optional-dependencies]
+ml = [
+    "torch>=2.4",             # linux x86_64 wheels on PyPI are CUDA-enabled
+    "transformers>=4.44",     # ProSST, SaProt, ESM-C, ESM-2
+    "huggingface-hub>=0.24",
+    "safetensors>=0.4",
+    "sentencepiece>=0.2",     # tokenizers for several PLM checkpoints
+    "einops>=0.8",            # latent reshaping in the world model
+    "fair-esm>=2.0",          # ESM-2 / ESMFold, for diagnostics D1 and D2
+    "torch-geometric>=2.5",   # GVP-GNN, the structure-encoder comparison in D1
+    "biotite>=0.41",          # PDB/mmCIF parsing, TM-score and RMSD
+    "wandb>=0.17",            # per-step training curves; bdtrack links to them
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+]
 docs = [
     "mkdocs>=1.6",
     "mkdocs-material>=9.5",
     "mkdocstrings[python]>=0.25",
 ]
+server = [
+    "fastapi>=0.112",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.8",
+]
 
 [tool.setuptools.packages.find]
 include = ["biodreamer*", "server*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

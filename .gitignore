@@ -226,3 +226,12 @@ phd_proposal.tex
 CLAUDE.md
 roadmap.md
 phd_proposal.md
+
+# ── Experiment tracker ──
+# The SQLite ledger is a local working store (binary, merge-conflict-prone).
+# The committed record is results/summary.json + results/RESULTS.md, written by
+# `bdtrack export`. See RESEARCH_PLAN.md step 0.5.
+results/tracking.db
+results/tracking.db-wal
+results/tracking.db-shm
+results/tracker.html
