@@ -5,18 +5,18 @@
     "steps_total": 31,
     "steps_complete": 0,
     "steps_running": 0,
-    "steps_partial": 1,
-    "steps_not_started": 30,
+    "steps_partial": 2,
+    "steps_not_started": 29,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 1,
+    "runs_total": 18,
     "runs_failed": 0,
-    "runs_dirty": 1,
+    "runs_dirty": 18,
     "runs_stale_plan": 0,
     "gates_open": 8,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T00:23:11+00:00",
+  "generated_at": "2026-10-27T00:38:05+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -67,14 +67,501 @@
       "name": "Data acquisition and licence register",
       "phase": "0",
       "gate": false,
-      "state": "not-started",
+      "state": "partial",
       "verdict": null,
       "thresholds": [],
       "missing_experiments": [
-        "hypercube_index",
-        "mutation_order_histogram"
+        "hypercube_index"
       ],
-      "runs": []
+      "runs": [
+        {
+          "id": "cbafeb865b9c4cc297b06963d06730bd",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB4",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:55.182869+00:00",
+          "duration_s": 0.025333,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.2568,
+            "completeness_vs_20": 0.9946,
+            "frac_above_wild_type": 0.5676,
+            "frac_dead": 0.0,
+            "n_genotypes": 159129.0,
+            "n_sites": 4.0,
+            "nonadditive_variance_fraction": 0.7432
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "83fe4372c36a49a0902fa29c4683f540",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3I",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:54.381597+00:00",
+          "duration_s": 0.025076,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.5349,
+            "completeness_vs_20": 0.973,
+            "frac_above_wild_type": 0.0084,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7784.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.4651
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "7da894f792bc45e886a9db78dda45fe0",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3H",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:53.579166+00:00",
+          "duration_s": 0.024746,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.0277,
+            "completeness_vs_20": 0.9645,
+            "frac_above_wild_type": 0.6109,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7716.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.9723
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "6f2a61a8671a4a68bee3d986ff614cc0",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3G",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:52.784868+00:00",
+          "duration_s": 0.023983,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.1453,
+            "completeness_vs_20": 0.9864,
+            "frac_above_wild_type": 0.7263,
+            "frac_dead": 0.0003,
+            "n_genotypes": 7891.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.8547
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "2a30c2d6f0124e098df1fdb025206ed3",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3F",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:51.982625+00:00",
+          "duration_s": 0.024042,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.1227,
+            "completeness_vs_20": 0.9671,
+            "frac_above_wild_type": 0.5961,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7737.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.8773
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "e15003b9938844c9be2ba5e2c13b04cf",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3E",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:51.177168+00:00",
+          "duration_s": 0.0255,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.053,
+            "completeness_vs_20": 0.9955,
+            "frac_above_wild_type": 0.4282,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7964.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.947
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "d9dd615747bd4015968e2b9f58ec2ec7",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3D",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:50.370968+00:00",
+          "duration_s": 0.024872,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.2507,
+            "completeness_vs_20": 0.9704,
+            "frac_above_wild_type": 0.9728,
+            "frac_dead": 0.0003,
+            "n_genotypes": 7763.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.7493
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "c8f4d94745b8443a9cbbae59c21f5a2d",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3C",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:49.568207+00:00",
+          "duration_s": 0.024173,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.1663,
+            "completeness_vs_20": 0.9992,
+            "frac_above_wild_type": 0.0135,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7994.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.8337
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "f4d7943affb44f8fa8f7433a51b3145c",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3B",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:48.767841+00:00",
+          "duration_s": 0.024901,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.1002,
+            "completeness_vs_20": 0.9995,
+            "frac_above_wild_type": 0.1096,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7996.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.8998
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "223b3841226d4c0d8d377ebae23945fe",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TrpB3A",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:47.973766+00:00",
+          "duration_s": 0.024947,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.2202,
+            "completeness_vs_20": 0.9964,
+            "frac_above_wild_type": 0.7769,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7971.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.7798
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "42c14d1f32fe47eb916654d9e05788c7",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "TEV",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:47.167575+00:00",
+          "duration_s": 0.02467,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.048,
+            "completeness_vs_20": 0.9946,
+            "frac_above_wild_type": 0.5053,
+            "frac_dead": 0.0026,
+            "n_genotypes": 159132.0,
+            "n_sites": 4.0,
+            "nonadditive_variance_fraction": 0.952
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "615fba2e1e884646a6c0501cacecc682",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "T7",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:46.372434+00:00",
+          "duration_s": 0.025078,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.0406,
+            "completeness_vs_20": 0.8406,
+            "frac_above_wild_type": 0.3405,
+            "frac_dead": 0.17,
+            "n_genotypes": 6725.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.9594
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "ab974c2792fc4fceb0be551a4ea3b32a",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "ParD3",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:45.586197+00:00",
+          "duration_s": 0.024694,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.8517,
+            "completeness_vs_20": 0.9852,
+            "frac_above_wild_type": 0.5211,
+            "frac_dead": 0.0001,
+            "n_genotypes": 7882.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.1483
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "12f0f12fe82f4953ae5b6e8e4483b0e8",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "ParD2",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:44.801373+00:00",
+          "duration_s": 0.024421,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.8419,
+            "completeness_vs_20": 0.9852,
+            "frac_above_wild_type": 0.0488,
+            "frac_dead": 0.0003,
+            "n_genotypes": 7882.0,
+            "n_sites": 3.0,
+            "nonadditive_variance_fraction": 0.1581
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "6a788b6e46104ab6a240b9fa57b8651a",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "GB1",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:44.015225+00:00",
+          "duration_s": 0.025167,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.1944,
+            "completeness_vs_20": 0.9335,
+            "frac_above_wild_type": 0.4518,
+            "frac_dead": 0.9195,
+            "n_genotypes": 149361.0,
+            "n_sites": 4.0,
+            "nonadditive_variance_fraction": 0.8056
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "8757bcf0d945487ca1024beda374b092",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "landscape": "DHFR",
+            "source": "SSMuLA"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:43.219685+00:00",
+          "duration_s": 0.025666,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "2ca0a3e460a8",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "additive_r2": 0.2771,
+            "completeness_vs_20": 0.0,
+            "frac_above_wild_type": 0.5699,
+            "frac_dead": 0.0,
+            "n_genotypes": 261333.0,
+            "n_sites": 9.0,
+            "nonadditive_variance_fraction": 0.7229
+          },
+          "artifacts": [],
+          "error": null
+        },
+        {
+          "id": "d1dfd02180cf402eaf98e6ac828ab2a5",
+          "experiment": "mutation_order_histogram",
+          "variant": {
+            "source": "ProteinGym",
+            "version": "v1.3"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T00:37:43.108465+00:00",
+          "duration_s": 0.032188,
+          "git_sha": "d1884c45dcfc8fad6d959684a424c5cbd798648b",
+          "git_dirty": true,
+          "config_hash": null,
+          "dataset_hash": "0d42b347fa1f",
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "assays_ge_10k_multimutants": 14.0,
+            "assays_with_multimutants": 69.0,
+            "frac_multiple": 0.7176,
+            "multiple_mutants": 1769456.0,
+            "n_assays": 217.0,
+            "single_mutants": 696311.0,
+            "total_mutants": 2465767.0
+          },
+          "artifacts": [
+            {
+              "path": "DATA_REGISTER.md",
+              "kind": "report",
+              "description": "Step 0.2 deliverable"
+            },
+            {
+              "path": "data/processed/proteingym_order_histograms.json",
+              "kind": "table",
+              "description": "per-assay mutation-order histograms"
+            }
+          ],
+          "error": null
+        }
+      ]
     },
     {
       "id": "0.3",

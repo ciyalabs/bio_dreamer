@@ -3,7 +3,7 @@
 _Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate with `bdtrack export`._
 
 - Steps complete: **0/31**
-- Runs recorded: **1** (0 failed, 1 from a dirty tree)
+- Runs recorded: **18** (0 failed, 18 from a dirty tree)
 - Gates open: **8** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
@@ -15,8 +15,28 @@ _Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate wi
 |---|---|---|---|---|
 | `47f9d1c1` | env_bootstrap | cuda=13.0, python=3.12 | cuda_available=1, tests_passing=26, vram_gib=3.62 | 4a7f3b3 ⚠dirty |
 
-### 0.2 — Data acquisition and licence register · `not-started`
-- Pending: `hypercube_index`, `mutation_order_histogram`
+### 0.2 — Data acquisition and licence register · `partial`
+- Pending: `hypercube_index`
+
+| Run | Experiment | Variant | Metrics | Code |
+|---|---|---|---|---|
+| `cbafeb86` | mutation_order_histogram | landscape=TrpB4, source=SSMuLA | additive_r2=0.2568, completeness_vs_20=0.9946, frac_above_wild_type=0.5676, frac_dead=0, n_genotypes=1.591e+05, n_sites=4, nonadditive_variance_fraction=0.7432 | d1884c4 ⚠dirty |
+| `83fe4372` | mutation_order_histogram | landscape=TrpB3I, source=SSMuLA | additive_r2=0.5349, completeness_vs_20=0.973, frac_above_wild_type=0.0084, frac_dead=0.0001, n_genotypes=7784, n_sites=3, nonadditive_variance_fraction=0.4651 | d1884c4 ⚠dirty |
+| `7da894f7` | mutation_order_histogram | landscape=TrpB3H, source=SSMuLA | additive_r2=0.0277, completeness_vs_20=0.9645, frac_above_wild_type=0.6109, frac_dead=0.0001, n_genotypes=7716, n_sites=3, nonadditive_variance_fraction=0.9723 | d1884c4 ⚠dirty |
+| `6f2a61a8` | mutation_order_histogram | landscape=TrpB3G, source=SSMuLA | additive_r2=0.1453, completeness_vs_20=0.9864, frac_above_wild_type=0.7263, frac_dead=0.0003, n_genotypes=7891, n_sites=3, nonadditive_variance_fraction=0.8547 | d1884c4 ⚠dirty |
+| `2a30c2d6` | mutation_order_histogram | landscape=TrpB3F, source=SSMuLA | additive_r2=0.1227, completeness_vs_20=0.9671, frac_above_wild_type=0.5961, frac_dead=0.0001, n_genotypes=7737, n_sites=3, nonadditive_variance_fraction=0.8773 | d1884c4 ⚠dirty |
+| `e15003b9` | mutation_order_histogram | landscape=TrpB3E, source=SSMuLA | additive_r2=0.053, completeness_vs_20=0.9955, frac_above_wild_type=0.4282, frac_dead=0.0001, n_genotypes=7964, n_sites=3, nonadditive_variance_fraction=0.947 | d1884c4 ⚠dirty |
+| `d9dd6157` | mutation_order_histogram | landscape=TrpB3D, source=SSMuLA | additive_r2=0.2507, completeness_vs_20=0.9704, frac_above_wild_type=0.9728, frac_dead=0.0003, n_genotypes=7763, n_sites=3, nonadditive_variance_fraction=0.7493 | d1884c4 ⚠dirty |
+| `c8f4d947` | mutation_order_histogram | landscape=TrpB3C, source=SSMuLA | additive_r2=0.1663, completeness_vs_20=0.9992, frac_above_wild_type=0.0135, frac_dead=0.0001, n_genotypes=7994, n_sites=3, nonadditive_variance_fraction=0.8337 | d1884c4 ⚠dirty |
+| `f4d7943a` | mutation_order_histogram | landscape=TrpB3B, source=SSMuLA | additive_r2=0.1002, completeness_vs_20=0.9995, frac_above_wild_type=0.1096, frac_dead=0.0001, n_genotypes=7996, n_sites=3, nonadditive_variance_fraction=0.8998 | d1884c4 ⚠dirty |
+| `223b3841` | mutation_order_histogram | landscape=TrpB3A, source=SSMuLA | additive_r2=0.2202, completeness_vs_20=0.9964, frac_above_wild_type=0.7769, frac_dead=0.0001, n_genotypes=7971, n_sites=3, nonadditive_variance_fraction=0.7798 | d1884c4 ⚠dirty |
+| `42c14d1f` | mutation_order_histogram | landscape=TEV, source=SSMuLA | additive_r2=0.048, completeness_vs_20=0.9946, frac_above_wild_type=0.5053, frac_dead=0.0026, n_genotypes=1.591e+05, n_sites=4, nonadditive_variance_fraction=0.952 | d1884c4 ⚠dirty |
+| `615fba2e` | mutation_order_histogram | landscape=T7, source=SSMuLA | additive_r2=0.0406, completeness_vs_20=0.8406, frac_above_wild_type=0.3405, frac_dead=0.17, n_genotypes=6725, n_sites=3, nonadditive_variance_fraction=0.9594 | d1884c4 ⚠dirty |
+| `ab974c27` | mutation_order_histogram | landscape=ParD3, source=SSMuLA | additive_r2=0.8517, completeness_vs_20=0.9852, frac_above_wild_type=0.5211, frac_dead=0.0001, n_genotypes=7882, n_sites=3, nonadditive_variance_fraction=0.1483 | d1884c4 ⚠dirty |
+| `12f0f12f` | mutation_order_histogram | landscape=ParD2, source=SSMuLA | additive_r2=0.8419, completeness_vs_20=0.9852, frac_above_wild_type=0.0488, frac_dead=0.0003, n_genotypes=7882, n_sites=3, nonadditive_variance_fraction=0.1581 | d1884c4 ⚠dirty |
+| `6a788b6e` | mutation_order_histogram | landscape=GB1, source=SSMuLA | additive_r2=0.1944, completeness_vs_20=0.9335, frac_above_wild_type=0.4518, frac_dead=0.9195, n_genotypes=1.494e+05, n_sites=4, nonadditive_variance_fraction=0.8056 | d1884c4 ⚠dirty |
+| `8757bcf0` | mutation_order_histogram | landscape=DHFR, source=SSMuLA | additive_r2=0.2771, completeness_vs_20=0, frac_above_wild_type=0.5699, frac_dead=0, n_genotypes=2.613e+05, n_sites=9, nonadditive_variance_fraction=0.7229 | d1884c4 ⚠dirty |
+| `d1dfd021` | mutation_order_histogram | source=ProteinGym, version=v1.3 | assays_ge_10k_multimutants=14, assays_with_multimutants=69, frac_multiple=0.7176, multiple_mutants=1.769e+06, n_assays=217, single_mutants=6.963e+05, total_mutants=2.466e+06 | d1884c4 ⚠dirty |
 
 ### 0.3 — Leakage firewall **[GATE]** · `not-started`
 - ⬜ `firewall_tests_passing == 1` → observed `—`

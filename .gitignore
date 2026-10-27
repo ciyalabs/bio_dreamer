@@ -235,3 +235,9 @@ results/tracking.db
 results/tracking.db-wal
 results/tracking.db-shm
 results/tracker.html
+
+# ── Research data ──
+# Raw downloads and extracted archives are large and externally licensed.
+# DATA_REGISTER.md records provenance; data/processed/*.json holds the audits.
+data/raw/
+data/processed/*.csv

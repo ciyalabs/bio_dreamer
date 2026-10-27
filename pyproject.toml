@@ -49,6 +49,7 @@ dependencies = [
     "scikit-learn>=1.4",  # the additive null (step 0.5) and ridge fits
     "matplotlib>=3.8",
     "tqdm>=4.66",
+    "openpyxl>=3.1",   # xlsx supplements from papers
 ]
 
 [project.scripts]

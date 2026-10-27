@@ -1,0 +1,9 @@
+{
+  "n_assays": 217,
+  "assays_with_multimutants": 69,
+  "total_mutants": 2465767,
+  "single_mutants": 696311,
+  "multiple_mutants": 1769456,
+  "frac_multiple": 0.7176,
+  "assays_ge_10k_multimutants": 14
+}
