@@ -1,22 +1,22 @@
 {
   "summary": {
     "project": "ProteinDreamer",
-    "plan_hash": "ff022d6d97d8",
+    "plan_hash": "d8cf8a531d85",
     "steps_total": 31,
     "steps_complete": 1,
     "steps_running": 0,
-    "steps_partial": 1,
-    "steps_not_started": 29,
+    "steps_partial": 2,
+    "steps_not_started": 28,
     "steps_thresholds_failed": 0,
     "steps_blocked": 0,
-    "runs_total": 22,
+    "runs_total": 23,
     "runs_failed": 0,
-    "runs_dirty": 22,
-    "runs_stale_plan": 0,
+    "runs_dirty": 23,
+    "runs_stale_plan": 22,
     "gates_open": 8,
     "steps_missing_prereg": 2
   },
-  "generated_at": "2026-10-27T01:27:28+00:00",
+  "generated_at": "2026-10-27T01:53:06+00:00",
   "steps": [
     {
       "id": "0.1",
@@ -734,14 +734,37 @@
       "name": "Encoder harness and embedding cache",
       "phase": "0",
       "gate": false,
-      "state": "not-started",
+      "state": "partial",
       "verdict": null,
       "thresholds": [],
       "missing_experiments": [
         "cache_throughput",
         "per_residue_rank_test"
       ],
-      "runs": []
+      "runs": [
+        {
+          "id": "0f8e4ca33e0a4a9db1781bcc5c578f7e",
+          "experiment": "tooling_verified",
+          "variant": {
+            "host": "local"
+          },
+          "status": "completed",
+          "started_at": "2026-10-27T01:53:05.792385+00:00",
+          "duration_s": 0.010744,
+          "git_sha": "69d9b9d1b037e165ec84bb445ff00f364d23c7ab",
+          "git_dirty": true,
+          "config_hash": "4078ac20734b",
+          "dataset_hash": null,
+          "seed": null,
+          "wandb_url": null,
+          "metrics": {
+            "tools_required": 3.0,
+            "tools_working": 3.0
+          },
+          "artifacts": [],
+          "error": null
+        }
+      ]
     },
     {
       "id": "0.5",
@@ -796,6 +819,7 @@
       "missing_experiments": [
         "additive_fit",
         "greedy_reachability",
+        "negative_control",
         "pairwise_fit",
         "rse_count",
         "stack_topk_headroom"

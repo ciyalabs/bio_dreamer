@@ -1,9 +1,9 @@
 # ProteinDreamer — results summary
 
-_Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate with `bdtrack export`._
+_Generated from `plan.yaml` (`d8cf8a531d85`). Do not edit by hand; regenerate with `bdtrack export`._
 
 - Steps complete: **1/31**
-- Runs recorded: **22** (0 failed, 22 from a dirty tree)
+- Runs recorded: **23** (0 failed, 23 from a dirty tree)
 - Gates open: **8** · steps missing pre-registration: **2**
 
 ## Phase 0 — Groundwork
@@ -45,8 +45,12 @@ _Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate wi
 - ⬜ `firewall_tests_passing == 1` → observed `—`
 - Pending: `firewall_poison_test`
 
-### 0.4 — Encoder harness and embedding cache · `not-started`
+### 0.4 — Encoder harness and embedding cache · `partial`
 - Pending: `cache_throughput`, `per_residue_rank_test`
+
+| Run | Experiment | Variant | Metrics | Code |
+|---|---|---|---|---|
+| `0f8e4ca3` | tooling_verified | host=local | tools_required=3, tools_working=3 | 69d9b9d ⚠dirty |
 
 ### 0.5 — Evaluation harness and the additive null **[GATE]** · `not-started`
 - Pending: `additive_null_impl`, `metric_validation`
@@ -58,7 +62,7 @@ _Generated from `plan.yaml` (`ff022d6d97d8`). Do not edit by hand; regenerate wi
 ### 1.1 — D3: Epistasis headroom audit **[GATE]** · `not-started`
 - ⬜ `nonadditive_variance_fraction >= 0.15 [all]` → observed `—`
 - ⬜ `greedy_optimum_hit_rate <= 0.8 [all]` → observed `—`
-- Pending: `additive_fit`, `greedy_reachability`, `pairwise_fit`, `rse_count`, `stack_topk_headroom`
+- Pending: `additive_fit`, `greedy_reachability`, `negative_control`, `pairwise_fit`, `rse_count`, `stack_topk_headroom`
 
 ### 1.2 — D1: Structure invariance under point mutation · `not-started`
 - Pending: `noise_floor`, `struct_displacement`, `substitution_stratified`

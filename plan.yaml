@@ -65,6 +65,8 @@ phases:
         size: M
         why: Everything downstream reads from this; without a cache, backbone forward passes dominate runtime.
         experiments:
+          - id: tooling_verified
+            name: foldseek / hmmer / mmseqs installed and functionally verified
           - id: cache_throughput
             name: Throughput and cache-hit benchmark
           - id: per_residue_rank_test
@@ -112,6 +114,8 @@ phases:
             name: Gain already captured by stacking top-k singles
           - id: rse_count
             name: Reciprocal-sign-epistasis pair count
+          - id: negative_control
+            name: ParD2/ParD3 near-additive controls - planner should show no advantage
         thresholds:
           - metric: nonadditive_variance_fraction
             op: ">="

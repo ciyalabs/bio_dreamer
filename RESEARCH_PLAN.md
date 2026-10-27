@@ -126,20 +126,25 @@ histogram per assay is the single number this whole project's feasibility rests 
 to be computed, not assumed.
 
 **Work.**
-- [ ] Acquire and checksum:
-  - ProteinGym — 217 substitution assays, singles + multiples supervised folds
-  - Tsuboyama mega-scale stability
-  - Rocklin 2026 release (~1.8M domains) — **verify composition and licence first**
-  - GB1 all-doubles (Olson 2014) — 1,045 singles + 535,917 doubles
-  - GB1 four-site (Wu 2016) — 160,000
-  - TrpB four-site (Johnston 2024) — 160,000
-  - PhoQ four-site (Podgornaia & Laub 2015)
-  - HIS3 (Pokusaeva 2019) — ~956k genotypes
-  - FLIP splits (Dallago 2021)
-  - HypercubeME code (`github.com/ivankovlab/HypercubeME`)
-- [ ] Write `DATA_REGISTER.md`, one row per source: licence, redistribution terms, variant
+- [x] Acquire and checksum (**the list collapsed once sources were checked**):
+  - **ProteinGym v1.3** (MIT) — 217 assays, 2,465,767 variants. **Also supplies** Olson 2014
+    GB1, Wu 2016 GB1 and HIS3 as standardised assays, so those three are *not* separate
+    acquisitions from paper supplements with unclear licences
+  - **SSMuLA** (CC-BY-4.0) — 16 combinatorial landscapes incl. TrpB4, TEV, GB1, ParD2/3
+  - **FLIP2** (CC-BY-4.0) — number splits: single→double, 2→many, 3→many
+  - **Tsuboyama** (CC-BY-4.0) — 725 domains with double scans, 36 with triples
+  - **SLIP** (Apache-2.0) — synthetic Potts landscapes, for Step 5
+  - **HypercubeME** (GPL-3.0)
+  - ~~Rocklin 2026~~ — **not needed**: mostly wild-type domains, no new mutant data
+  - ~~PhoQ~~ — **withdrawn**: 403 behind AAAS login, and only 1,659/160,000 functional
+    under a binary selection, so not a quantitative landscape
+  - **Tooling**: hmmer 3.4, mmseqs2 18-8cc5c (apt); foldseek 10-941cd33 (static binary,
+    `tools/foldseek/bin`) — all three verified functionally
+- [x] Write `DATA_REGISTER.md`, one row per source: licence, redistribution terms, variant
       count, **mutation-order histogram**, measurement floor / censoring behaviour, assay type.
-- [ ] Run HypercubeME on HIS3; record the hypercube count **by dimension**, not just the total.
+- [x] Run HypercubeME on HIS3; record the hypercube count **by dimension**, not just the total.
+      Must be run **per segment** — genotypes from different mutagenesis segments cannot form
+      a hypercube together, and a combined run wastes nearly all its effort.
 
 **Experiments.** Descriptive only — but the mutation-order histograms and the HIS3 hypercube
 dimension breakdown are inputs to Step 1.1 and belong in the paper.
@@ -149,6 +154,15 @@ drop it and proceed on Tsuboyama — note this in the register rather than quiet
 in the proposal.
 
 **Outputs.** `data/` with checksums; `DATA_REGISTER.md`; HIS3 hypercube index by dimension.
+
+**✅ DONE (2026-10-27).** See `DATA_REGISTER.md`. Three findings changed later steps:
+ProteinGym is **72% multi-mutant** (not predominantly single, as first written); it already
+contains Olson 2014 GB1, Wu 2016 GB1 and HIS3 as MIT-licensed standardised assays, removing
+three separate acquisitions; and Rocklin 2026 is mostly **wild-type** domains, so it was
+**not** downloaded. HypercubeME reproduced: 2,221 HIS3 genotypes → 58,597 complete
+sub-landscapes reaching **dimension 6**. Acquired ProteinGym, SSMuLA (16 landscapes),
+FLIP2, Tsuboyama, SLIP. **ProSST has no licence** → SaProt (MIT) is now the default encoder.
+PhoQ withdrawn (only 1,659 of 160,000 functional, binary selection).
 
 ---
 
@@ -172,7 +186,12 @@ never cross-reported:
 | **`planning`** | GB1, TrpB, PhoQ fully held out | Everything in Phase 6, including H4 |
 
 **Work.**
-- [ ] Freeze the held-out set: GB1, TrpB, PhoQ — excluded from reward-head *and* dynamics training.
+- [ ] Freeze the held-out set: **GB1, TrpB4, TEV, ParD2, ParD3** — excluded from reward-head
+      *and* dynamics training. (PhoQ dropped; see 0.2.)
+- [ ] **Hold out the ProteinGym assay ids too**, since 0.2 established that the landscapes live
+      *inside* the training corpus rather than in separate files:
+      `SPG1_STRSG_Olson_2014`, `SPG1_STRSG_Wu_2016`, `HIS7_YEAST_Pokusaeva_2019`.
+      This makes the firewall more necessary, not less — the leak is now a silent one.
 - [ ] Write `splits/` manifests with content hashes.
 - [ ] Add a **CI test that fails** if a held-out protein's sequence (or a close homolog, by
       sequence identity threshold) appears in any training split.
@@ -281,8 +300,12 @@ months is worth more than any other single result here. It also produces, as a b
 exact additive-null numbers the paper will need in every later table.
 
 **Work.**
-- [ ] Fit additive models to: GB1 four-site, TrpB four-site, PhoQ four-site, GB1 all-doubles,
-      and a stratified sample of HIS3 hypercubes (dimensions 3–8).
+- [ ] Fit additive models to: **TrpB4 and TEV (primary), GB1 (third)**, GB1 all-doubles, the
+      nine TrpB 3-site landscapes, and a stratified sample of HIS3 hypercubes (dimensions 3–6).
+- [ ] **Negative controls: ParD2 and ParD3** (non-additive fraction 0.148–0.158, near-additive).
+      A planner whose advantage is real should show little or none on these.
+- [ ] A first pass is already done in 0.2 (`scripts/audit_landscapes.py`,
+      `data/processed/landscape_audit.json`); 1.1 extends it with path-level analysis.
 - [ ] Fit pairwise (and where data allows, third-order) models.
 - [ ] Handle censoring explicitly — see Step 2.1.
 
@@ -292,6 +315,11 @@ exact additive-null numbers the paper will need in every later table.
 - [ ] **Fraction of global optima reachable by greedy hill-climbing from wild type**, versus
       requiring an indirect path — i.e. how often the phenomenon H4 targets actually occurs.
 - [ ] How much of the achievable fitness gain the "stack top-*k* singles" heuristic already captures.
+
+**⚠ Read the dead fraction before the R².** 0.2 measured GB1 at **92% dead** — a large part of
+what its additive model fails to explain is a floor-dominated distribution, not exploitable
+epistasis. TrpB4 (0% dead) and TEV (0.3% dead) do not have this problem, which is why they
+are primary. Never quote a non-additive fraction without the dead fraction beside it.
 
 **Go / no-go.**
 - **Go** if a material fraction of variance is non-additive **and** greedy fails to reach the
