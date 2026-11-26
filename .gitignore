@@ -271,6 +271,9 @@ data/processed/hypercubeme/out_6_40/hypercubes_*.txt
 # sidecars, regenerable from data/processed/d1_fold_manifest.json (which IS
 # committed -- the manifest is the reviewable artifact, the folds are output).
 data/processed/d1_folds/
+# dry-run and partial outputs: never real results
+data/processed/*.dryrun.json
+data/processed/*.partial.json
 
 # Firewall working files (fasta + mmseqs tmp): regenerable
 splits/work/

@@ -137,11 +137,26 @@ def landscape_sequences() -> dict[str, list[str]]:
 
 
 def probe_sequences(n: int = 200) -> dict[str, list[str]]:
-    """A fixed small batch, to benchmark the card before committing to a long run."""
-    from biodreamer.eval.landscape import Landscape  # noqa: PLC0415
+    """A fixed small batch of REAL proteins, to benchmark the card.
 
-    ls = Landscape.from_csv(LANDSCAPES["ParD3"], "ParD3")
-    return {"probe": ls.sequences()[:n]}
+    Taken from the D1 manifest, which holds whole wild-type and mutant sequences of
+    36-390 residues. It must not come from `Landscape.sequences()`: those are the
+    variable residues only -- three characters for ParD3 -- so a throughput number
+    measured on them would be meaningless, and the encoder would be embedding
+    3-residue "proteins" without complaining.
+    """
+    manifest = Path("data/processed/d1_fold_manifest.json")
+    if not manifest.exists():
+        raise FileNotFoundError(
+            f"{manifest} missing -- run scripts/d1_build_manifest.py first"
+        )
+    out: list[str] = []
+    for e in json.loads(manifest.read_text())["proteins"]:
+        out.append(e["wt_sequence"])
+        out.extend(m["sequence"] for m in e["mutants"])
+        if len(out) >= n:
+            break
+    return {"probe": out[:n]}
 
 
 WORKLOADS = {"h1": h1_sequences, "landscapes": landscape_sequences, "probe": probe_sequences}

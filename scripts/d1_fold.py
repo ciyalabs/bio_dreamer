@@ -50,6 +50,9 @@ from biodreamer.protein_dreamer.encoder import foldseek_3di
 
 MANIFEST = Path("data/processed/d1_fold_manifest.json")
 OUT_JSON = Path("data/processed/d1_structure.json")
+# A dry run's numbers are not real, and a limited run's are partial. Neither may
+# overwrite the full result -- that mistake has already cost two sets of real numbers.
+DRY_JSON = Path("data/processed/d1_structure.dryrun.json")
 PDB_DIR = Path("data/processed/d1_folds")
 MODEL = "facebook/esmfold_v1"
 
@@ -279,8 +282,9 @@ def main() -> int:
         )
 
     agg = aggregate(results)
-    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(
+    out_path = DRY_JSON if (args.dry_run or args.limit) else OUT_JSON
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
         json.dumps({"aggregate": agg, "dry_run": args.dry_run, "proteins": results}, indent=2)
         + "\n"
     )
@@ -304,7 +308,9 @@ def main() -> int:
             print(f"    {band:<13} n={agg[f'n_{band}']:>4.0f}  "
                   f"rmsd {agg[f'median_ca_rmsd_{band}']:>7.4f}  "
                   f"3Di {agg[f'median_tdi_hamming_{band}']:>7.4f}")
-    print(f"\n  {time.time()-t0:.0f}s total; wrote {OUT_JSON}")
+    print(f"\n  {time.time()-t0:.0f}s total; wrote {out_path}")
+    if out_path is DRY_JSON:
+        print(f"  (dry or limited run -- {OUT_JSON} left untouched)")
 
     if not args.no_track and not args.dry_run:
         with tracking.run(

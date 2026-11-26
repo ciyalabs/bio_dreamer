@@ -1,0 +1,15 @@
+{
+  "probe": {
+    "groups": {
+      "probe": {
+        "n_sequences": 200,
+        "residues": 8075,
+        "seconds": 0.1,
+        "residues_per_second": 128658.7
+      }
+    },
+    "total_seconds": 0.1,
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "cache_dir": "models/cache"
+  }
+}

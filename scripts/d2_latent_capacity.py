@@ -51,6 +51,8 @@ from biodreamer.protein_dreamer.encoder import ProteinEncoder
 
 MANIFEST = Path("data/processed/d1_fold_manifest.json")
 OUT = Path("data/processed/d2_latent.json")
+# see the note in d1_fold.py: a limited run writes elsewhere
+PARTIAL = Path("data/processed/d2_latent.partial.json")
 DIMS = (64, 128, 256, 512)
 
 
@@ -245,9 +247,12 @@ def main() -> int:
             })
 
     if results:
-        OUT.parent.mkdir(parents=True, exist_ok=True)
-        OUT.write_text(json.dumps(results, indent=2) + "\n")
-        print(f"\nwrote {OUT}")
+        out_path = PARTIAL if args.limit else OUT
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(results, indent=2) + "\n")
+        print(f"\nwrote {out_path}")
+        if out_path is PARTIAL:
+            print(f"  (--limit given -- {OUT} left untouched)")
     return 0
 
 

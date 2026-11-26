@@ -1,29 +1,16 @@
 #!/usr/bin/env bash
-# window_a.sh — every GPU job Phase 1 needs, unattended, in one pass.
-#
-# RENTAL_PLAN.md calls this Window A. Nothing here needs a human watching it, which
-# is the point: the rented box bills by availability, not by GPU utilisation, so the
-# cheapest run is the one nobody has to babysit. Measured utilisation across the
-# whole study is 6%.
+# window_a.sh — the GPU jobs Phase 1 needs. Unattended, one pass, ~5 GPU-hours.
 #
 #   bash scripts/window_a.sh            # the real thing
 #   bash scripts/window_a.sh --dry-run  # prove every code path, no model, no GPU
 #
-# Order matters. The benchmark runs first because every cost estimate depends on it
-# and it takes seconds. The probe encode runs second because it is the cheapest way
-# to find out the cache and the backbone work before committing to a long job.
+# Window A produces MEASUREMENTS, not a cache. That is deliberate. Step 1.3 fixed the
+# latent dimension at d=128, and the adapter that projects 1280 -> 128 does not exist
+# until Phase 2. Caching raw d=1280 latents here would mean moving 152 GiB home, when
+# re-encoding later costs 0.8 GPU-hours. So this script encodes only a sample, to
+# measure throughput, and leaves the real cache for Phase 2.
 #
-# What is NOT here, and why:
-#   - encode_corpus.py --workload landscapes
-#       The SSMuLA landscape CSVs store only the variable residues (4 characters for
-#       TrpB4), not full protein sequences, and only TEV ships a "Complete Sequence"
-#       column. Encoding 4-residue fragments through a protein language model is
-#       meaningless. The variable-position mapping for TrpB4, GB1, ParD2 and ParD3
-#       has to be established first -- see DATA_REGISTER.md. That is Window B work
-#       and it needs no GPU, so it must not consume rented hours.
-#   - anything at d=128
-#       The 10x storage saving needs the trained adapter, which does not exist until
-#       Phase 2. Window A caches raw d=1280; at this scope that is 152 GiB and fits.
+# Everything it writes comes to under 100 MB.
 
 set -euo pipefail
 
@@ -49,46 +36,48 @@ run() {
 printf 'Window A starting %s\n' "$(date -Is)" | tee "$LOG"
 nvidia-smi --query-gpu=name,memory.total --format=csv 2>&1 | tee -a "$LOG" || true
 
-# 1. Measure the card. Everything in RENTAL_PLAN.md scales with this number, and
-#    the 30 TFLOP/s in cost_model.py is an estimate from the card's power budget.
-run "1/5  benchmark the card" python -I scripts/bench_encoder.py
+# 1. Measure the card. Every hour and euro in RENTAL_PLAN.md scales with this, and
+#    the figure in cost_model.py is an estimate from the card's power budget.
+run "1/4  benchmark the card" python -I scripts/bench_encoder.py
 
-# 2. Smallest possible encode: proves backbone, cache and disk before a long run.
-run "2/5  probe encode (200 sequences)" \
+# 2. A 200-sequence encode. Proves the backbone, the cache and the disk work, and
+#    gives a real residues-per-second number for Phase 2's planning. Not a cache fill.
+run "2/4  encoding throughput sample" \
   python -I scripts/encode_corpus.py --workload probe
 
-# 3. H1's real scope: 7 unbanned assays with order>=3. 287k sequences, 64M residues,
-#    0.083 EFLOP. The cost model's 0.90 EFLOP assumed the whole corpus; the firewall
-#    bans 49% of it and H1's protocol touches 2.6% of what remains.
-run "3/5  encode H1 train+test" \
-  python -I scripts/encode_corpus.py --workload h1
+# 3. The reason this window exists. ESMFold does not fit a 4 GB laptop card.
+#    Wild types are folded twice so the floor is the predictor's own reproducibility;
+#    without that, "the structure does not move" cannot be falsified.
+run "3/4  D1 fold the manifest" python -I scripts/d1_fold.py $DRY
 
-# 4. D1 folding. Wild types are folded twice to establish the predictor's own
-#    reproducibility as the floor -- without that, "the structure does not move" is
-#    unfalsifiable. Selection already happened on CPU; this only consumes a manifest.
-run "4/5  D1 fold manifest" python -I scripts/d1_fold.py $DRY
-
-# 5. D2 latent capacity (step 1.3). Decides per-residue versus pooled, and fixes d.
-if [[ -f scripts/d2_latent_capacity.py ]]; then
-  run "5/5  D2 latent capacity" python -I scripts/d2_latent_capacity.py $DRY
+# 4. Step 1.3 already ran at home and fixed d=128, but SaProt had no structure tokens
+#    there, so it was compared as a plain sequence model. Now that the folds exist,
+#    re-run it with real 3Di to settle the backbone choice.
+# d2 has no --dry-run: it runs fine without a big GPU, so the dry form is a
+# two-protein pass that exercises the same code.
+if [[ -n "$DRY" ]]; then
+  run "4/4  D2 re-run with real 3Di (dry: 2 proteins)" \
+    python -I scripts/d2_latent_capacity.py --limit 2 --no-track
 else
-  printf '\n\033[1m== 5/5  D2 latent capacity -- SCRIPT NOT WRITTEN\033[0m\n' | tee -a "$LOG"
-  echo "scripts/d2_latent_capacity.py does not exist yet. Write it BEFORE ordering," \
-       "or Window A finishes early and the box bills while you write it." | tee -a "$LOG"
+  run "4/4  D2 re-run with real 3Di" python -I scripts/d2_latent_capacity.py
 fi
 
 printf '\nWindow A finished %s\n' "$(date -Is)" | tee -a "$LOG"
-bdtrack status 2>&1 | head -30 | tee -a "$LOG"
+bdtrack status 2>&1 | sed -n '/Phase 1/,/Phase 2/p' | tee -a "$LOG"
+du -sh data/processed/d1_folds 2>/dev/null | tee -a "$LOG" || true
 
 cat <<'EOF' | tee -a "$LOG"
 
-BEFORE CANCELLING THE SERVER
-  1. rsync the cache home. It is the only expensive-to-recreate artifact, and the
-     monthly disk goes away with the order:
-       rsync -az --info=progress2 root@BOX:/root/bio_dreamer/models/cache_bench/ ./
-  2. rsync data/processed/ back (fold PDBs, d1_structure.json, encoding_log.json).
-  3. Commit and push. The tracker flags runs from a dirty tree as non-reproducible,
-     and these are headline numbers.
-  4. Re-read the cancel rule in RENTAL_PLAN.md: the EUR 209 setup fee is worth 610
-     hours of runtime, so cancel only if the next GPU job is more than ~4 weeks out.
+BEFORE DESTROYING THE BOX
+  Copy these home. Under 100 MB in total:
+    data/processed/d1_folds/      the predicted structures
+    data/processed/*.json         d1_structure, d2_latent, encoding_log
+    experiments.db                the tracker ledger
+    data/processed/window_a_*.log this log
+
+  Do NOT copy models/ -- those are the raw d=1280 embedding cache and the downloaded
+  weights. The cache is 152 GiB and re-encoding it costs 0.8 GPU-hours; the weights
+  re-download from Hugging Face in minutes.
+
+  Then commit and push. The tracker flags runs from a dirty tree as non-reproducible.
 EOF
