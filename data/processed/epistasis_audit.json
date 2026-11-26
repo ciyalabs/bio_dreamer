@@ -1,0 +1,1063 @@
+[
+  {
+    "name": "TrpB4",
+    "control": false,
+    "note": "4 sites, 0% dead, no published error bars",
+    "additive_fit": {
+      "n_genotypes": 159129.0,
+      "n_sites": 4.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.2568300210184721,
+      "nonadditive_variance_fraction": 0.7431699789815279,
+      "additive_spearman_higher_order": 0.0695816221318937,
+      "frac_order_ge2": 0.9995161158556894,
+      "frac_dead": 2.5136838665485235e-05,
+      "frac_above_wild_type": 0.5676338065343212,
+      "nonadditive_variance_fraction_alive": 0.74318030210199,
+      "n_alive": 159125.0
+    },
+    "timing_s": {
+      "additive_fit": 1.8,
+      "pairwise_fit": 17.4,
+      "greedy_reachability": 9.6,
+      "stack_topk_headroom": 1.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.25623096818327085,
+      "cv_r2_order_2": 0.6001855953660795,
+      "cv_r2_order_3": 0.7594317080091979,
+      "cv_r2_additive": 0.25623096818327085,
+      "cv_r2_best": 0.7594317080091979,
+      "pairwise_increment": 0.34395462718280867,
+      "structured_nonadditive_fraction": 0.5032007398259271,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 1.0,
+      "greedy_oracle_calls_restarts_1": 468.0,
+      "greedy_hit_rate_restarts_5": 1.0,
+      "greedy_oracle_calls_restarts_5": 1346.2,
+      "greedy_optimum_hit_rate": 1.0,
+      "greedy_oracle_calls": 1346.2,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 4452.8,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 17344.6,
+      "path_accessibility": 0.625,
+      "n_singles_available": 76.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 76.0,
+      "additive_null_fitting_cost": 77.0,
+      "stack_topk_gain_fraction": 0.0301028148110983,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.039957297527154094,
+      "wild_type_fitness": 0.009906062512173517,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 67.0,
+      "rse_pairs_examined": 2166.0,
+      "rse_fraction": 0.030932594644506
+    }
+  },
+  {
+    "name": "TEV",
+    "control": false,
+    "note": "4 sites, primary landscape as registered in Step 0.5",
+    "additive_fit": {
+      "n_genotypes": 159132.0,
+      "n_sites": 4.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.04796077169700075,
+      "nonadditive_variance_fraction": 0.9520392283029993,
+      "additive_spearman_higher_order": -0.004951062843386078,
+      "frac_order_ge2": 0.9995161249780057,
+      "frac_dead": 0.00257019329864515,
+      "frac_above_wild_type": 0.5052535002387954,
+      "nonadditive_variance_fraction_alive": 0.9546253079480514,
+      "n_alive": 158723.0,
+      "noise_fraction": 0.33164627217445136,
+      "reliability_ceiling": 0.6683537278255487,
+      "noise_fraction_median": 0.03467433978393708
+    },
+    "timing_s": {
+      "additive_fit": 1.8,
+      "pairwise_fit": 36.5,
+      "greedy_reachability": 10.1,
+      "stack_topk_headroom": 0.8,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.046984554787462884,
+      "cv_r2_order_2": 0.07668993141652403,
+      "cv_r2_order_3": 0.07747101326524852,
+      "cv_r2_additive": 0.046984554787462884,
+      "cv_r2_best": 0.07747101326524852,
+      "pairwise_increment": 0.029705376629061142,
+      "structured_nonadditive_fraction": 0.03048645847778564,
+      "max_order_fitted": 3.0,
+      "hiconf_read_threshold": 209.0,
+      "n_hiconf": 79630.0,
+      "hiconf_cv_r2_additive": 0.23491414123099685,
+      "hiconf_cv_r2_pairwise": 0.49197075087492237,
+      "hiconf_pairwise_increment": 0.2570566096439255
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 134.0,
+      "greedy_hit_rate_restarts_5": 0.0,
+      "greedy_oracle_calls_restarts_5": 904.5,
+      "greedy_optimum_hit_rate": 0.0,
+      "greedy_oracle_calls": 904.5,
+      "greedy_hit_rate_restarts_20": 0.0,
+      "greedy_oracle_calls_restarts_20": 3993.0,
+      "greedy_hit_rate_restarts_100": 0.6,
+      "greedy_oracle_calls_restarts_100": 17609.1,
+      "path_accessibility": 0.041666666666666664,
+      "n_singles_available": 76.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 76.0,
+      "additive_null_fitting_cost": 77.0,
+      "stack_topk_gain_fraction": 0.07928487714660865,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.20349866541688577,
+      "wild_type_fitness": -0.016226802,
+      "global_optimum_fitness": 1.4044468
+    },
+    "rse_count": {
+      "rse_pairs": 372.0,
+      "rse_pairs_examined": 2166.0,
+      "rse_fraction": 0.17174515235457063
+    }
+  },
+  {
+    "name": "GB1",
+    "control": false,
+    "note": "4 sites, 92% dead; input count is independent of the measured fitness",
+    "additive_fit": {
+      "n_genotypes": 149361.0,
+      "n_sites": 4.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.1943975540707007,
+      "nonadditive_variance_fraction": 0.8056024459292993,
+      "additive_spearman_higher_order": 0.4760439405698523,
+      "frac_order_ge2": 0.9994844705110437,
+      "frac_dead": 0.9195171430293049,
+      "frac_above_wild_type": 0.4518314687234285,
+      "nonadditive_variance_fraction_alive": 0.6340538370154217,
+      "n_alive": 12021.0
+    },
+    "timing_s": {
+      "additive_fit": 1.1,
+      "pairwise_fit": 90.2,
+      "greedy_reachability": 9.9,
+      "stack_topk_headroom": 0.7,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.19326484543576428,
+      "cv_r2_order_2": 0.610261613365509,
+      "cv_r2_order_3": 0.885106216081702,
+      "cv_r2_additive": 0.19326484543576428,
+      "cv_r2_best": 0.885106216081702,
+      "pairwise_increment": 0.4169967679297447,
+      "structured_nonadditive_fraction": 0.6918413706459378,
+      "max_order_fitted": 3.0,
+      "hiconf_read_threshold": 249.0,
+      "n_hiconf": 74779.0,
+      "hiconf_cv_r2_additive": 0.2258573260595288,
+      "hiconf_cv_r2_pairwise": 0.6464742898658196,
+      "hiconf_pairwise_increment": 0.42061696380629077
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 299.0,
+      "greedy_hit_rate_restarts_5": 0.7,
+      "greedy_oracle_calls_restarts_5": 1353.0,
+      "greedy_optimum_hit_rate": 0.7,
+      "greedy_oracle_calls": 1353.0,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 4403.2,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 16637.3,
+      "path_accessibility": 0.5833333333333334,
+      "n_singles_available": 76.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 76.0,
+      "additive_null_fitting_cost": 77.0,
+      "stack_topk_gain_fraction": 0.06685826239136859,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.30728926177364463,
+      "wild_type_fitness": 0.003890273,
+      "global_optimum_fitness": 8.761965656
+    },
+    "rse_count": {
+      "rse_pairs": 87.0,
+      "rse_pairs_examined": 2163.0,
+      "rse_fraction": 0.04022191400832178
+    }
+  },
+  {
+    "name": "T7",
+    "control": false,
+    "note": "3 sites, median 11 reads per variant",
+    "additive_fit": {
+      "n_genotypes": 6725.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.040607703368828796,
+      "nonadditive_variance_fraction": 0.9593922966311712,
+      "additive_spearman_higher_order": -0.0374102594946817,
+      "frac_order_ge2": 0.9913754646840148,
+      "frac_dead": 0.1699628252788104,
+      "frac_above_wild_type": 0.3405204460966543,
+      "nonadditive_variance_fraction_alive": 0.9513151789770735,
+      "n_alive": 5582.0,
+      "noise_fraction": 0.2656148376731162,
+      "reliability_ceiling": 0.7343851623268838,
+      "noise_fraction_median": 0.09471224616578074
+    },
+    "timing_s": {
+      "additive_fit": 0.0,
+      "pairwise_fit": 0.7,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.023434766161229748,
+      "cv_r2_order_2": 0.026881562874341514,
+      "cv_r2_order_3": 0.026854374108615797,
+      "cv_r2_additive": 0.023434766161229748,
+      "cv_r2_best": 0.026881562874341514,
+      "pairwise_increment": 0.003446796713111766,
+      "structured_nonadditive_fraction": 0.003446796713111766,
+      "max_order_fitted": 3.0,
+      "hiconf_read_threshold": 11.0,
+      "n_hiconf": 3499.0,
+      "hiconf_cv_r2_additive": 0.03900194297761461,
+      "hiconf_cv_r2_pairwise": 0.048350922708313315,
+      "hiconf_pairwise_increment": 0.009348979730698703
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 95.0,
+      "greedy_hit_rate_restarts_5": 0.0,
+      "greedy_oracle_calls_restarts_5": 471.4,
+      "greedy_optimum_hit_rate": 0.0,
+      "greedy_oracle_calls": 471.4,
+      "greedy_hit_rate_restarts_20": 0.3,
+      "greedy_oracle_calls_restarts_20": 1688.2,
+      "greedy_hit_rate_restarts_100": 0.7,
+      "greedy_oracle_calls_restarts_100": 4882.0,
+      "path_accessibility": 0.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.491558141819107,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.66321391566329,
+      "wild_type_fitness": -0.45277876,
+      "global_optimum_fitness": 0.8512114
+    },
+    "rse_count": {
+      "rse_pairs": 99.0,
+      "rse_pairs_examined": 1049.0,
+      "rse_fraction": 0.09437559580552908
+    }
+  },
+  {
+    "name": "DHFR",
+    "control": false,
+    "note": "9 nucleotide sites",
+    "additive_fit": {
+      "n_genotypes": 261333.0,
+      "n_sites": 9.0,
+      "alphabet_size": 4.0,
+      "additive_r2_full": 0.2770952437425679,
+      "nonadditive_variance_fraction": 0.7229047562574321,
+      "additive_spearman_higher_order": 0.02715757605680617,
+      "frac_order_ge2": 0.9998928570061951,
+      "frac_dead": 3.826535493029966e-06,
+      "frac_above_wild_type": 0.5698591452285016,
+      "nonadditive_variance_fraction_alive": 0.7228963110344286,
+      "n_alive": 261332.0
+    },
+    "timing_s": {
+      "additive_fit": 6.0,
+      "pairwise_fit": 109.4,
+      "greedy_reachability": 26.1,
+      "stack_topk_headroom": 2.1,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.27692389664560824,
+      "cv_r2_order_2": 0.7289880211399133,
+      "cv_r2_order_3": 0.8247611686322639,
+      "cv_r2_additive": 0.27692389664560824,
+      "cv_r2_best": 0.8247611686322639,
+      "pairwise_increment": 0.4520641244943051,
+      "structured_nonadditive_fraction": 0.5478372719866557,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 213.0,
+      "greedy_hit_rate_restarts_5": 0.0,
+      "greedy_oracle_calls_restarts_5": 624.6,
+      "greedy_optimum_hit_rate": 0.0,
+      "greedy_oracle_calls": 624.6,
+      "greedy_hit_rate_restarts_20": 0.2,
+      "greedy_oracle_calls_restarts_20": 2178.7,
+      "greedy_hit_rate_restarts_100": 0.7,
+      "greedy_oracle_calls_restarts_100": 9163.1,
+      "path_accessibility": 0.034722222222222224,
+      "n_singles_available": 27.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 27.0,
+      "additive_null_fitting_cost": 28.0,
+      "stack_topk_gain_fraction": 0.08647879723133207,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.1573330125554109,
+      "wild_type_fitness": -0.725598325274967,
+      "global_optimum_fitness": 1.395791684395264
+    },
+    "rse_count": {
+      "rse_pairs": 50.0,
+      "rse_pairs_examined": 324.0,
+      "rse_fraction": 0.15432098765432098
+    }
+  },
+  {
+    "name": "TrpB3A",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7971.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.22015364440461616,
+      "nonadditive_variance_fraction": 0.7798463555953838,
+      "additive_spearman_higher_order": 0.12651300857662126,
+      "frac_order_ge2": 0.9927236231338602,
+      "frac_dead": 0.00012545477355413375,
+      "frac_above_wild_type": 0.7769414126207502,
+      "nonadditive_variance_fraction_alive": 0.7734028478892343,
+      "n_alive": 7970.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.9,
+      "stack_topk_headroom": 0.1,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.2054555481523067,
+      "cv_r2_order_2": 0.21132814496010688,
+      "cv_r2_order_3": 0.22265753659684906,
+      "cv_r2_additive": 0.2054555481523067,
+      "cv_r2_best": 0.22265753659684906,
+      "pairwise_increment": 0.005872596807800168,
+      "structured_nonadditive_fraction": 0.01720198844454235,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 207.0,
+      "greedy_hit_rate_restarts_5": 0.4,
+      "greedy_oracle_calls_restarts_5": 740.3,
+      "greedy_optimum_hit_rate": 0.4,
+      "greedy_oracle_calls": 740.3,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 2211.5,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5781.2,
+      "path_accessibility": 0.16666666666666666,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.046568096618769,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.1516062431097994,
+      "wild_type_fitness": -0.06989449040805665,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 177.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.1634349030470914
+    }
+  },
+  {
+    "name": "TrpB3B",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7996.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.10017717136560833,
+      "nonadditive_variance_fraction": 0.8998228286343917,
+      "additive_spearman_higher_order": 0.09689246601621944,
+      "frac_order_ge2": 0.9927463731865933,
+      "frac_dead": 0.0001250625312656328,
+      "frac_above_wild_type": 0.10955477738869435,
+      "nonadditive_variance_fraction_alive": 0.8970219102957433,
+      "n_alive": 7995.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.08644337721306816,
+      "cv_r2_order_2": 0.09154210917867844,
+      "cv_r2_order_3": 0.09144861806059257,
+      "cv_r2_additive": 0.08644337721306816,
+      "cv_r2_best": 0.09154210917867844,
+      "pairwise_increment": 0.005098731965610281,
+      "structured_nonadditive_fraction": 0.005098731965610281,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 96.0,
+      "greedy_hit_rate_restarts_5": 0.4,
+      "greedy_oracle_calls_restarts_5": 628.7,
+      "greedy_optimum_hit_rate": 0.4,
+      "greedy_oracle_calls": 628.7,
+      "greedy_hit_rate_restarts_20": 0.6,
+      "greedy_oracle_calls_restarts_20": 2143.3,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5837.6,
+      "path_accessibility": 0.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.09237831834086101,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.09237831834086101,
+      "wild_type_fitness": -0.01726189507123209,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 78.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.07202216066481995
+    }
+  },
+  {
+    "name": "TrpB3C",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7994.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.16627071813049865,
+      "nonadditive_variance_fraction": 0.8337292818695013,
+      "additive_spearman_higher_order": 0.19059980837117724,
+      "frac_order_ge2": 0.9927445584188141,
+      "frac_dead": 0.00012509382036527395,
+      "frac_above_wild_type": 0.013510132599449587,
+      "nonadditive_variance_fraction_alive": 0.8313830972976789,
+      "n_alive": 7993.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.1,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.14954874239860938,
+      "cv_r2_order_2": 0.15182631088459597,
+      "cv_r2_order_3": 0.15169818703133697,
+      "cv_r2_additive": 0.14954874239860938,
+      "cv_r2_best": 0.15182631088459597,
+      "pairwise_increment": 0.002277568485986592,
+      "structured_nonadditive_fraction": 0.002277568485986592,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 96.0,
+      "greedy_hit_rate_restarts_5": 0.2,
+      "greedy_oracle_calls_restarts_5": 632.1,
+      "greedy_optimum_hit_rate": 0.2,
+      "greedy_oracle_calls": 632.1,
+      "greedy_hit_rate_restarts_20": 0.8,
+      "greedy_oracle_calls_restarts_20": 2114.4,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5720.0,
+      "path_accessibility": 0.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.10103764120766588,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 1.0,
+      "additive_null_gain_fraction_b100": 1.0,
+      "wild_type_fitness": 0.12932857315873178,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 23.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.02123730378578024
+    }
+  },
+  {
+    "name": "TrpB3D",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7763.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.25072811650681703,
+      "nonadditive_variance_fraction": 0.749271883493183,
+      "additive_spearman_higher_order": 0.23880873969127892,
+      "frac_order_ge2": 0.9925286615998969,
+      "frac_dead": 0.0002576323586242432,
+      "frac_above_wild_type": 0.9728197861651423,
+      "nonadditive_variance_fraction_alive": 0.7483279179505737,
+      "n_alive": 7761.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.9,
+      "stack_topk_headroom": 0.1,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.23451750576538954,
+      "cv_r2_order_2": 0.45590827795200195,
+      "cv_r2_order_3": 0.472272773053923,
+      "cv_r2_additive": 0.23451750576538954,
+      "cv_r2_best": 0.472272773053923,
+      "pairwise_increment": 0.2213907721866124,
+      "structured_nonadditive_fraction": 0.23775526728853347,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 169.0,
+      "greedy_hit_rate_restarts_5": 0.7,
+      "greedy_oracle_calls_restarts_5": 693.0,
+      "greedy_optimum_hit_rate": 0.7,
+      "greedy_oracle_calls": 693.0,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 1962.3,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5382.1,
+      "path_accessibility": 1.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.21900416820383492,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.7485532607264853,
+      "wild_type_fitness": -0.07272253187661504,
+      "global_optimum_fitness": 0.99822988131436
+    },
+    "rse_count": {
+      "rse_pairs": 0.0,
+      "rse_pairs_examined": 1077.0,
+      "rse_fraction": 0.0
+    }
+  },
+  {
+    "name": "TrpB3E",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7964.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.052979541502280014,
+      "nonadditive_variance_fraction": 0.94702045849772,
+      "additive_spearman_higher_order": 0.028174627498092242,
+      "frac_order_ge2": 0.9927172275238574,
+      "frac_dead": 0.00012556504269211453,
+      "frac_above_wild_type": 0.4281767955801105,
+      "nonadditive_variance_fraction_alive": 0.9461259506460122,
+      "n_alive": 7963.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.04110803093681781,
+      "cv_r2_order_2": 0.23744082725680338,
+      "cv_r2_order_3": 0.23583811873563387,
+      "cv_r2_additive": 0.04110803093681781,
+      "cv_r2_best": 0.23744082725680338,
+      "pairwise_increment": 0.19633279631998557,
+      "structured_nonadditive_fraction": 0.19633279631998557,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 96.0,
+      "greedy_hit_rate_restarts_5": 0.4,
+      "greedy_oracle_calls_restarts_5": 605.0,
+      "greedy_optimum_hit_rate": 0.4,
+      "greedy_oracle_calls": 605.0,
+      "greedy_hit_rate_restarts_20": 0.9,
+      "greedy_oracle_calls_restarts_20": 2098.5,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5811.5,
+      "path_accessibility": 0.3333333333333333,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.07701598991021544,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.041341287389842364,
+      "wild_type_fitness": 0.0037162483020545603,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 113.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.10433979686057249
+    }
+  },
+  {
+    "name": "TrpB3F",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7737.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.12269563269314665,
+      "nonadditive_variance_fraction": 0.8773043673068533,
+      "additive_spearman_higher_order": 0.17941878575725603,
+      "frac_order_ge2": 0.992503554349231,
+      "frac_dead": 0.00012924906294429367,
+      "frac_above_wild_type": 0.5960966782990823,
+      "nonadditive_variance_fraction_alive": 0.8767289971113885,
+      "n_alive": 7736.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.10886729853664445,
+      "cv_r2_order_2": 0.1278102647070154,
+      "cv_r2_order_3": 0.1303024328011958,
+      "cv_r2_additive": 0.10886729853664445,
+      "cv_r2_best": 0.1303024328011958,
+      "pairwise_increment": 0.018942966170370945,
+      "structured_nonadditive_fraction": 0.021435134264551348,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 1.0,
+      "greedy_oracle_calls_restarts_1": 133.0,
+      "greedy_hit_rate_restarts_5": 1.0,
+      "greedy_oracle_calls_restarts_5": 552.2,
+      "greedy_optimum_hit_rate": 1.0,
+      "greedy_oracle_calls": 552.2,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 1942.4,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5414.7,
+      "path_accessibility": 1.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 1.0,
+      "stack_topk_hit_rate": 1.0,
+      "additive_null_hit_rate_b100": 1.0,
+      "additive_null_gain_fraction_b100": 1.0,
+      "wild_type_fitness": -0.030240421444403497,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 62.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.057248384118190214
+    }
+  },
+  {
+    "name": "TrpB3G",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7891.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.14525716760300533,
+      "nonadditive_variance_fraction": 0.8547428323969947,
+      "additive_spearman_higher_order": 0.11800941573577366,
+      "frac_order_ge2": 0.9926498542643518,
+      "frac_dead": 0.0002534533012292485,
+      "frac_above_wild_type": 0.7262704346724116,
+      "nonadditive_variance_fraction_alive": 0.8538567962023876,
+      "n_alive": 7889.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.9,
+      "stack_topk_headroom": 0.1,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.13023380317034783,
+      "cv_r2_order_2": 0.24678681859180873,
+      "cv_r2_order_3": 0.24132513325431804,
+      "cv_r2_additive": 0.13023380317034783,
+      "cv_r2_best": 0.24678681859180873,
+      "pairwise_increment": 0.1165530154214609,
+      "structured_nonadditive_fraction": 0.1165530154214609,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 133.0,
+      "greedy_hit_rate_restarts_5": 0.8,
+      "greedy_oracle_calls_restarts_5": 652.6,
+      "greedy_optimum_hit_rate": 0.8,
+      "greedy_oracle_calls": 652.6,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 2060.3,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5529.9,
+      "path_accessibility": 0.6666666666666666,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.06580136653248564,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.5955159067188452,
+      "wild_type_fitness": -0.014321698155379774,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 11.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.010156971375807941
+    }
+  },
+  {
+    "name": "TrpB3H",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7716.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.02766124741599929,
+      "nonadditive_variance_fraction": 0.9723387525840007,
+      "additive_spearman_higher_order": 0.002149592315672652,
+      "frac_order_ge2": 0.9924831518921721,
+      "frac_dead": 0.00012960082944530845,
+      "frac_above_wild_type": 0.6109383100051841,
+      "nonadditive_variance_fraction_alive": 0.9725403138353267,
+      "n_alive": 7715.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.4,
+      "greedy_reachability": 0.6,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.016096800315165805,
+      "cv_r2_order_2": 0.05915212903094591,
+      "cv_r2_order_3": 0.061781063298105954,
+      "cv_r2_additive": 0.016096800315165805,
+      "cv_r2_best": 0.061781063298105954,
+      "pairwise_increment": 0.043055328715780106,
+      "structured_nonadditive_fraction": 0.04568426298294015,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 1.0,
+      "greedy_oracle_calls_restarts_1": 170.0,
+      "greedy_hit_rate_restarts_5": 1.0,
+      "greedy_oracle_calls_restarts_5": 563.9,
+      "greedy_optimum_hit_rate": 1.0,
+      "greedy_oracle_calls": 563.9,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 1967.2,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5586.0,
+      "path_accessibility": 0.16666666666666666,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.08504028886170953,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.08504741953273823,
+      "wild_type_fitness": -0.019388014138356866,
+      "global_optimum_fitness": 1.0
+    },
+    "rse_count": {
+      "rse_pairs": 144.0,
+      "rse_pairs_examined": 1080.0,
+      "rse_fraction": 0.13333333333333333
+    }
+  },
+  {
+    "name": "TrpB3I",
+    "control": false,
+    "note": "3 sites",
+    "additive_fit": {
+      "n_genotypes": 7784.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.5348634501207901,
+      "nonadditive_variance_fraction": 0.46513654987920994,
+      "additive_spearman_higher_order": 0.644107086238604,
+      "frac_order_ge2": 0.9925488180883865,
+      "frac_dead": 0.00012846865364850977,
+      "frac_above_wild_type": 0.008350462487153135,
+      "nonadditive_variance_fraction_alive": 0.46512248693736447,
+      "n_alive": 7783.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.6,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.5265167058751752,
+      "cv_r2_order_2": 0.782024070597088,
+      "cv_r2_order_3": 0.7825450034453995,
+      "cv_r2_additive": 0.5265167058751752,
+      "cv_r2_best": 0.7825450034453995,
+      "pairwise_increment": 0.2555073647219128,
+      "structured_nonadditive_fraction": 0.2560282975702243,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 1.0,
+      "greedy_oracle_calls_restarts_1": 133.0,
+      "greedy_hit_rate_restarts_5": 1.0,
+      "greedy_oracle_calls_restarts_5": 635.7,
+      "greedy_optimum_hit_rate": 1.0,
+      "greedy_oracle_calls": 635.7,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 1947.9,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 5211.5,
+      "path_accessibility": 1.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.9179489964692608,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 1.0,
+      "additive_null_gain_fraction_b100": 1.0,
+      "wild_type_fitness": 0.5834148966911614,
+      "global_optimum_fitness": 0.999729865230869
+    },
+    "rse_count": {
+      "rse_pairs": 5.0,
+      "rse_pairs_examined": 1082.0,
+      "rse_fraction": 0.0046210720887245845
+    }
+  },
+  {
+    "name": "ParD2",
+    "control": true,
+    "note": "negative control: near-additive",
+    "additive_fit": {
+      "n_genotypes": 7882.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.8419495315018499,
+      "nonadditive_variance_fraction": 0.15805046849815008,
+      "additive_spearman_higher_order": 0.8438885624676328,
+      "frac_order_ge2": 0.9926414615579802,
+      "frac_dead": 0.0002537427048972342,
+      "frac_above_wild_type": 0.04884547069271759,
+      "nonadditive_variance_fraction_alive": 0.15812753669474877,
+      "n_alive": 7880.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.5,
+      "greedy_reachability": 0.8,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.8391130917226887,
+      "cv_r2_order_2": 0.9492775373412486,
+      "cv_r2_order_3": 0.9492669899228746,
+      "cv_r2_additive": 0.8391130917226887,
+      "cv_r2_best": 0.9492775373412486,
+      "pairwise_increment": 0.11016444561855998,
+      "structured_nonadditive_fraction": 0.11016444561855998,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 1.0,
+      "greedy_oracle_calls_restarts_1": 133.0,
+      "greedy_hit_rate_restarts_5": 1.0,
+      "greedy_oracle_calls_restarts_5": 559.6,
+      "greedy_optimum_hit_rate": 1.0,
+      "greedy_oracle_calls": 559.6,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 1658.0,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 4614.7,
+      "path_accessibility": 1.0,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 1.0,
+      "stack_topk_hit_rate": 1.0,
+      "additive_null_hit_rate_b100": 1.0,
+      "additive_null_gain_fraction_b100": 1.0,
+      "wild_type_fitness": 0.872225975,
+      "global_optimum_fitness": 1.026803807
+    },
+    "rse_count": {
+      "rse_pairs": 0.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.0
+    }
+  },
+  {
+    "name": "ParD3",
+    "control": true,
+    "note": "negative control: near-additive",
+    "additive_fit": {
+      "n_genotypes": 7882.0,
+      "n_sites": 3.0,
+      "alphabet_size": 20.0,
+      "additive_r2_full": 0.8516789474022881,
+      "nonadditive_variance_fraction": 0.1483210525977119,
+      "additive_spearman_higher_order": 0.8902051342238444,
+      "frac_order_ge2": 0.9926414615579802,
+      "frac_dead": 0.0001268713524486171,
+      "frac_above_wild_type": 0.5210606445064705,
+      "nonadditive_variance_fraction_alive": 0.1483863508676595,
+      "n_alive": 7881.0
+    },
+    "timing_s": {
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.6,
+      "stack_topk_headroom": 0.0,
+      "rse_count": 0.0
+    },
+    "pairwise_fit": {
+      "cv_r2_order_1": 0.8492013123384605,
+      "cv_r2_order_2": 0.9368897745373965,
+      "cv_r2_order_3": 0.9367042733763019,
+      "cv_r2_additive": 0.8492013123384605,
+      "cv_r2_best": 0.9368897745373965,
+      "pairwise_increment": 0.087688462198936,
+      "structured_nonadditive_fraction": 0.087688462198936,
+      "max_order_fitted": 3.0
+    },
+    "greedy_reachability": {
+      "n_seeds": 10.0,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 168.0,
+      "greedy_hit_rate_restarts_5": 1.0,
+      "greedy_oracle_calls_restarts_5": 627.1,
+      "greedy_optimum_hit_rate": 1.0,
+      "greedy_oracle_calls": 627.1,
+      "greedy_hit_rate_restarts_20": 1.0,
+      "greedy_oracle_calls_restarts_20": 1734.3,
+      "greedy_hit_rate_restarts_100": 1.0,
+      "greedy_oracle_calls_restarts_100": 4648.8,
+      "path_accessibility": 0.5,
+      "n_singles_available": 57.0
+    },
+    "stack_topk_headroom": {
+      "stack_topk_oracle_calls": 57.0,
+      "additive_null_fitting_cost": 58.0,
+      "stack_topk_gain_fraction": 0.9766435401363751,
+      "stack_topk_hit_rate": 0.0,
+      "additive_null_hit_rate_b100": 0.0,
+      "additive_null_gain_fraction_b100": 0.9845802559560188,
+      "wild_type_fitness": 0.268149579,
+      "global_optimum_fitness": 1.017502225
+    },
+    "rse_count": {
+      "rse_pairs": 5.0,
+      "rse_pairs_examined": 1083.0,
+      "rse_fraction": 0.0046168051708217915
+    }
+  }
+]

@@ -14,6 +14,7 @@ it scores, and H4 is falsified regardless of absolute performance.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from itertools import permutations
 
@@ -111,11 +112,21 @@ def reciprocal_sign_epistasis(landscape: Landscape, max_pairs: int = 20_000) -> 
     return TrapReport(n_pairs, n_rse)
 
 
-def path_accessibility(landscape: Landscape, target: str | None = None) -> float:
+def path_accessibility(
+    landscape: Landscape,
+    target: str | None = None,
+    max_paths: int | None = None,
+    seed: int = 0,
+) -> float:
     """Fraction of shortest mutational paths to `target` that increase monotonically.
 
     Low accessibility means the target is reachable only by crossing a valley,
     which is precisely where planning should beat greedy.
+
+    There are k! shortest paths for a target k substitutions away, which is 362,880
+    at the dimension-9 HIS3 hypercubes. `max_paths` caps the enumeration and
+    samples random orderings instead, making the result an estimate; left unset,
+    every path is enumerated exactly.
     """
     target = target or landscape.global_optimum()[0]
     wt = landscape.wild_type
@@ -124,8 +135,14 @@ def path_accessibility(landscape: Landscape, target: str | None = None) -> float
     if not diff:
         return float("nan")
 
+    if max_paths is not None and math.factorial(len(diff)) > max_paths:
+        rng = np.random.default_rng(seed)
+        orders = (tuple(rng.permutation(diff)) for _ in range(max_paths))
+    else:
+        orders = permutations(diff)
+
     total = accessible = 0
-    for order in permutations(diff):
+    for order in orders:
         cur = list(wt)
         prev = idx.get(wt, float("-inf"))
         ok = True

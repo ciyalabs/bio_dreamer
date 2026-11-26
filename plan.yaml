@@ -116,6 +116,13 @@ phases:
             name: Reciprocal-sign-epistasis pair count
           - id: negative_control
             name: ParD2/ParD3 near-additive controls - planner should show no advantage
+        experiments_note: >-
+          2026-11-26 outcome: GO. Both thresholds pass, but '1 - additive R2' is
+          rank-correlated with exploitable epistasis at rho = -0.49 (p = 0.052,
+          n = 16). The reporting standard is now the out-of-fold increment from
+          interaction order 1 to order 2. Thresholds below are UNCHANGED, because
+          they were registered before the measurement and editing them after it
+          would be the rationalisation PREREGISTRATION.md forbids.
         thresholds:
           # existential, not universal: the project needs ONE landscape with
           # headroom, not all of them. 'all' would fail on ParD2/ParD3 by design.
@@ -441,7 +448,9 @@ phases:
           - id: h4_vs_stack_topk
             name: Versus stack top-k beneficial singles
           - id: h4_vs_greedy_same_reward
-            name: Versus greedy single-step on the same reward head
+            name: Versus greedy with 5 random restarts on the same reward head
+          - id: h4_oracle_budget_reconciliation
+            name: Price every baseline in distinct oracle calls before comparing (blocking, added by 1.1)
           - id: h4_vs_random
             name: Versus random within budget, and wild type
           - id: h4_vs_published
@@ -452,6 +461,10 @@ phases:
           # reframed 2026-10-27 per PREREGISTRATION.md: stated per oracle call
           # (B=100) against the STRONGEST baseline, because step 0.5 measured
           # greedy-with-5-restarts solving 4 of 5 landscapes outright.
+          # 2026-11-26, step 1.1: B=100 and "5 restarts x 20 steps" are not
+          # compatible -- the registered greedy costs order 1e3 distinct calls on
+          # a four-site landscape. h4_oracle_budget_reconciliation blocks this
+          # step until both are priced in the same currency. Thresholds unchanged.
           - metric: optimum_hit_rate_margin_over_best_baseline
             op: ">"
             value: 0.10

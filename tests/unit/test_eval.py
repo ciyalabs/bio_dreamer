@@ -259,3 +259,96 @@ def test_wild_type_is_the_modal_residue(additive):
 def test_landscape_rejects_mismatched_lengths():
     with pytest.raises(ValueError, match="lengths differ"):
         Landscape("x", np.array([list("AA")]), np.array([1.0, 2.0]), "AA")
+
+
+# ---- oracle accounting (Step 1.1) ----
+
+
+def test_counting_oracle_charges_once_per_distinct_sequence():
+    """A campaign remembers what it measured, so a repeat query is free."""
+    from biodreamer.eval.baselines import CountingOracle
+
+    ls = Landscape.synthetic_additive(n_sites=2, alphabet="AC")
+    oracle = CountingOracle(ls)
+    seq = ls.sequences()[0]
+    for _ in range(5):
+        oracle(seq)
+    assert oracle.queries == 5
+    assert oracle.distinct == 1
+
+
+def test_counting_oracle_returns_the_same_values_as_the_landscape_index():
+    from biodreamer.eval.baselines import CountingOracle
+
+    ls = Landscape.synthetic_additive(n_sites=3, alphabet="ACD")
+    oracle = CountingOracle(ls)
+    for seq, fit in zip(ls.sequences(), ls.fitness):
+        assert oracle(seq) == pytest.approx(fit)
+
+
+def test_counting_oracle_reports_the_best_sequence_it_measured():
+    from biodreamer.eval.baselines import CountingOracle
+
+    ls = Landscape.synthetic_sign_epistasis()
+    oracle = CountingOracle(ls)
+    for s in ("AA", "AB"):
+        oracle(s)
+    seq, fit = oracle.best()
+    assert seq == "AA" and fit == pytest.approx(1.0)
+    # the true optimum was never measured, so it cannot be reported
+    assert fit < ls.global_optimum()[1]
+
+
+def test_counting_oracle_is_empty_before_any_query():
+    from biodreamer.eval.baselines import CountingOracle
+
+    oracle = CountingOracle(Landscape.synthetic_sign_epistasis())
+    assert oracle.distinct == 0
+    assert oracle.best()[0] == ""
+
+
+def test_greedy_costs_far_more_oracle_calls_than_the_registered_h4_budget():
+    """The inconsistency Step 1.1 found: H4 fixes B=100 true evaluations, while
+    "greedy" is fixed at 5 restarts of 20 steps. One step over 20 residues at four
+    sites evaluates 76 neighbours, so the two definitions differ by orders of
+    magnitude and cannot both hold."""
+    from biodreamer.eval.baselines import CountingOracle, GreedyWalk
+
+    ls = Landscape.synthetic_additive(n_sites=4, alphabet="ACDEFGHIKL")
+    oracle = CountingOracle(ls)
+    GreedyWalk(max_steps=20, restarts=5, seed=0).propose(ls, 10**6, oracle=oracle)
+    assert oracle.distinct > 100
+
+
+def test_stack_topk_costs_one_call_per_single_mutant():
+    from biodreamer.eval.baselines import CountingOracle, StackTopK
+
+    ls = Landscape.synthetic_additive(n_sites=3, alphabet="ACDE")
+    oracle = CountingOracle(ls)
+    StackTopK(k=3).propose(ls, 3, oracle=oracle)
+    # 3 sites x 3 non-wild-type residues, plus whatever the stacking evaluates
+    assert oracle.distinct >= 9
+
+
+# ---- path accessibility sampling (Step 1.1) ----
+
+
+def test_path_accessibility_sampling_approximates_the_exact_enumeration():
+    """9! = 362,880 paths at the dimension-9 hypercubes, so the cap matters."""
+    ls = Landscape.synthetic_additive(n_sites=4, alphabet="AC")
+    exact = path_accessibility(ls)
+    sampled = path_accessibility(ls, max_paths=200)
+    assert sampled == pytest.approx(exact, abs=0.1)
+
+
+def test_path_accessibility_is_exact_when_under_the_cap():
+    ls = Landscape.synthetic_additive(n_sites=3, alphabet="AC")
+    assert path_accessibility(ls, max_paths=10**6) == pytest.approx(
+        path_accessibility(ls)
+    )
+
+
+def test_path_accessibility_on_a_constructed_valley_is_zero():
+    """Reciprocal sign epistasis: every shortest path goes down before it goes up."""
+    ls = Landscape.synthetic_sign_epistasis()
+    assert path_accessibility(ls) == 0.0

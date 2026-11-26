@@ -441,6 +441,35 @@ are primary. Never quote a non-additive fraction without the dead fraction besid
 **Outputs.** `diagnostics/epistasis_audit.md` + figures; additive-null reference numbers for
 every landscape, frozen and reused everywhere downstream.
 
+**✅ DONE (2026-11-26) — verdict: go.** See `diagnostics/epistasis_audit.md`. Both gate
+conditions pass (`nonadditive_variance_fraction` max 0.972, `greedy_optimum_hit_rate` min
+0.00) — **and the metric they pass on is the wrong metric.** `1 − additive R²` is
+rank-correlated with exploitable epistasis at **ρ = −0.49** (p = 0.052, n = 16): the three
+landscapes it ranks highest have almost none. The figure that separates epistasis from noise
+is the **out-of-fold increment from interaction order 1 to order 2**, now the reporting
+standard.
+
+Five things changed as a result:
+
+1. **Six of sixteen landscapes dropped** — T7 and TrpB3A/B/C/F/H, all with increments ≤ 0.043.
+2. **TEV must be depth-filtered.** Its reliability ceiling is R² ≤ 0.668; at full depth its
+   increment is +0.030, at above-median depth +0.257. It stays primary, but the registered
+   reason ("additive signal absent") was measuring read noise.
+3. **DHFR is now a third negative control**, protein level only. Its 9 sites are nucleotides;
+   translated it is a complete 3-site landscape that is 78% additive with greedy solving it 0.9.
+4. **GB1's epistasis is real** (+0.421 depth-filtered) — a fifth of its raw figure is floor
+   censoring, but unlike TEV none of it is noise.
+5. **Greedy's oracle cost conflicts with H4's budget** — see the new blocking requirement on
+   Step 6.3 below.
+
+**The depth result is the one that matters most.** On 1,200 HIS3 hypercubes at dimensions 3–9,
+greedy's hit rate falls from **0.906 to 0.242** and monotone path accessibility from **0.609 to
+0.095**, while reciprocal sign epistasis goes from 14% to 63% of hypercubes. The order-1
+variance share plateaus near 0.27 from dimension 7, so what grows with depth is the number of
+ways to be trapped, not the degree of non-additivity. This is the project's premise, measured
+for the first time — and it is only measurable beyond four sites, which is why the HypercubeME
+extraction was worth running.
+
 ---
 
 ## Step 1.2 — D1: Structure invariance under point mutation `S`
@@ -784,16 +813,32 @@ awkward.
 **Work.** Confirm the firewall (Step 0.3) one more time before running. Use the `planning`
 instance only.
 
-**Experiments.** On GB1 four-site, TrpB four-site, PhoQ four-site, each fully held out:
+**⚠ BLOCKING REQUIREMENT, added by Step 1.1.** Reconcile the oracle budget with the baseline
+definitions **before** running anything here. H4 is registered as a margin at **B = 100** true
+evaluations; "greedy" is registered as **5 restarts × 20 steps**, which Step 1.1 measured at
+**order 10³** distinct evaluations on a four-site landscape — one step over 20 residues at four
+sites costs 76 neighbours. Left as it stands, H4 is won trivially by holding the planner to 100
+calls and the baseline to none, which makes it unfalsifiable in the easy direction. Use
+`CountingOracle` (`biodreamer/eval/baselines.py`) to price every baseline in the same currency,
+and note that a single-mutant scan alone costs 76 of the 100 — so the registered sweep point
+B = 30 does not pay for the scan at all. Decide and record whether B counts the scan.
+
+**Experiments.** On **TEV four-site (depth-filtered, primary)**, TrpB4 and GB1, each fully held
+out. PhoQ is withdrawn (Step 0.2: only 1,659 of 160,000 functional, binary selection):
 - [ ] vs **additive null** ← decisive
 - [ ] vs **"stack top-k beneficial singles"**
-- [ ] vs **greedy single-step on the project's own reward head** ← isolates planning from the reward model
+- [ ] vs **greedy with 5 random restarts on the project's own reward head**, as registered —
+      *not* single-step ← isolates planning from the reward model
 - [ ] vs random within the same mutational budget, and wild type
 - [ ] vs DynaPPO, µProtein / µSearch, StructEvo, ProSpero
 - [ ] **Correlation between ProteinDreamer's predictions and the additive null's** — reported
       always; a high correlation falsifies H4 regardless of absolute performance
-- [ ] Metrics: global-optimum hit rate; trap escape rate; path-accessibility versus ground truth
-- [ ] ≥3–5 seeds with variance reported
+- [ ] Negative controls **ParD2, ParD3 and protein-level DHFR**: a win here indicates reward
+      exploitation, not epistatic reasoning
+- [ ] Metrics: global-optimum hit rate; trap escape rate; path-accessibility versus ground truth.
+      Report accessibility and greedy failure **separately** — Step 1.1 found 26% of dimension-3
+      hypercubes admit no monotone shortest path while greedy still solves 99% of them
+- [ ] ≥5 seeds with variance reported
 
 **Go / no-go.** Compare against `PREREGISTRATION.md` and accept the answer. If H4 fails, go to
 Step 8.1's decision table — a well-executed negative result here is publishable and useful.
@@ -909,6 +954,11 @@ The checklist to re-read at the start of every phase.
 | 14 | **Keep `proposal.tex` and this plan in sync** | The proposal is the spec; divergence means one of them is lying. |
 | 15 | **Negative results are publishable here — if pre-registered** | `PREREGISTRATION.md` is what converts a disappointment into a contribution. |
 | 16 | **Re-check the literature quarterly** | Six months of silence cost two of four original contributions. Set a recurring reminder. |
+| 17 | **`1 − additive R²` is not a measure of epistasis** | Step 1.1: rank-correlated with exploitable epistasis at **ρ = −0.49**. Use the out-of-fold increment from order 1 to order 2, every time. |
+| 18 | **Quote the reliability ceiling beside any non-additive figure** | TEV's own error bars cap every R² at 0.668. A third of its "epistasis" was read noise, and it was the registered primary landscape for a month. |
+| 19 | **Price every baseline in oracle calls** | H4's B = 100 versus a registered greedy costing order 10³. Unfalsifiable in the *easy* direction until reconciled. |
+| 20 | **Path accessibility ≠ greedy fails** | 26% of dimension-3 hypercubes admit no monotone shortest path and greedy solves 99% of them anyway. Report both or overstate the case for planning. |
+| 21 | **Check whether a landscape is nucleotide-level** | DHFR looked like the best landscape in the set and is near-additive as a protein. Synonymous averaging had removed ~16× of noise. |
 
 ---
 

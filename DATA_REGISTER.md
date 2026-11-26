@@ -94,41 +94,69 @@ own right, before any hypercube extraction.
 | Acquired | `data.zip` 279 MB · `sha256:6acdf302d412` (`results.zip`, 5.9 GB, not needed) |
 | Role | 16 combinatorial landscapes in one consistent format |
 
-Audited with `scripts/audit_landscapes.py` (de-duplicated; additive model = one-hot per
-site-residue, the null Step 1.1 must beat):
+**Re-audited 2026-11-26 by Step 1.1** (`scripts/epistasis_audit.py`). The table below is
+sorted by the column that matters, and it is **not** the column the first audit produced.
 
-| Landscape | genotypes | sites | complete vs 20ⁿ | additive R² | **non-additive** | dead | >WT |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| TrpB3H | 7,716 | 3 | 96.5% | 0.028 | **0.972** | 0% | 61.1% |
-| T7 | 6,725 | 3 | 84.1% | 0.041 | **0.959** | 17.0% | 34.1% |
-| TEV | 159,132 | 4 | 99.5% | 0.048 | **0.952** | 0.3% | 50.5% |
-| TrpB3E | 7,964 | 3 | 99.6% | 0.053 | 0.947 | 0% | 42.8% |
-| TrpB3B | 7,996 | 3 | 100.0% | 0.100 | 0.900 | 0% | 11.0% |
-| TrpB3F | 7,737 | 3 | 96.7% | 0.123 | 0.877 | 0% | 59.6% |
-| TrpB3G | 7,891 | 3 | 98.6% | 0.145 | 0.855 | 0% | 72.6% |
-| TrpB3C | 7,994 | 3 | 99.9% | 0.166 | 0.834 | 0% | 1.4% |
-| **GB1** | 149,361 | 4 | 93.3% | 0.194 | 0.806 | **92.0%** | 45.2% |
-| TrpB3A | 7,971 | 3 | 99.6% | 0.220 | 0.780 | 0% | 77.7% |
-| TrpB3D | 7,763 | 3 | 97.0% | 0.251 | 0.749 | 0% | 97.3% |
-| **TrpB4** | 159,129 | 4 | **99.5%** | 0.257 | 0.743 | **0%** | 56.8% |
-| DHFR | 261,333 | 9 (nt) | n/a | 0.277 | 0.723 | 0% | 57.0% |
-| TrpB3I | 7,784 | 3 | 97.3% | 0.535 | 0.465 | 0% | 0.8% |
-| ParD2 | 7,882 | 3 | 98.5% | 0.842 | **0.158** | 0% | 4.9% |
-| ParD3 | 7,882 | 3 | 98.5% | 0.852 | **0.148** | 0% | 52.1% |
+`1−R² (old)` is the Step 0.2 figure: one minus the R² of an additive model fitted to all the
+data. It conflates genuine epistasis with measurement noise and floor censoring, and across
+these sixteen landscapes it is rank-correlated with exploitable epistasis at **ρ = −0.49**
+(p = 0.052). `cv1` and `cv2` are out-of-fold R² at interaction order 1 and 2, and
+**`structured` = cv2 − cv1** is predictable variance that site-independence cannot reach —
+the figure that separates the three causes.
 
-Notes that change how these should be used:
+| Landscape | genotypes | sites | complete | dead | 1−R² *(old)* | cv1 | cv2 | **structured** | greedy@5 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| DHFR | 261,333 | 9 (nt) | n/a | 0% | 0.723 | 0.277 | 0.729 | **+0.452** | 0.0 |
+| GB1 | 149,361 | 4 | 93.3% | 92% | 0.806 | 0.193 | 0.610 | **+0.421**† | 0.7 |
+| TrpB4 | 159,129 | 4 | 99.5% | 0% | 0.743 | 0.256 | 0.600 | **+0.344** | 1.0 |
+| TEV | 159,132 | 4 | 99.5% | 0% | 0.952 | 0.047 | 0.077 | **+0.257**† | 0.0 |
+| TrpB3I | 7,784 | 3 | 97.3% | 0% | 0.465 | 0.527 | 0.782 | **+0.256** | 1.0 |
+| TrpB3D | 7,763 | 3 | 97.0% | 0% | 0.749 | 0.235 | 0.456 | **+0.221** | 0.7 |
+| TrpB3E | 7,964 | 3 | 99.6% | 0% | 0.947 | 0.041 | 0.237 | **+0.196** | 0.4 |
+| TrpB3G | 7,891 | 3 | 98.6% | 0% | 0.855 | 0.130 | 0.247 | **+0.117** | 0.8 |
+| ParD2* | 7,882 | 3 | 98.5% | 0% | 0.158 | 0.839 | 0.949 | **+0.110** | 1.0 |
+| ParD3* | 7,882 | 3 | 98.5% | 0% | 0.148 | 0.849 | 0.937 | **+0.088** | 1.0 |
+| TrpB3H | 7,716 | 3 | 96.5% | 0% | 0.972 | 0.016 | 0.059 | **+0.043** | 1.0 |
+| TrpB3F | 7,737 | 3 | 96.7% | 0% | 0.877 | 0.109 | 0.128 | **+0.019** | 1.0 |
+| T7 | 6,725 | 3 | 84.1% | 17% | 0.959 | 0.023 | 0.027 | **+0.009**† | 0.0 |
+| TrpB3A | 7,971 | 3 | 99.6% | 0% | 0.780 | 0.205 | 0.211 | **+0.006** | 0.4 |
+| TrpB3B | 7,996 | 3 | 100.0% | 0% | 0.900 | 0.086 | 0.092 | **+0.005** | 0.4 |
+| TrpB3C | 7,994 | 3 | 99.9% | 0% | 0.834 | 0.150 | 0.152 | **+0.002** | 0.2 |
 
-- **GB1 is 92% dead.** Its high non-additive fraction is partly the additive model failing
-  to fit a floor-dominated distribution, not exploitable epistasis. Do not read 0.806 as
-  headroom without inspecting the live fraction first.
-- **TrpB4 is the cleanest 4-site landscape**: 99.5% complete, 0% dead, 0.743 non-additive.
-  Better suited as the primary H4 landscape than GB1.
-- **TEV** is an equally good second: 159k genotypes, 99.5% complete, 0.3% dead.
-- **ParD2 and ParD3 are nearly additive (0.15).** These are the natural **negative
-  controls** for H4 — a planner should show no advantage on them. The plan has no negative
-  control; it should.
-- **DHFR is nucleotide-level** (3 codons), not amino-acid. Different semantics; do not mix
-  it with the others without translating.
+*\* negative control. † measured on the above-median-read-depth subset, which is how these
+landscapes must be used. `greedy@5` = optimum hit rate at 5 restarts, 10 seeds, max 20 steps.*
+
+### What changed, and how these must be used
+
+- **Six landscapes are dropped**: T7, TrpB3A, TrpB3B, TrpB3C, TrpB3F, TrpB3H, all with
+  structured epistasis ≤ 0.043. T7 is the clearest case — 0.959 by the old metric, **+0.003**
+  by the new one, with a reliability ceiling of 0.73 and a median 11 reads per variant. A
+  method cannot be shown to use epistasis on a landscape whose epistasis is not measurable.
+- **TEV: use the depth-filtered subset only** (reads ≥ median = 209, n = 79,630). Its
+  published per-variant variance caps any model's R² at **0.668**. Structured epistasis is
+  +0.030 at full depth and +0.257 filtered. Its floor-removed 1−R² is 0.955 against 0.952
+  raw, so none of the inflation is censoring — all of it is read noise. Still the primary H4
+  landscape, now for the right reason: greedy failure is total (0.0 at 5 restarts across 10
+  seeds, 0.6 at 100; path accessibility 0.042) with structured epistasis present. GB1 and
+  TrpB3E combine the two as well — TEV is the extreme, not the only case.
+- **GB1 is 92% dead, and its epistasis is still real.** 1−R² falls from 0.806 to **0.634**
+  with floored variants removed — so a fifth of the raw figure is censoring — but the
+  structured figure barely moves under depth filtering (+0.417 → +0.421). Median **4**
+  selected reads per variant, 19.7% at zero, so fitness is coarse even where not floored.
+- **DHFR is a negative control, not a candidate.** Its 9 sites are nucleotides. 13.5% of
+  variants carry a stop codon; of the rest only 6.3% of variance is synonymous, so the
+  epistasis is not codon usage — but averaging the median 16 synonymous codons per protein
+  removes ~16× of noise, and the translated landscape (8,000 variants, **100% complete**,
+  0.1% dead) is **78% additive with greedy solving it 0.9**. Never quote its nucleotide
+  figures as protein figures.
+- **TrpB4 remains the cleanest 4-site landscape**: 99.5% complete, 0% dead, +0.344 structured.
+  Greedy solves it from the wild type in 7 steps at **one** restart, so it cannot be decisive
+  for H4 on hit rate alone.
+- **ParD2, ParD3 and protein-level DHFR are the negative controls.** Note they are not
+  epistasis-free: +0.110, +0.088 and +0.187 structured. They are *near-additive*, which is
+  what a control needs to be.
+
+Full write-up and the dimension 3–9 depth curve: `diagnostics/epistasis_audit.md`.
 
 ### FLIP2 — splits
 

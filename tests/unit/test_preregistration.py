@@ -140,3 +140,50 @@ def test_greedy_is_defined_as_restart_based(prereg_text):
     assert re.search(r"5 random restarts", prereg_text), (
         "the document must fix which greedy variant is the baseline"
     )
+
+
+# ---- Step 1.1 amendments ----
+
+
+def test_amendment_table_is_no_longer_empty(prereg_text):
+    """Step 1.1 amended six definitions. An empty table would mean they were
+    applied silently, which is the failure this file exists to prevent."""
+    assert "*(none yet)*" not in prereg_text
+    assert prereg_text.count("| 2026-11-26 |") >= 6
+
+
+def test_amendments_state_that_no_threshold_was_edited(prereg_text):
+    """The one promise the document makes about itself after Phase 1 begins."""
+    assert "No threshold was edited" in prereg_text
+
+
+def test_step_1_1_thresholds_are_unchanged_from_registration(plan):
+    """The registered numbers, re-asserted after the measurement that could have
+    tempted an edit. 1.1 passed at max 0.972 and min 0.00."""
+    by = {t.metric: t for t in plan.step("1.1").thresholds}
+    assert by["nonadditive_variance_fraction"].op == ">=" 
+    assert by["nonadditive_variance_fraction"].value == pytest.approx(0.15)
+    assert by["greedy_optimum_hit_rate"].op == "<="
+    assert by["greedy_optimum_hit_rate"].value == pytest.approx(0.80)
+
+
+def test_tev_is_recorded_as_depth_filtered(prereg_text):
+    """Using the unfiltered landscape would reinstate the error Step 1.1 found."""
+    assert "depth-filtered" in prereg_text
+    assert "0.668" in prereg_text, "TEV's reliability ceiling must be on the record"
+
+
+def test_dhfr_is_listed_as_a_negative_control(prereg_text):
+    """Its nucleotide-level figures made it look like the best landscape in the set."""
+    i = prereg_text.index("**Negative controls**")
+    assert "DHFR" in prereg_text[i : i + 400]
+
+
+def test_the_oracle_cost_rule_is_registered(prereg_text):
+    """H4's B=100 and the registered greedy are incompatible; the rule that
+    surfaces it must be a standing one, not a footnote."""
+    assert "Every baseline reports its oracle cost" in prereg_text
+
+
+def test_reliability_ceiling_rule_is_registered(prereg_text):
+    assert "reliability ceiling" in prereg_text

@@ -29,8 +29,9 @@ Ambiguity here is how a threshold gets reinterpreted later.
 | **Strongest baseline** | The **maximum** over {greedy, additive null, stack-top-k, random} on the metric in question. Not a chosen comparator. |
 | **Oracle budget** | Number of *true* fitness evaluations a method may request. Headline budget **B = 100**, swept over {30, 100, 300}. |
 | **Seed noise** | Pooled standard deviation across seeds of the same configuration. A difference counts only if it exceeds **2 × pooled sd**. |
-| **Primary landscape** | **TEV.** Chosen in Step 0.5 because it is the only landscape where the additive signal is absent (null Spearman −0.005 on order ≥ 2) *and* greedy fails (0/5 at 5 restarts, 2/5 at 100). |
-| **Negative controls** | **ParD2, ParD3** — near-additive (null Spearman 0.844, 0.890). A planner should show little or no advantage here. |
+| **Primary landscape** | **TEV, depth-filtered** (reads ≥ median = 209, n = 79,630). The landscape where greedy failure is *total* — 0 of 10 seeds at 5 restarts, 0.6 at 100, path accessibility 0.042 — with substantial structured epistasis present (out-of-fold pairwise increment +0.257). GB1 (+0.417, greedy 0.7) and TrpB3E (+0.196, greedy 0.4) combine the two as well; TEV is the extreme of the set. *Amended 2026-11-26: Step 0.5 chose TEV because its additive signal was absent, which Step 1.1 showed to be read noise — its reliability ceiling is R² ≤ 0.668. The choice stands; the reason for it does not, and the full-depth landscape must not be used.* |
+| **Negative controls** | **ParD2, ParD3, DHFR (protein level)** — near-additive (cv1 0.839, 0.849, 0.784). A planner should show little or no advantage here. *DHFR added 2026-11-26; its nucleotide-level figures are not protein-level figures.* |
+| **Oracle cost of a baseline** | Distinct sequences measured, counted by `CountingOracle`; repeat queries are free. The registered greedy costs order 10³ on a four-site landscape — see the amendment table. |
 
 ---
 
@@ -144,6 +145,12 @@ universal**: the project needs *at least one* landscape with headroom, not all o
 Measured already in Step 0.5: TEV satisfies both (0.952 non-additive, greedy 0/5). The gate is
 expected to pass on TEV alone, and that expectation is recorded here rather than discovered.
 
+**Outcome (2026-11-26): GO.** `nonadditive_variance_fraction` max 0.972, `greedy_optimum_hit_rate`
+min 0.00 — both pass. The expectation above was half right: TEV did satisfy both conditions, but
+its 0.952 was read noise rather than epistasis, and the gate's registered metric turned out to be
+negatively rank-correlated with real epistasis. The substantive answer comes from elsewhere —
+greedy solves 91% of 3-site HIS3 hypercubes and 24% of 9-site ones. See `diagnostics/epistasis_audit.md`.
+
 **Read the dead fraction before the R².** GB1 is 92% dead, so much of its apparent
 non-additivity is a floored distribution. Any non-additive figure quoted without its dead
 fraction is inadmissible.
@@ -160,6 +167,11 @@ fraction is inadmissible.
 4. **Uncertainty calibration is a primary result**, reported alongside accuracy.
 5. **No biological claim rests on a simulated label** (SLIP, FoldX, pseudo-labels).
 6. **The `benchmark` instance never produces a Phase 6 result** (Step 0.3 firewall).
+7. **No non-additive figure is quoted without its dead fraction and its reliability ceiling.**
+   Step 1.1 found all three of noise, floor censoring and codon redundancy masquerading as
+   epistasis. The out-of-fold pairwise increment is the figure that separates them.
+8. **Every baseline reports its oracle cost** in distinct evaluations, in the same currency as
+   the budget the method under test is held to.
 
 ---
 
@@ -168,9 +180,19 @@ fraction is inadmissible.
 Any change after Phase 1 begins is logged here with its date and reason. The original
 threshold stays visible.
 
-| Date | Threshold | From | To | Reason |
+| Date | What | From | To | Reason |
 |---|---|---|---|---|
-| — | — | — | — | *(none yet)* |
+| 2026-11-26 | **TEV data rule** | full landscape | **depth-filtered**, reads ≥ median (209) | Step 1.1: TEV's reliability ceiling is R² ≤ 0.668. At full depth its out-of-fold pairwise increment is +0.030; filtered it is +0.257. The full-depth figure measures read noise |
+| 2026-11-26 | **TEV's justification as primary** | "additive signal absent, null Spearman −0.005" | "total greedy failure with structured epistasis present" | The registered reason was a noise artifact. TEV stays primary; the stated ground for it was wrong |
+| 2026-11-26 | **DHFR** | candidate landscape | **third negative control**, protein level only | Step 1.1: at protein level DHFR is 78% additive (cv1 0.784) and greedy solves it 0.9. Its nucleotide-level epistasis is a noise-averaging artifact of 16 synonymous codons per protein |
+| 2026-11-26 | **Landscape set** | all 16 SSMuLA landscapes | **T7, TrpB3A/B/C/F/H dropped** | Out-of-fold pairwise increment ≤ 0.043. A method cannot be shown to use epistasis on a landscape whose epistasis is not measurable |
+| 2026-11-26 | **Reporting metric for epistasis** | `1 − additive R²` (full fit) | out-of-fold pairwise increment | `1 − additive R²` is rank-correlated with real epistasis at ρ = −0.49 (p = 0.052, n = 16). **Gate thresholds are unchanged**; this governs reporting and landscape selection only |
+| 2026-11-26 | **Greedy's oracle cost** | unspecified | **counted, and must be reconciled with B** | The registered greedy (5 restarts × 20 steps) costs order 10³ evaluations on a four-site landscape, against a registered budget of B = 100. Blocking requirement on Step 6.3 |
+
+**No threshold was edited.** All six entries correct a measurement error or a definition.
+None follows from a model result, because no model exists — these come from the step whose
+purpose is to find such errors. They are logged as amendments rather than pre-Phase-1
+revisions only because Step 1.1 is itself the first step of Phase 1.
 
 **Pre-Phase-1 revisions**, made while this file was being written and therefore not amendments:
 

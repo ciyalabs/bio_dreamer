@@ -1,0 +1,336 @@
+{
+  "140_160": {
+    "3": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.4179393239716152,
+        "mean_order_2_fraction": 0.4276126681461942,
+        "mean_order_3plus_fraction": 0.15444800788219062,
+        "mean_nonadditive_variance_fraction": 0.5820606760283847,
+        "mean_greedy_hit_rate": 0.9905000000000002,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.93,
+        "mean_greedy_oracle_calls": 7.894500000000001,
+        "mean_path_accessibility": 0.6620879120879121,
+        "frac_hypercubes_no_monotone_path": 0.2,
+        "frac_hypercubes_with_reciprocal_sign": 0.235,
+        "mean_reciprocal_sign_pairs": 0.28,
+        "mean_stack_topk_gain_fraction": 0.6033467692457689,
+        "frac_wild_type_corner_is_best": 0.09,
+        "dimension": 3.0,
+        "population": 8190.0,
+        "sampling_fraction": 0.02442002442002442
+      },
+      "sampling": {
+        "seen": 8190,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "4": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.2688001265191713,
+        "mean_order_2_fraction": 0.3886090448094148,
+        "mean_order_3plus_fraction": 0.34259082867141394,
+        "mean_nonadditive_variance_fraction": 0.7311998734808287,
+        "mean_greedy_hit_rate": 0.926,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.695,
+        "mean_greedy_oracle_calls": 14.913999999999998,
+        "mean_path_accessibility": 0.5502645502645502,
+        "frac_hypercubes_no_monotone_path": 0.255,
+        "frac_hypercubes_with_reciprocal_sign": 0.325,
+        "mean_reciprocal_sign_pairs": 0.475,
+        "mean_stack_topk_gain_fraction": 0.6915468255392265,
+        "frac_wild_type_corner_is_best": 0.055,
+        "dimension": 4.0,
+        "population": 3154.0,
+        "sampling_fraction": 0.06341154090044387
+      },
+      "sampling": {
+        "seen": 3154,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "5": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.1773820718166305,
+        "mean_order_2_fraction": 0.33315476361394813,
+        "mean_order_3plus_fraction": 0.4894631645694213,
+        "mean_nonadditive_variance_fraction": 0.8226179281833694,
+        "mean_greedy_hit_rate": 0.8294999999999999,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.48,
+        "mean_greedy_oracle_calls": 26.346999999999998,
+        "mean_path_accessibility": 0.43868739205526774,
+        "frac_hypercubes_no_monotone_path": 0.345,
+        "frac_hypercubes_with_reciprocal_sign": 0.5,
+        "mean_reciprocal_sign_pairs": 0.945,
+        "mean_stack_topk_gain_fraction": 0.6283638414310827,
+        "frac_wild_type_corner_is_best": 0.035,
+        "dimension": 5.0,
+        "population": 446.0,
+        "sampling_fraction": 0.4484304932735426
+      },
+      "sampling": {
+        "seen": 446,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "6": {
+      "aggregate": {
+        "n_hypercubes": 18.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.16417601455696207,
+        "mean_order_2_fraction": 0.29156225802403096,
+        "mean_order_3plus_fraction": 0.5442617274190069,
+        "mean_nonadditive_variance_fraction": 0.8358239854430379,
+        "mean_greedy_hit_rate": 0.6777777777777777,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.3888888888888889,
+        "mean_greedy_oracle_calls": 41.46666666666667,
+        "mean_path_accessibility": 0.3823529411764706,
+        "frac_hypercubes_no_monotone_path": 0.3888888888888889,
+        "frac_hypercubes_with_reciprocal_sign": 0.8888888888888888,
+        "mean_reciprocal_sign_pairs": 2.1666666666666665,
+        "mean_stack_topk_gain_fraction": 0.5821988965367202,
+        "frac_wild_type_corner_is_best": 0.05555555555555555,
+        "dimension": 6.0,
+        "population": 18.0,
+        "sampling_fraction": 1.0
+      },
+      "sampling": {
+        "seen": 18,
+        "sampled": 18,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 18
+      }
+    }
+  },
+  "6_40": {
+    "3": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.6017211719937547,
+        "mean_order_2_fraction": 0.30384745696983545,
+        "mean_order_3plus_fraction": 0.09443137103640975,
+        "mean_nonadditive_variance_fraction": 0.39827882800624526,
+        "mean_greedy_hit_rate": 0.9055000000000001,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.8,
+        "mean_greedy_oracle_calls": 7.873500000000002,
+        "mean_path_accessibility": 0.6089385474860335,
+        "frac_hypercubes_no_monotone_path": 0.255,
+        "frac_hypercubes_with_reciprocal_sign": 0.14,
+        "mean_reciprocal_sign_pairs": 0.16,
+        "mean_stack_topk_gain_fraction": 0.8355561920261633,
+        "frac_wild_type_corner_is_best": 0.225,
+        "dimension": 3.0,
+        "population": 3478667.0,
+        "sampling_fraction": 5.749328694008366e-05
+      },
+      "sampling": {
+        "seen": 3478667,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "4": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.47650617767773884,
+        "mean_order_2_fraction": 0.30988085727927756,
+        "mean_order_3plus_fraction": 0.21361296504298358,
+        "mean_nonadditive_variance_fraction": 0.5234938223222612,
+        "mean_greedy_hit_rate": 0.9185,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.76,
+        "mean_greedy_oracle_calls": 14.83,
+        "mean_path_accessibility": 0.5348360655737705,
+        "frac_hypercubes_no_monotone_path": 0.26,
+        "frac_hypercubes_with_reciprocal_sign": 0.235,
+        "mean_reciprocal_sign_pairs": 0.285,
+        "mean_stack_topk_gain_fraction": 0.6765904455036513,
+        "frac_wild_type_corner_is_best": 0.135,
+        "dimension": 4.0,
+        "population": 3898512.0,
+        "sampling_fraction": 5.130162482506146e-05
+      },
+      "sampling": {
+        "seen": 3898512,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "5": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.3927656640567148,
+        "mean_order_2_fraction": 0.2669636169431763,
+        "mean_order_3plus_fraction": 0.3402707190001089,
+        "mean_nonadditive_variance_fraction": 0.6072343359432852,
+        "mean_greedy_hit_rate": 0.8454999999999999,
+        "frac_hypercubes_greedy_never_solves": 0.0,
+        "frac_hypercubes_greedy_always_solves": 0.545,
+        "mean_greedy_oracle_calls": 26.034499999999998,
+        "mean_path_accessibility": 0.46050347222222215,
+        "frac_hypercubes_no_monotone_path": 0.315,
+        "frac_hypercubes_with_reciprocal_sign": 0.315,
+        "mean_reciprocal_sign_pairs": 0.52,
+        "mean_stack_topk_gain_fraction": 0.20168755067944977,
+        "frac_wild_type_corner_is_best": 0.075,
+        "dimension": 5.0,
+        "population": 2576913.0,
+        "sampling_fraction": 7.761224379713245e-05
+      },
+      "sampling": {
+        "seen": 2576913,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "6": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.3096860183796646,
+        "mean_order_2_fraction": 0.24299548014467157,
+        "mean_order_3plus_fraction": 0.4473185014756638,
+        "mean_nonadditive_variance_fraction": 0.6903139816203354,
+        "mean_greedy_hit_rate": 0.7225,
+        "frac_hypercubes_greedy_never_solves": 0.005,
+        "frac_hypercubes_greedy_always_solves": 0.345,
+        "mean_greedy_oracle_calls": 41.399499999999996,
+        "mean_path_accessibility": 0.3289904117315285,
+        "frac_hypercubes_no_monotone_path": 0.425,
+        "frac_hypercubes_with_reciprocal_sign": 0.445,
+        "mean_reciprocal_sign_pairs": 0.945,
+        "mean_stack_topk_gain_fraction": 0.5928157573501823,
+        "frac_wild_type_corner_is_best": 0.02,
+        "dimension": 6.0,
+        "population": 988823.0,
+        "sampling_fraction": 0.00020226066748042876
+      },
+      "sampling": {
+        "seen": 988823,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "7": {
+      "aggregate": {
+        "n_hypercubes": 200.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.28536054313419557,
+        "mean_order_2_fraction": 0.23171499458058398,
+        "mean_order_3plus_fraction": 0.4829244622852204,
+        "mean_nonadditive_variance_fraction": 0.7146394568658044,
+        "mean_greedy_hit_rate": 0.5495,
+        "frac_hypercubes_greedy_never_solves": 0.005,
+        "frac_hypercubes_greedy_always_solves": 0.205,
+        "mean_greedy_oracle_calls": 59.873000000000005,
+        "mean_path_accessibility": 0.28274410774410774,
+        "frac_hypercubes_no_monotone_path": 0.455,
+        "frac_hypercubes_with_reciprocal_sign": 0.54,
+        "mean_reciprocal_sign_pairs": 1.37,
+        "mean_stack_topk_gain_fraction": 0.5566766461903241,
+        "frac_wild_type_corner_is_best": 0.01,
+        "dimension": 7.0,
+        "population": 209135.0,
+        "sampling_fraction": 0.0009563200803308868
+      },
+      "sampling": {
+        "seen": 209135,
+        "sampled": 200,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 200
+      }
+    },
+    "8": {
+      "aggregate": {
+        "n_hypercubes": 100.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.26899216496892187,
+        "mean_order_2_fraction": 0.22940309363955572,
+        "mean_order_3plus_fraction": 0.5016047413915223,
+        "mean_nonadditive_variance_fraction": 0.7310078350310782,
+        "mean_greedy_hit_rate": 0.325,
+        "frac_hypercubes_greedy_never_solves": 0.07,
+        "frac_hypercubes_greedy_always_solves": 0.09,
+        "mean_greedy_oracle_calls": 77.56,
+        "mean_path_accessibility": 0.1562222222222222,
+        "frac_hypercubes_no_monotone_path": 0.64,
+        "frac_hypercubes_with_reciprocal_sign": 0.72,
+        "mean_reciprocal_sign_pairs": 2.1,
+        "mean_stack_topk_gain_fraction": 0.38399913561880034,
+        "frac_wild_type_corner_is_best": 0.0,
+        "dimension": 8.0,
+        "population": 21741.0,
+        "sampling_fraction": 0.0045996044340186745
+      },
+      "sampling": {
+        "seen": 21741,
+        "sampled": 100,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 100
+      }
+    },
+    "9": {
+      "aggregate": {
+        "n_hypercubes": 100.0,
+        "n_seeds": 10.0,
+        "mean_order_1_fraction": 0.27751530279850023,
+        "mean_order_2_fraction": 0.23914219207944143,
+        "mean_order_3plus_fraction": 0.4833425051220584,
+        "mean_nonadditive_variance_fraction": 0.7224846972014997,
+        "mean_greedy_hit_rate": 0.24200000000000002,
+        "frac_hypercubes_greedy_never_solves": 0.12,
+        "frac_hypercubes_greedy_always_solves": 0.06,
+        "mean_greedy_oracle_calls": 97.30599999999998,
+        "mean_path_accessibility": 0.09541666666666668,
+        "frac_hypercubes_no_monotone_path": 0.62,
+        "frac_hypercubes_with_reciprocal_sign": 0.63,
+        "mean_reciprocal_sign_pairs": 2.33,
+        "mean_stack_topk_gain_fraction": 0.4329132734765358,
+        "frac_wild_type_corner_is_best": 0.0,
+        "dimension": 9.0,
+        "population": 817.0,
+        "sampling_fraction": 0.12239902080783353
+      },
+      "sampling": {
+        "seen": 817,
+        "sampled": 100,
+        "unparsed": 0,
+        "incomplete": 0,
+        "usable": 100
+      }
+    }
+  }
+}

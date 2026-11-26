@@ -42,6 +42,46 @@ def _one_hot(variants: np.ndarray, alphabet: list[str]) -> np.ndarray:
     return X
 
 
+class CountingOracle:
+    """A landscape oracle that records how many distinct sequences it was asked for.
+
+    H4 is pre-registered as a margin over the strongest baseline **at a fixed
+    oracle budget** (B = 100 true fitness evaluations). "Greedy" is pre-registered
+    separately as 5 restarts of at most 20 steps. Those two definitions were never
+    reconciled, and they are not compatible: one greedy step on a four-site
+    landscape over 20 residues evaluates 76 neighbours, so the registered greedy
+    spends thousands of calls. Comparing it to a method held to 100 is not a
+    comparison. Step 1.1 measures the real consumption so Phase 6 can price every
+    baseline in the same currency.
+
+    Repeated queries of the same sequence cost nothing, because a real campaign
+    remembers what it has already measured.
+    """
+
+    def __init__(self, landscape: Landscape) -> None:
+        self._index = landscape.index()
+        self.cache: dict[str, float] = {}
+        self.queries = 0
+
+    def __call__(self, seq: str) -> float:
+        self.queries += 1
+        if seq not in self.cache:
+            self.cache[seq] = self._index.get(seq, float("-inf"))
+        return self.cache[seq]
+
+    @property
+    def distinct(self) -> int:
+        """Distinct sequences measured — the number a budget constrains."""
+        return len(self.cache)
+
+    def best(self) -> tuple[str, float]:
+        """Best sequence actually measured, which is all a campaign can report."""
+        if not self.cache:
+            return "", float("nan")
+        seq = max(self.cache, key=lambda s: self.cache[s])
+        return seq, self.cache[seq]
+
+
 @dataclass
 class AdditiveNull:
     """Additive (site-independent) model of fitness.
