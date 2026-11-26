@@ -1,6 +1,8 @@
 # Step 1.3 — D2: Latent capacity and dimension
 
-**Status: COMPLETE for the two local backbones.** No GPU rental needed.
+**Status: COMPLETE.** The ddG and dimension work ran on the laptop; the backbone
+comparison needed Step 1.2's folds and was settled on 2026-11-26 — see the correction
+immediately below, which reverses the backbone conclusion.
 **Run:** 2026-11-26 · `scripts/d2_latent_capacity.py` · 1,000 Tsuboyama mutants with
 measured ddG, 50 domains, lengths 36–72.
 
@@ -68,7 +70,38 @@ agree, but a basis from more data would likely shift the absolute values slightl
 
 ---
 
-## Backbone: SaProt stays, and this is not a clean comparison
+## ⚠ Updated 2026-11-26 after the folds existed: SaProt loses
+
+The section below was written when SaProt had **no** structure tokens, because the
+Tsuboyama domains had no structures. Step 1.2's folds removed that excuse, and the
+re-run reverses the backbone conclusion.
+
+| Spearman against \|ddG\| | SaProt, no 3Di | **SaProt + real 3Di** | ESM-2 *(ignores 3Di)* |
+|---|---:|---:|---:|
+| whole per-residue matrix | +0.459 | **+0.304** | **+0.445** |
+| mean-pooled | +0.410 | +0.311 | +0.361 |
+| at the substituted residue | +0.131 | +0.197 | +0.265 |
+| projected to d = 128 | +0.473 | **+0.332** | **+0.502** |
+
+**Feeding SaProt its structure channel makes the stability signal worse**, by 0.155
+on the per-residue matrix. ESM-2's numbers are byte-identical to the earlier run,
+which is the control: a sequence-only model must ignore the structures, and it does.
+
+Why: Step 1.2 measured TM-score **0.984** between wild type and mutant even at
+ddG ≤ −2. ESMFold returns a confident, well-folded structure for a severely
+destabilising mutation, so the 3Di tokens assert *"still folded"* for proteins that
+are measurably destabilised — a misleading input, not merely a weak one.
+
+**ESM-2 650M is therefore the leading backbone** (+0.445 raw, +0.502 at d = 128).
+Both are MIT-licensed, so nothing but the measurement is at stake. Confirm on H1 at
+Step 2.2 before making it permanent — this is one task on 50 small domains with one
+structure predictor.
+
+**The d = 128 choice is unaffected** and holds on both backbones.
+
+---
+
+## Backbone: the original reasoning, before the folds existed
 
 ESM-2 is marginally ahead in the projected space (+0.503 against +0.449 at d=64) and
 marginally behind unprojected (+0.445 against +0.459). On this metric the two are a

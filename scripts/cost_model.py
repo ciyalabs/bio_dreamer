@@ -24,17 +24,26 @@ import argparse
 # ---- measured ----
 PROTEINGYM_RESIDUES = 972_380_198   # sum(variants * seq_len) from the reference file
 LOCAL_TFLOPS = 0.27                 # laptop GTX 1650, measured in step 0.4
+# Window A actually cost $1.05: 1h45m on an A40 at $0.59/h, of which 36 minutes was
+# the 1,188 ESMFold folds. The 40 billed hours budgeted for phase 1 below is now
+# known to be about 4x too high for the folding half.
 
 # (effective TFLOP/s for 650M inference, currency/GPU-hour on-demand, late Oct 2026)
 GPUS = {
     "rtx4090": (50.0, 0.89),
     "a100": (100.0, 1.16),
     "h100": (250.0, 2.90),
+    # MEASURED 2026-11-26 on a rented RunPod A40, by scripts/bench_encoder.py:
+    # 217.1 seq/s cold at L=56, batch 8 = 12,158 residues/s = 15.8 TFLOP/s effective
+    # for SaProt 650M inference. That is 58x the laptop. It is a LOWER BOUND -- L=56
+    # and batch 8 leave the card latency-bound, and longer sequences do better.
+    "a40": (15.8, 0.59),
     # Hetzner GEX45: RTX PRO 4000 Blackwell SFF, 24 GB, EUR 0.3429/h capped at
     # EUR 214/mo, plus a EUR 209 one-time setup fee PER ORDER. Rate is EUR, not USD.
-    # The 30 TFLOP/s is an ESTIMATE -- an SFF card is roughly a third of a 4090 by
-    # power budget. Replace it with a measurement from scripts/bench_encoder.py on
-    # the first day of the rental, exactly as step 0.4 did for the laptop.
+    # STILL AN ESTIMATE -- we rented an A40, not this card. The A40 measuring 15.8
+    # against the 30 assumed here suggests the estimate is optimistic by about 2x:
+    # an SFF card at a third of a 4090's power will not beat a 300 W A40. Treat
+    # hetzner-gex45 hours as roughly double what this prints until it is measured.
     "hetzner-gex45": (30.0, 0.3429),
 }
 # one-time charge per ORDER, not per month: re-ordering repeatedly pays it again
@@ -46,7 +55,12 @@ WORKLOAD = {
     ("1", "Encode ProteinGym (210 trainable assays)"): 0.90,
     ("1", "Encode Tsuboyama + held-out landscapes"): 0.31,
     ("1", "D2 backbone sweep (3 backbones, subset)"): 0.50,
-    ("1", "D1 ESMFold folds (~2000 mutants)"): 0.60,
+    # MEASURED, not derived: 1,188 folds took 36 minutes on an A40 at 15.8 TFLOP/s
+    # effective = 0.034 EFLOP. The old 0.60 came from a 2*N*D estimate with N=650M,
+    # which is simply the wrong model for ESMFold -- its folding trunk is cheap on
+    # the 36-72 residue domains this step uses. It was the largest phase-1 line item
+    # and it was 17x too high.
+    ("1", "D1 ESMFold folds (1,188, measured)"): 0.034,
     ("2", "Reward head train + benchmark"): 0.05,
     ("3", "World model B + collapse diagnostics"): 0.15,
     ("4", "World model A: flow matching + DDPM ablation"): 0.30,

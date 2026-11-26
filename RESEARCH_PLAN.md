@@ -545,6 +545,27 @@ than reinstating per-step folding wholesale.
 
 **Outputs.** `diagnostics/d1_structure.md`; paper figure.
 
+**✅ DONE (2026-11-26) — verdict: keep the decision, replace the reason.** See
+`diagnostics/d1_structure.md`. 1,188 ESMFold folds on a rented A40, 36 minutes, ~$1.05.
+
+The premise was that a point mutation barely moves the predicted structure. It moves, and
+**in proportion to how destabilising the mutation is**: Cα RMSD 0.210 → 0.541 Å and 3Di
+Hamming 0.0295 → 0.0896 across the stabilising → severe bands, monotone on both metrics.
+Every wild type was folded **twice**, and all 54 gave bitwise identical 3Di (floor exactly
+0.0) with an RMSD floor of 3.4e-15 Å, so the signal is unambiguous. Without that second
+fold the claim could not have been falsified.
+
+But TM-score is **0.9838** and median RMSD **0.32 Å** — the global fold is untouched — and
+a fold costs 30 s. **Drop the per-step stream for cost and a static fold, not for
+invariance.**
+
+**The sharper finding: the structure channel actively hurts.** Re-running Step 1.3 with
+these folds, SaProt's correlation with |ddG| falls from +0.459 to **+0.304** (d=128:
+0.473 → 0.332), while ESM-2 — which ignores 3Di, and returned byte-identical numbers as a
+control — sits at **+0.445 / +0.502**. ESMFold hands back a confident folded structure even
+at ddG ≤ −2, so the 3Di tokens assert "still folded" for destabilised proteins. **ESM-2 is
+now the leading backbone**; confirm on H1 at Step 2.2 before making it permanent.
+
 ---
 
 ## Step 1.3 — D2: Latent capacity and dimension `S`
@@ -585,9 +606,11 @@ position argument, not this one.**
 discarding directions that carry no stability signal — and 4× larger buys ≤ 0.04. This unlocks
 the 10× cache reduction the rental plan depends on (1.7 TiB → 170 GiB for ProteinGym).
 
-**No backbone winner is reported.** SaProt ran with *no* 3Di tokens, because the Tsuboyama
-domains have no structures, so this compared ESM-2 against a deliberately hobbled SaProt.
-Re-run after Step 1.2's folds exist.
+**Backbone: resolved 2026-11-26, and it is ESM-2.** The first pass ran SaProt with no 3Di,
+because the Tsuboyama domains had no structures. With Step 1.2's folds, SaProt + real 3Di
+scores **+0.304** against ESM-2's **+0.445** (d=128: 0.332 vs 0.502) — the structure channel
+makes it worse, because the predictor reports a folded structure for destabilised mutants.
+Confirm on H1 before making it permanent.
 
 ---
 

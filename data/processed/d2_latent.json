@@ -3,44 +3,48 @@
     "metrics": {
       "backbone": "westlake-repl/SaProt_650M_AF2",
       "n_pairs": 1000.0,
-      "rho_at_pos_vs_absddG": 0.13114451480083603,
-      "rho_frobenius_vs_absddG": 0.45905145546318366,
-      "rho_pooled_vs_absddG": 0.4101148952459983,
+      "n_pairs_with_3di": 1000.0,
+      "structure_aware": 1.0,
+      "rho_at_pos_vs_absddG": 0.19686012146688533,
+      "rho_frobenius_vs_absddG": 0.3044457000732269,
+      "rho_pooled_vs_absddG": 0.3109314661463015,
       "mean_length": 52.94,
-      "per_residue_advantage_rho": 0.04893656021718534,
-      "rho_pooled_vs_length": -0.17412767821635006,
-      "rho_at_pos_vs_length": -0.0747835728665528,
-      "rho_d64": 0.44900961881011753,
-      "rho_d128": 0.4730774567341045,
-      "rho_d256": 0.4933971462321639,
-      "rho_d512": 0.5110520690754317
+      "per_residue_advantage_rho": -0.006485766073074606,
+      "rho_pooled_vs_length": -0.12704486386000877,
+      "rho_at_pos_vs_length": -0.14201250758958647,
+      "rho_d64": 0.32786811167569796,
+      "rho_d128": 0.3321438883993024,
+      "rho_d256": 0.33756867230420184,
+      "rho_d512": 0.346585416158851
     },
     "dim_sweep": {
-      "64": 0.44900961881011753,
-      "128": 0.4730774567341045,
-      "256": 0.4933971462321639,
-      "512": 0.5110520690754317
+      "64": 0.32786811167569796,
+      "128": 0.3321438883993024,
+      "256": 0.33756867230420184,
+      "512": 0.346585416158851
     }
   },
   "esm2": {
     "metrics": {
       "backbone": "facebook/esm2_t33_650M_UR50D",
       "n_pairs": 1000.0,
-      "rho_at_pos_vs_absddG": 0.2649862639966368,
-      "rho_frobenius_vs_absddG": 0.4451781548533599,
-      "rho_pooled_vs_absddG": 0.36133953355349524,
+      "n_pairs_with_3di": 1000.0,
+      "structure_aware": 0.0,
+      "rho_at_pos_vs_absddG": 0.2650972210972211,
+      "rho_frobenius_vs_absddG": 0.44515395715395717,
+      "rho_pooled_vs_absddG": 0.36128296928296927,
       "mean_length": 52.94,
-      "per_residue_advantage_rho": 0.08383862129986464,
-      "rho_pooled_vs_length": -0.3070477778121831,
-      "rho_at_pos_vs_length": -0.004533888519514476,
+      "per_residue_advantage_rho": 0.0838709878709879,
+      "rho_pooled_vs_length": -0.3068575208938331,
+      "rho_at_pos_vs_length": -0.004569016707422721,
       "rho_d64": 0.5029606435040218,
-      "rho_d128": 0.5024030150188438,
+      "rho_d128": 0.5023983274895468,
       "rho_d256": 0.5057020981381133,
       "rho_d512": 0.5114823842649017
     },
     "dim_sweep": {
       "64": 0.5029606435040218,
-      "128": 0.5024030150188438,
+      "128": 0.5023983274895468,
       "256": 0.5057020981381133,
       "512": 0.5114823842649017
     }

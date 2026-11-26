@@ -1,119 +1,119 @@
 # Step 1.2 — D1: Structure invariance under point mutation
 
-**Status: PARTIAL.** The local half is done; the folding half is blocked on hardware.
-**Run:** 2026-11-26 · `scripts/d1_noise_floor.py` · SaProt 650M, real 3Di from shipped
-wild-type structures.
+**Status: COMPLETE.** **Run:** 2026-11-26 · ESMFold on a rented A40 · 1,188 folds over
+54 proteins (36–390 residues), 1,080 mutants stratified by measured ddG.
+**Cost: about $1.05.**
 
 ---
 
-## What this step decides
+## Verdict: drop the per-step structure stream — but not for the stated reason
 
-Whether to keep a **per-step structure stream** in the world model — the largest
-architectural change in the proposal revision was removing it. The argument for removal is
-that a point mutation barely moves the predicted structure, so re-folding at every planning
-step buys nothing. That argument needs measuring, not asserting.
+The proposal removes the per-step structure stream on the grounds that **a point
+mutation barely moves the predicted structure**. Measured, that premise is wrong in
+one direction and irrelevant in another.
 
-It splits cleanly into two halves, and only one runs on this machine.
+**The structure does move, and it moves in proportion to how destabilising the
+mutation is:**
 
-| | Measures | Needs | Status |
-|---|---|---|---|
-| **Noise floor** | how much the encoder moves when nothing changes | SaProt, 1.3 GiB | **done** |
-| **Sequence-channel signal** | displacement under one substitution, structure held fixed | SaProt | **done** |
-| **Structure displacement** | TM-score, Cα RMSD, 3Di token change, WT vs mutant | ESMFold | **blocked** |
-| **Folding noise floor** | fold the same sequence twice — the floor for the row above | ESMFold | **blocked** |
+| ddG band | n | Cα RMSD (Å) | 3Di Hamming |
+|---|---:|---:|---:|
+| **severe** (≤ −2 kcal/mol) | 243 | **0.541** | **0.0896** |
+| moderate (−2 to −1) | 257 | 0.322 | 0.0667 |
+| mild (−1 to 0) | 250 | 0.214 | 0.0348 |
+| stabilising (> 0) | 250 | 0.210 | 0.0295 |
+| *length probe (no ddG)* | 80 | 0.567 | 0.0433 |
 
----
+Monotone across all four measured bands, on both metrics. That is a dose–response,
+not noise.
 
-## The noise floor is fp16 rounding
+**The floor is zero, so every one of those numbers is signal.** Each wild type was
+folded **twice**, and across all 54 proteins the two passes gave **bitwise identical
+3Di strings** (floor = 0.0 exactly) and a Cα RMSD of 3.4 × 10⁻¹⁵ Å — float64 rounding
+in the superposition, not structure. ESMFold is deterministic. Without that second
+fold the comparison would have had no scale and "the structure does not move" could
+not have been falsified.
 
-The comparison the step rests on is meaningless without knowing how much the encoder's output
-moves when the input does not. Three perturbations, none biological, measured as relative
-Frobenius displacement `‖A−B‖/‖A‖`:
+So **SaProt's structure channel is not invariant to point mutation**: 5.2% of 3Di
+tokens change at the median, 9.0% for severe destabilisation.
 
-| protein | L | identical call | padded in batch | batch size 1 vs 8 | **floor** | mutation | SNR | change within ±5 residues |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| GB1 | 56 | 0 | 1.4e-3 | 1.4e-3 | **1.45e-3** | 0.1318 | 91× | 39.8% |
-| ParD3 | 85 | 0 | 1.4e-3 | 1.4e-3 | **1.40e-3** | 0.1201 | 86× | 44.3% |
-| ParD2 | 87 | 0 | 1.4e-3 | 1.4e-3 | **1.38e-3** | 0.1196 | 87× | 44.2% |
-| TEV | 229 | 0 | **0** | **0** | **0** | 0.0736 | — | 32.8% |
-| TrpB | 389 | 0 | **0** | **0** | **0** | 0.0504 | — | 25.9% |
+**But the global fold is untouched.** TM-score is **0.9838** and median RMSD **0.32 Å**
+— within crystallographic noise. And a fold costs **30 seconds** on an A40, which is
+prohibitive inside a planning loop that takes hundreds of steps.
 
-**The two zeros are not better stability.** The backbone runs in **float16**, whose epsilon is
-9.77e-4, and the measured floor is 1.38–1.45e-3 — **1.4 to 1.5 × fp16 epsilon**. The floor is
-float16 rounding under a changed reduction order: cuBLAS picks kernels by tensor shape, and on
-the two long proteins it happened to pick the same kernel on both sides of the comparison, so
-the difference came out bitwise zero. Rerun with different padding and it will not.
-
-So the figure to use downstream is the **pooled floor, 1.45e-3**, and against it the weakest
-single-substitution signal (TrpB, 0.0504) is still **35×**. Recorded as a standing number:
-any structural displacement below ~1.5e-3 relative is indistinguishable from arithmetic.
-
-Two further things worth having on the record:
-
-**A single substitution is not a local perturbation of the embedding.** Only 26–44% of the
-total per-residue change falls within ±5 residues of the substituted site; the majority is
-spread across the rest of the chain. This is the sequence channel alone — the structure
-channel was held fixed — so it is a property of the encoder's attention, not of protein
-physics. It matters because it sets a ceiling on how much a per-step structure update could
-add: the embedding already moves globally without one.
-
-**Displacement falls with length** (0.132 at L=56 to 0.050 at L=389), roughly as one would
-expect from one residue in L changing under a relative-norm metric. Comparisons across
-proteins of different length must therefore be length-normalised or stratified, not pooled.
+**The decision survives; the argument for it does not.** Per-step structure is dropped
+because it is expensive and the global fold is static, **not** because the structure
+channel carries nothing. It carries a graded, measurable signal.
 
 ---
 
-## What is blocked, and why
+## And the structure channel actively hurts
 
-The remaining experiments need a structure predictor for every mutant: ~50 proteins × ~20
-single mutants ≈ 1,000–2,000 folds.
+Step 1.3 was re-run with these predicted structures, which is the first time SaProt
+has been measured with its 3Di channel fed rather than blanked:
 
-**ESMFold does not fit this machine.** The GPU is a laptop **GTX 1650 with 4,096 MiB total
-and ~2,700 MiB free**. `facebook/esmfold_v1` carries an ESM-2 3B trunk plus a folding head;
-its weights alone exceed the card in half precision, before any activation memory, which for
-the folding trunk scales with L². No chunking setting reduces weight memory.
+| Spearman against \|ddG\| | SaProt, no 3Di | **SaProt + real 3Di** | ESM-2 *(ignores 3Di)* |
+|---|---:|---:|---:|
+| whole per-residue matrix | +0.459 | **+0.304** | **+0.445** |
+| mean-pooled | +0.410 | +0.311 | +0.361 |
+| at the substituted residue | +0.131 | +0.197 | +0.265 |
+| projected to d = 128 | +0.473 | **+0.332** | **+0.502** |
 
-**Do not rent for this step alone.** `scripts/cost_model.py` puts the whole of Phase 1 at
-~6.5 A100-hours of pure compute, of which D1's folds are 1.7:
+**Giving SaProt the predicted structure makes its stability signal worse** — 0.459 →
+0.304 on the per-residue matrix, 0.473 → 0.332 at d = 128.
 
-| Phase 1 item | EFLOP | A100-hours |
-|---|---:|---:|
-| Encode ProteinGym (210 trainable assays) | 0.90 | 2.5 |
-| D1 ESMFold folds (~2,000 mutants) | 0.60 | 1.7 |
-| D2 backbone sweep (Step 1.3) | 0.50 | 1.4 |
-| Encode Tsuboyama + held-out landscapes | 0.31 | 0.9 |
-| **Total** | **2.31** | **6.5** |
+ESM-2's figures are byte-identical to the pre-fold run, which is the control: it is
+sequence-only, so it must ignore the structures, and it does.
 
-One rental covering D1's folds, Step 1.3's backbone sweep and the two encoding passes is the
-efficient unit. A 24 GB card (L4, A10G, RTX 4090) is sufficient — the 40 GB A100 the cost
-model prices is not required, only ≥16 GB for ESMFold.
+The explanation is in the table above. ESMFold returns a confident, well-folded
+structure for a severely destabilising mutant — TM-score 0.984 even at ddG ≤ −2. The
+3Di tokens therefore assert *"still folded"* for proteins that are measurably
+destabilised. That is not a weak signal, it is a **misleading** one, and it dilutes
+the sequence signal SaProt would otherwise have.
 
-**One methodological point for when that rental happens.** The floor for the TM-score and RMSD
-comparison is *not* the encoder's fp16 floor measured above — it is the **folding model's own
-reproducibility**, which is a different and larger number. Fold every wild type twice and
-measure TM-score and RMSD between the two predictions before comparing any mutant to anything.
-Skipping that would make "the structure does not move" unfalsifiable, which is the same error
-Step 1.1 found in the TEV figures: an artifact of the instrument read as a property of biology.
+**Consequence: ESM-2 650M is the better backbone for the reward head**, at +0.445
+raw and +0.502 at d = 128 against SaProt's +0.304 and +0.332. SaProt was made the
+default in the revision because it is structure-aware and MIT-licensed; ESM-2 is
+equally MIT-licensed, and structure-awareness turns out to be a liability on this
+task.
 
-There is also a known confound to state in the write-up rather than discover in review:
-**sequence-based structure predictors are documented as insensitive to point mutations.** A
-finding that predicted structure does not move is therefore partly a statement about the
-predictor. That is still the right measurement for the *architectural* decision — the stream
-we would actually build consumes predicted structure, so if the prediction does not move the
-stream carries nothing — but it is not evidence that the real structure does not move, and the
-two claims must not be conflated. If a biological claim is wanted, the route that needs no GPU
-is experimentally determined wild-type/mutant structure pairs from the PDB, compared with the
-already-installed Foldseek.
+**Caveat before acting on it.** This is one task — correlation of latent displacement
+with \|ddG\| — on 50 small domains of 36–72 residues, with structures from one
+predictor. The reward head consumes the latents differently, and Phase 2's H1
+benchmark is the test that matters. Treat this as a strong prior for ESM-2, to be
+confirmed at Step 2.2, not as a settled encoder change.
+
+---
+
+## What this changes
+
+- **Keep the architecture decision**, restate the reason: cost and a static global
+  fold, not an unmoving structure channel.
+- **Rewrite the proposal's §3 structure paragraph.** It claims recent evidence shows
+  structure is invariant under point mutation. The measurement here shows a graded
+  response against a zero floor; what is invariant is the *fold*, not the tokens.
+- **Carry ESM-2 into Phase 2 as the leading backbone**, with SaProt as the comparator,
+  and settle it on H1 rather than here.
+- **Do not feed predicted 3Di to a structure-aware encoder for stability work** until
+  a predictor that responds to destabilisation is available. This is the sharpest
+  practical finding of Phase 1.
 
 ---
 
 ## Reproduction
 
 ```
-python -I scripts/d1_noise_floor.py                      # all five proteins, ~3 min
-python -I scripts/d1_noise_floor.py --proteins TEV --n-mutants 10
+python -I scripts/d1_build_manifest.py        # CPU, picks the proteins and mutants
+python -I scripts/d1_fold.py                  # needs ~16 GB VRAM; 36 min on an A40
+python -I scripts/d1_fold.py --log-only       # re-record tracker runs, no folding
+python -I scripts/d2_latent_capacity.py       # uses the folds; --no-3di for the control
 ```
 
-Writes `data/processed/d1_noise_floor.json`; tracker runs under `1.2 / noise_floor`.
-Caching is disabled throughout — a cache hit returns the identical array and would report a
-floor of zero everywhere.
+Writes `data/processed/d1_structure.json` and the predicted structures under
+`data/processed/d1_folds/` (65 MB, gitignored; the manifest that generates them is
+committed). Tracker runs under `1.2 / struct_displacement` and
+`1.2 / substitution_stratified`.
+
+**Mutants are stratified by measured ddG** — 5 severe / 5 moderate / 5 mild / 5
+stabilising per protein — which is what makes the dose–response visible. An
+unstratified sample would be dominated by mild substitutions and would have shown a
+flat median, i.e. the invariance the proposal assumed.

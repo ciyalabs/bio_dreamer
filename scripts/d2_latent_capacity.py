@@ -50,18 +50,77 @@ from biodreamer import tracking
 from biodreamer.protein_dreamer.encoder import ProteinEncoder
 
 MANIFEST = Path("data/processed/d1_fold_manifest.json")
+FOLDS = Path("data/processed/d1_folds")
 OUT = Path("data/processed/d2_latent.json")
 # see the note in d1_fold.py: a limited run writes elsewhere
 PARTIAL = Path("data/processed/d2_latent.partial.json")
 DIMS = (64, 128, 256, 512)
 
 
-def collect(enc: ProteinEncoder, entries: list[dict]) -> list[dict]:
+_LOADED: list = []
+
+
+def release_gpu() -> None:
+    """Free the previously loaded backbone before loading the next one.
+
+    A 650M model in fp16 is ~2.5 GiB. The laptop card has 3.6 GiB total and the
+    desktop session already holds ~0.7 GiB, so the second backbone OOMs unless the
+    first is released. Python's refcount alone is not enough -- the CUDA caching
+    allocator keeps the blocks until `empty_cache`.
+    """
+    while _LOADED:
+        backbone = _LOADED.pop()
+        for attr in ("_model", "_tok"):
+            if getattr(backbone, attr, None) is not None:
+                setattr(backbone, attr, None)
+    try:
+        import gc  # noqa: PLC0415
+
+        import torch  # noqa: PLC0415
+
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:  # pragma: no cover - torch absent or CPU-only
+        pass
+
+
+def fold_dir(wt_name: str) -> Path:
+    """Where scripts/d1_fold.py put this protein's structures. Same name mangling."""
+    return FOLDS / wt_name.replace("/", "_").replace("|", "_")
+
+
+def read_3di(directory: Path, stem: str, expect_len: int) -> str | None:
+    """3Di string from the Foldseek sidecar d1_fold.py already wrote.
+
+    Reading the sidecar rather than re-running Foldseek: the folds exist, and 1,134
+    subprocess calls to regenerate what is on disk would be pure waste. Returns None
+    unless the token string matches the sequence length exactly -- a mismatch means
+    the structure and the sequence are not the same molecule, and interleaving them
+    would feed the model silent nonsense.
+    """
+    tsv = directory / f"{stem}.3di.tsv"
+    if not tsv.exists():
+        return None
+    try:
+        fields = tsv.read_text().splitlines()[0].split("\t")
+    except (IndexError, OSError):
+        return None
+    if len(fields) < 3:
+        return None
+    tdi = fields[2].strip()
+    return tdi if len(tdi) == expect_len else None
+
+
+def collect(enc: ProteinEncoder, entries: list[dict], use_3di: bool = True) -> list[dict]:
     """Displacement scalars and |ddG| for every mutant with a measured ddG."""
     rows = []
+    n_with_3di = n_without = 0
     for i, e in enumerate(entries, 1):
         wt_seq = e["wt_sequence"]
-        z_wt = enc.encode([wt_seq], batch_size=1, use_cache=True)[0]
+        d = fold_dir(e["wt_name"])
+        wt_3di = read_3di(d, "wt_a", len(wt_seq)) if use_3di else None
+        z_wt = enc.encode([wt_seq], structure=wt_3di, batch_size=1, use_cache=True)[0]
         mu_wt = z_wt.mean(axis=0)
         n = 0
         for m in e["mutants"]:
@@ -73,7 +132,16 @@ def collect(enc: ProteinEncoder, entries: list[dict]) -> list[dict]:
             pos = next((k for k, (a, b) in enumerate(zip(wt_seq, seq)) if a != b), None)
             if pos is None:
                 continue
-            z = enc.encode([seq], batch_size=1, use_cache=True)[0]
+            # the mutant's OWN predicted structure, not the wild type's -- using the
+            # wild type's 3Di for every mutant is what makes a structure channel look
+            # uninformative when it is not
+            mut_3di = read_3di(d, m["mut_type"], len(seq)) if use_3di else None
+            if wt_3di is not None and mut_3di is not None:
+                n_with_3di += 1
+            else:
+                n_without += 1
+                mut_3di = None
+            z = enc.encode([seq], structure=mut_3di, batch_size=1, use_cache=True)[0]
             if z.shape != z_wt.shape:
                 continue
             diff = z - z_wt
@@ -95,8 +163,11 @@ def collect(enc: ProteinEncoder, entries: list[dict]) -> list[dict]:
                 }
             )
             n += 1
-        print(f"  [{i}/{len(entries)}] {e['wt_name'][:30]:<30} L={e['length']:>3} {n:>2} pairs",
-              flush=True)
+        print(f"  [{i}/{len(entries)}] {e['wt_name'][:30]:<30} L={e['length']:>3} {n:>2} pairs"
+              f"{'  3Di' if wt_3di else '  (no 3Di)'}", flush=True)
+    if rows:
+        rows[0]["_n_with_3di"] = n_with_3di
+        rows[0]["_n_without_3di"] = n_without
     return rows
 
 
@@ -150,6 +221,8 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no-track", action="store_true")
+    ap.add_argument("--no-3di", action="store_true",
+                    help="ignore the predicted structures; reproduces the pre-fold run")
     args = ap.parse_args()
 
     if not MANIFEST.exists():
@@ -161,8 +234,10 @@ def main() -> int:
     for backbone in args.backbones:
         print(f"\n=== {backbone} ===")
         t0 = time.time()
+        release_gpu()  # the previous backbone is 2.5 GiB; two do not fit in 3.6
         enc = ProteinEncoder(backbone)
-        rows = collect(enc, entries)
+        _LOADED.append(enc.backbone)
+        rows = collect(enc, entries, use_3di=not args.no_3di)
         if len(rows) < 20:
             print(f"  only {len(rows)} pairs; skipping")
             continue
@@ -172,6 +247,8 @@ def main() -> int:
         m = {
             "backbone": enc.name,
             "n_pairs": float(len(rows)),
+            "n_pairs_with_3di": float(rows[0].get("_n_with_3di", 0)),
+            "structure_aware": float(getattr(enc.backbone, "structure_aware", False)),
             "rho_at_pos_vs_absddG": rho(np.array([r["at_pos"] for r in rows]), ad),
             "rho_frobenius_vs_absddG": rho(np.array([r["frobenius"] for r in rows]), ad),
             "rho_pooled_vs_absddG": rho(np.array([r["pooled"] for r in rows]), ad),
@@ -200,7 +277,10 @@ def main() -> int:
         for d, v in sweep.items():
             m[f"rho_d{d}"] = v
 
-        print(f"\n  |ddG| versus displacement (Spearman, n={len(rows)}):")
+        w3 = rows[0].get("_n_with_3di", 0)
+        print(f"\n  |ddG| versus displacement (Spearman, n={len(rows)}; "
+              f"{w3} pairs with real 3Di, "
+              f"{'consumed' if getattr(enc.backbone, 'structure_aware', False) else 'IGNORED -- sequence-only backbone'}):")
         print(f"    at the substituted residue  {m['rho_at_pos_vs_absddG']:+.3f}")
         print(f"    whole per-residue matrix    {m['rho_frobenius_vs_absddG']:+.3f}")
         print(f"    mean-pooled                 {m['rho_pooled_vs_absddG']:+.3f}")

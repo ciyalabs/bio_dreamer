@@ -4,11 +4,11 @@
       "probe": {
         "n_sequences": 200,
         "residues": 8075,
-        "seconds": 0.1,
-        "residues_per_second": 128658.7
+        "seconds": 8.3,
+        "residues_per_second": 972.4
       }
     },
-    "total_seconds": 0.1,
+    "total_seconds": 8.3,
     "backbone": "westlake-repl/SaProt_650M_AF2",
     "cache_dir": "models/cache"
   }

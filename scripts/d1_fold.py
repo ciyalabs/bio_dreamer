@@ -55,6 +55,7 @@ OUT_JSON = Path("data/processed/d1_structure.json")
 DRY_JSON = Path("data/processed/d1_structure.dryrun.json")
 PDB_DIR = Path("data/processed/d1_folds")
 MODEL = "facebook/esmfold_v1"
+BANDS = ("severe", "moderate", "mild", "stabilising", "unmeasured")
 
 
 # ---- geometry ----
@@ -245,6 +246,50 @@ def aggregate(results: list[dict]) -> dict[str, float]:
     return out
 
 
+def log_runs(agg: dict[str, float], n_proteins: int, out_path: Path) -> None:
+    """Two tracker runs, because the step declares two distinct experiments.
+
+    `struct_displacement` is the headline: does the structure move at all, against
+    the predictor's own reproducibility. `substitution_stratified` is the one that
+    says whether any class of substitution moves it more, and it is the reason the
+    manifest was stratified by measured ddG in the first place -- an unstratified
+    median would hide a dose-response.
+    """
+    overall = {
+        k: v for k, v in agg.items()
+        if np.isfinite(v) and not any(
+            k.endswith(f"_{b}") for b in BANDS
+        )
+    }
+    with tracking.run(
+        "1.2", "struct_displacement",
+        variant={"model": MODEL, "n_proteins": n_proteins},
+        datasets=[str(MANIFEST)],
+        notes=(
+            "Wild types folded twice so the floor is the predictor's own "
+            "reproducibility rather than zero. 3Di Hamming is the decisive metric: "
+            "it is literally SaProt's structure channel."
+        ),
+    ) as r:
+        r.log_metrics(overall)
+        r.log_artifact(str(out_path), kind="table")
+
+    banded = {k: v for k, v in agg.items()
+              if np.isfinite(v) and any(k.endswith(f"_{b}") for b in BANDS)}
+    if banded:
+        with tracking.run(
+            "1.2", "substitution_stratified",
+            variant={"model": MODEL, "strata": "ddG band"},
+            datasets=[str(MANIFEST)],
+            notes=(
+                "Displacement by measured ddG band. A monotone rise across severe / "
+                "moderate / mild / stabilising is the signature of a real structural "
+                "response; a flat profile would mean the predictor is insensitive."
+            ),
+        ) as r:
+            r.log_metrics(banded)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true",
@@ -252,7 +297,22 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--chunk-size", type=int, default=64)
     ap.add_argument("--no-track", action="store_true")
+    ap.add_argument("--log-only", action="store_true",
+                    help="record tracker runs from an existing result file, no folding")
     args = ap.parse_args()
+
+    if args.log_only:
+        if not OUT_JSON.exists():
+            print(f"missing {OUT_JSON}")
+            return 1
+        saved = json.loads(OUT_JSON.read_text())
+        if saved.get("dry_run"):
+            print(f"{OUT_JSON} is from a dry run; refusing to log it as a result")
+            return 1
+        log_runs(saved["aggregate"], len(saved["proteins"]), OUT_JSON)
+        print(f"logged 1.2 runs from {OUT_JSON} "
+              f"({len(saved['proteins'])} proteins, no folding)")
+        return 0
 
     if not MANIFEST.exists():
         print(f"missing {MANIFEST} -- run scripts/d1_build_manifest.py first")
@@ -313,19 +373,7 @@ def main() -> int:
         print(f"  (dry or limited run -- {OUT_JSON} left untouched)")
 
     if not args.no_track and not args.dry_run:
-        with tracking.run(
-            "1.2",
-            "struct_displacement",
-            variant={"model": MODEL, "n_proteins": len(results)},
-            datasets=[str(MANIFEST)],
-            notes=(
-                "Wild types folded twice to establish the predictor's own "
-                "reproducibility as the floor. 3Di Hamming is the decisive metric: it "
-                "is literally SaProt's structure channel."
-            ),
-        ) as r:
-            r.log_metrics({k: v for k, v in agg.items() if np.isfinite(v)})
-            r.log_artifact(str(OUT_JSON), kind="table")
+        log_runs(agg, len(results), out_path)
     return 0
 
 
