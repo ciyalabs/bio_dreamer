@@ -1,6 +1,5 @@
 {
   "140_160": {
-    "genotypes": 916,
     "by_dimension": {
       "1": 4681,
       "2": 9191,
@@ -9,11 +8,11 @@
       "5": 446,
       "6": 18
     },
-    "total": 25680,
-    "max_dimension": 6
+    "genotypes": 916,
+    "max_dimension": 6,
+    "total": 25680
   },
   "160_180": {
-    "genotypes": 799,
     "by_dimension": {
       "1": 4185,
       "2": 8085,
@@ -22,11 +21,11 @@
       "5": 682,
       "6": 51
     },
-    "total": 23568,
-    "max_dimension": 6
+    "genotypes": 799,
+    "max_dimension": 6,
+    "total": 23568
   },
   "60_80": {
-    "genotypes": 264,
     "by_dimension": {
       "1": 1211,
       "2": 1954,
@@ -35,18 +34,35 @@
       "5": 30,
       "6": 1
     },
-    "total": 4703,
-    "max_dimension": 6
+    "genotypes": 264,
+    "max_dimension": 6,
+    "total": 4703
+  },
+  "6_40": {
+    "by_dimension": {
+      "1": 497062,
+      "2": 1792772,
+      "3": 3478667,
+      "4": 3898512,
+      "5": 2576913,
+      "6": 988823,
+      "7": 209135,
+      "8": 21741,
+      "9": 817
+    },
+    "genotypes": 58008,
+    "max_dimension": 9,
+    "total": 13464442
   },
   "80_100": {
-    "genotypes": 242,
     "by_dimension": {
       "1": 1196,
       "2": 2003,
       "3": 1209,
       "4": 238
     },
-    "total": 4646,
-    "max_dimension": 4
+    "genotypes": 242,
+    "max_dimension": 4,
+    "total": 4646
   }
 }

@@ -173,7 +173,7 @@ Note: FLIP2 does **not** include GB1 or PhoQ, despite original FLIP having GB1.
 | **Licence** | **GPL-3.0** |
 | Acquired | Cloned, 316 KB |
 | Input | Tab-separated genotype file; first column colon-separated mutations (`0C:2T`), wild type `0Z` or empty |
-| Status | Cloned, **not yet run** — see Blocked below |
+| Status | **Run on five HIS3 segments** — see HypercubeME run below |
 
 ### Wu 2016 GB1 (original supplement)
 
@@ -193,7 +193,6 @@ Note: FLIP2 does **not** include GB1 or PhoQ, despite original FLIP having GB1.
 | **PhoQ** (Podgornaia & Laub 2015) | `podgornaia-table-s1.xlsx` returns **HTTP 403** behind AAAS login. Copyright © AAAS; supplementary terms unclear | Download manually if you have access — or **drop it**. SSMuLA's TEV and TrpB4 are better: quantitative, cleanly licensed, and not 99% dead |
 | **PhoQ suitability** | Of 160,000 variants only **1,659 are functional** (~1%), and the assay is a binary selection, not quantitative fitness | Reconsider its role; it is not a quantitative landscape like GB1/TrpB |
 | **HIS3 GitHub repo** | `Lcarey/HIS3InterspeciesEpistasis` has **no LICENSE file** (3.5 GB) | Not needed — use ProteinGym's `HIS7_YEAST_Pokusaeva_2019` (MIT) instead. Paper is CC-BY; raw data at GEO `GSE99990` |
-| **HypercubeME run** | Not executed. Running third-party downloaded code was declined by the sandbox | Run manually, or approve: `python -I data/raw/hypercubeme/repo/HypercubeME.py -g <genotypes> -d <out>` |
 | **Tsuboyama** | Not downloaded (1.0 GB) | Fetch before Step 2.1 |
 | **Rocklin 2026** | Not downloaded (8.0 GB) | Register use first (authors' request), then decide if the limited role justifies 8 GB |
 | **Measurement floors** | GB1 92% dead quantified. Floors for Tsuboyama/HIS3 **not yet characterised** | Required before Step 2.1's censoring decision |
@@ -301,16 +300,44 @@ published method is per-segment, and that is what is reported here.
 | 160–180 | 799 | 23,568 | 29.5 | **6** |
 | 60–80 | 264 | 4,703 | 17.8 | **6** |
 | 80–100 | 242 | 4,646 | 19.2 | 4 |
-| **Total (4 segments)** | **2,221** | **58,597** | **26.4** | **6** |
-| 6–40 | 58,008 | *running* (~2 h expected) | | |
+| 6–40 | 58,008 | 13,464,442 | 232.1 | **9** |
+| **Total (5 segments)** | **60,229** | **13,523,039** | **224.5** | **9** |
 
 Dimension breakdown for segment 140–160: d1 4,681 · d2 9,191 · d3 8,190 · d4 3,154 ·
 d5 446 · **d6 18**.
 
-**What this means for the plan.** 2,221 genotypes yield 58,597 combinatorially complete
-sub-landscapes, a ~26× multiplication, **reaching dimension 6**. Path-level ground truth
-beyond horizon 4 exists in quantity even in small segments — the "path-level data remains
-narrow" caution in the proposal's limitations is too strong as written.
+Dimension breakdown for segment 6–40: d1 497,062 · d2 1,792,772 · d3 3,478,667 ·
+d4 3,898,512 · d5 2,576,913 · d6 988,823 · d7 209,135 · d8 21,741 · **d9 817**.
+Dimension 10 returned zero.
+
+**The multiplication factor is strongly superlinear in segment size.** The four small
+segments average 26×; segment 6–40, 26× larger in genotypes, multiplies 232× and reaches
+three dimensions deeper. This is expected — a hypercube needs every corner present, so
+density matters more than count — but it was not obvious in advance, and it means the four
+small segments *understated* what the method yields.
+
+**What this means for the plan.** Path-level ground truth now exists to **horizon 9**, not
+4 or 6. Three plan steps were widened accordingly: the Phase 2 stratified sample (3–6 → 3–9),
+the Phase 4 error-growth curve (3–8 → 3–9), and the Phase 7 depth check (5–8 → 5–9). The
+"path-level data remains narrow" caution in the proposal's limitations was too strong and has
+been rewritten; what remains true is that this is **one protein**, segment-local, with heavily
+overlapping hypercubes and a growth-assay measurement floor.
+
+**Run cost:** 6 h 22 m (22,896 s) wall clock on 8 cores of the laptop, peak ~0.6 GiB RSS
+across 12 workers. Within the 2 h–10 d band the paper reports for 16k–82k genotypes.
+
+**Storage.** The segment 6–40 output is **856 MB**, too large for git. Dimensions 8 and 9 are
+committed (1.9 MB — they are the scarce ones, and the only ≥8-step ground truth the project
+has); dimensions 1–7 are gitignored and regenerable in 6 h 22 m with:
+
+```
+python data/raw/hypercubeme/repo/HypercubeME.py \
+  -g data/processed/hypercubeme/his3_seg_6_40.txt \
+  -d data/processed/hypercubeme/out_6_40 -c 8
+```
+
+Note the output directory must **not** exist beforehand; HypercubeME creates it and refuses
+to run if it is already there.
 
 Outputs: `data/processed/hypercube_index.json`; per-segment files under
 `data/processed/hypercubeme/`. Recorded in the tracker as `0.2 / hypercube_index`.

@@ -252,6 +252,13 @@ data/processed/hypercubeme/*.txt
 # Transient per-chunk working files written during a run (bare N.txt).
 data/processed/hypercubeme/out_*/[0-9]*.txt
 !data/processed/hypercubeme/out_*/hypercubes_*.txt
+# Segment 6-40 is 856 MB -- too large for git, and regenerable in 6h22m on 8 cores
+# (command in DATA_REGISTER.md). Counts live in hypercube_index.json. The two
+# deepest dimensions are kept because they are the scarce ones: dimension 8 and 9
+# hypercubes are the only >=8-step ground-truth trajectories the project has.
+data/processed/hypercubeme/out_6_40/hypercubes_*.txt
+!data/processed/hypercubeme/out_6_40/hypercubes_8.txt
+!data/processed/hypercubeme/out_6_40/hypercubes_9.txt
 
 # Firewall working files (fasta + mmseqs tmp): regenerable
 splits/work/

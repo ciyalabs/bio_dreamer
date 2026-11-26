@@ -289,7 +289,7 @@ phases:
           - id: rollout_2step_gb1
             name: Error growth over 2 steps on held-out GB1 all-doubles
           - id: rollout_his3
-            name: Error growth over 3-8 steps on HIS3 hypercubes by dimension
+            name: Error growth over 3-9 steps on HIS3 hypercubes by dimension
           - id: reward_error_growth
             name: Reward-error growth alongside latent-error growth
         outputs: [results/rollout_B.md]
@@ -485,7 +485,7 @@ phases:
         why: Does the planner's advantage persist past the four-site regime?
         experiments:
           - id: his3_dim5_8
-            name: HIS3 hypercubes at dimension 5-8
+            name: HIS3 hypercubes at dimension 5-9
         outputs: [longer-horizon table with caveats]
 
   - id: "7"

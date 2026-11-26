@@ -168,8 +168,8 @@ in the proposal.
 ProteinGym is **72% multi-mutant** (not predominantly single, as first written); it already
 contains Olson 2014 GB1, Wu 2016 GB1 and HIS3 as MIT-licensed standardised assays, removing
 three separate acquisitions; and Rocklin 2026 is mostly **wild-type** domains, so it was
-**not** downloaded. HypercubeME reproduced: 2,221 HIS3 genotypes → 58,597 complete
-sub-landscapes reaching **dimension 6**. Acquired ProteinGym, SSMuLA (16 landscapes),
+**not** downloaded. HypercubeME reproduced on five segments: 60,229 HIS3 genotypes → 13,523,039
+complete sub-landscapes reaching **dimension 9**. Acquired ProteinGym, SSMuLA (16 landscapes),
 FLIP2, Tsuboyama, SLIP. **ProSST has no licence** → SaProt (MIT) is now the default encoder.
 PhoQ withdrawn (only 1,659 of 160,000 functional, binary selection).
 
@@ -411,7 +411,7 @@ exact additive-null numbers the paper will need in every later table.
 
 **Work.**
 - [ ] Fit additive models to: **TrpB4 and TEV (primary), GB1 (third)**, GB1 all-doubles, the
-      nine TrpB 3-site landscapes, and a stratified sample of HIS3 hypercubes (dimensions 3–6).
+      nine TrpB 3-site landscapes, and a stratified sample of HIS3 hypercubes (dimensions 3–9).
 - [ ] **Negative controls: ParD2 and ParD3** (non-additive fraction 0.148–0.158, near-additive).
       A planner whose advantage is real should show little or none on these.
 - [ ] A first pass is already done in 0.2 (`scripts/audit_landscapes.py`,
@@ -656,7 +656,7 @@ and the remedy ladder decided in advance rather than improvised.
 **Experiments.**
 - [ ] Error growth over 2 steps on GB1 all-doubles (**held out** — use the `planning` instance
       and a non-GB1 training set; the GB1 doubles are evaluation data here, not training data).
-- [ ] Error growth over 3–8 steps on HIS3 hypercubes, stratified by dimension.
+- [ ] Error growth over 3–9 steps on HIS3 hypercubes, stratified by dimension.
 - [ ] Reward-error growth alongside latent-error growth; they can diverge.
 
 **Go / no-go.** If 2-step error already exceeds the useful range, flow matching will not rescue
@@ -804,7 +804,7 @@ Step 8.1's decision table — a well-executed negative result here is publishabl
 
 ## Step 6.4 — Longer horizon `M`
 
-**Experiments.** HIS3 hypercubes at dimension 5–8: does the planner's advantage persist past
+**Experiments.** HIS3 hypercubes at dimension 5–9: does the planner's advantage persist past
 the four-site regime? Caveat it properly — one protein, segment-local hypercubes, heavily
 overlapping, measurement floor.
 
