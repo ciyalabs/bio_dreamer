@@ -498,6 +498,17 @@ Five things changed as a result:
 5. **Greedy's oracle cost conflicts with H4's budget** — see the new blocking requirement on
    Step 6.3 below.
 
+**⚠ Corrected the same day.** `Landscape` was using a **dead variant** as the wild type
+— it inferred the modal residue per site, which is arbitrary on a combinatorially complete
+landscape. Both gate metrics, the whole order decomposition, the landscape-set decisions and
+the HIS3 depth curve are unaffected; path accessibility, reciprocal-sign counts, stack-top-k
+and greedy-from-wild-type are not. From the verified wild type, path accessibility on TEV and
+TrpB4 is **0.000**, and 5-restart greedy solves none of GB1/TEV/TrpB4 reliably (0.7, 0.0,
+0.4). The case for planning is stronger; Step 0.5's "greedy solves 4 of 5 landscapes", which
+drove H4's reframing, was the artifact. ParD2, ParD3 and ten others still have unresolved wild
+types — see `DATA_REGISTER.md`. **Resolving ParD2/ParD3 blocks H4**, since a negative control
+needs a correct starting point.
+
 **The depth result is the one that matters most.** On 1,200 HIS3 hypercubes at dimensions 3–9,
 greedy's hit rate falls from **0.906 to 0.242** and monotone path accessibility from **0.609 to
 0.095**, while reciprocal sign epistasis goes from 14% to 63% of hypercubes. The order-1
@@ -994,6 +1005,8 @@ The checklist to re-read at the start of every phase.
 | 18 | **Quote the reliability ceiling beside any non-additive figure** | TEV's own error bars cap every R² at 0.668. A third of its "epistasis" was read noise, and it was the registered primary landscape for a month. |
 | 19 | **Price every baseline in oracle calls** | H4's B = 100 versus a registered greedy costing order 10³. Unfalsifiable in the *easy* direction until reconciled. |
 | 20 | **Path accessibility ≠ greedy fails** | 26% of dimension-3 hypercubes admit no monotone shortest path and greedy solves 99% of them anyway. Report both or overstate the case for planning. |
+| 22 | **Verify the wild type; never let it be inferred** | `Landscape` picks the modal residue per site unless told, which is arbitrary on a combinatorially complete landscape and was a **dead** variant on all three checked. Check `wild_type_source`. |
+| 23 | **`frac_above_wild_type` above ~20% means the wild type is wrong** | 0.4–2.4% on verified landscapes, 34–97% on unresolved ones. It sat in the Step 0.2 audit for a month saying 45–57%. |
 | 21 | **Check whether a landscape is nucleotide-level** | DHFR looked like the best landscape in the set and is near-additive as a protein. Synonymous averaging had removed ~16× of noise. |
 
 ---

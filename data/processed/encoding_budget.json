@@ -1,0 +1,2894 @@
+{
+  "assays": [
+    {
+      "assay": "A0A140D2T1_ZIKV_Sourisseau_2019",
+      "n": 9576,
+      "length": 3423,
+      "max_order": 1,
+      "n_order_1": 9576,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 9576
+      }
+    },
+    {
+      "assay": "A0A192B1T2_9HIV1_Haddox_2018",
+      "n": 12577,
+      "length": 852,
+      "max_order": 1,
+      "n_order_1": 12577,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 12577
+      }
+    },
+    {
+      "assay": "A0A1I9GEU1_NEIME_Kennouche_2019",
+      "n": 922,
+      "length": 161,
+      "max_order": 1,
+      "n_order_1": 922,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 922
+      }
+    },
+    {
+      "assay": "A0A247D711_LISMN_Stadelmann_2021",
+      "n": 1653,
+      "length": 87,
+      "max_order": 1,
+      "n_order_1": 1653,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1653
+      }
+    },
+    {
+      "assay": "A0A2Z5U3Z0_9INFA_Doud_2016",
+      "n": 10715,
+      "length": 565,
+      "max_order": 1,
+      "n_order_1": 10715,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 10715
+      }
+    },
+    {
+      "assay": "A0A2Z5U3Z0_9INFA_Wu_2014",
+      "n": 2350,
+      "length": 565,
+      "max_order": 1,
+      "n_order_1": 2350,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2350
+      }
+    },
+    {
+      "assay": "A4D664_9INFA_Soh_2019",
+      "n": 14421,
+      "length": 759,
+      "max_order": 1,
+      "n_order_1": 14421,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 14421
+      }
+    },
+    {
+      "assay": "A4GRB6_PSEAI_Chen_2020",
+      "n": 5004,
+      "length": 266,
+      "max_order": 1,
+      "n_order_1": 5004,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 5004
+      }
+    },
+    {
+      "assay": "A4_HUMAN_Seuma_2022",
+      "n": 14811,
+      "length": 770,
+      "max_order": 2,
+      "n_order_1": 796,
+      "n_order_2": 14015,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 796,
+        "2": 14015
+      }
+    },
+    {
+      "assay": "AACC1_PSEAI_Dandage_2018",
+      "n": 1801,
+      "length": 177,
+      "max_order": 1,
+      "n_order_1": 1801,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1801
+      }
+    },
+    {
+      "assay": "ACE2_HUMAN_Chan_2020",
+      "n": 2223,
+      "length": 805,
+      "max_order": 1,
+      "n_order_1": 2223,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2223
+      }
+    },
+    {
+      "assay": "ADRB2_HUMAN_Jones_2020",
+      "n": 7800,
+      "length": 413,
+      "max_order": 1,
+      "n_order_1": 7800,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7800
+      }
+    },
+    {
+      "assay": "AICDA_HUMAN_Gajula_2014_3cycles",
+      "n": 209,
+      "length": 198,
+      "max_order": 1,
+      "n_order_1": 209,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 209
+      }
+    },
+    {
+      "assay": "AMFR_HUMAN_Tsuboyama_2023_4G3O",
+      "n": 2972,
+      "length": 47,
+      "max_order": 2,
+      "n_order_1": 820,
+      "n_order_2": 2152,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 820,
+        "2": 2152
+      }
+    },
+    {
+      "assay": "AMIE_PSEAE_Wrenbeck_2017",
+      "n": 6227,
+      "length": 346,
+      "max_order": 1,
+      "n_order_1": 6227,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6227
+      }
+    },
+    {
+      "assay": "ANCSZ_Hobbs_2022",
+      "n": 4670,
+      "length": 627,
+      "max_order": 1,
+      "n_order_1": 4670,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4670
+      }
+    },
+    {
+      "assay": "ARGR_ECOLI_Tsuboyama_2023_1AOY",
+      "n": 1287,
+      "length": 69,
+      "max_order": 1,
+      "n_order_1": 1287,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1287
+      }
+    },
+    {
+      "assay": "B2L11_HUMAN_Dutta_2010_binding-Mcl-1",
+      "n": 170,
+      "length": 198,
+      "max_order": 1,
+      "n_order_1": 170,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 170
+      }
+    },
+    {
+      "assay": "BBC1_YEAST_Tsuboyama_2023_1TG0",
+      "n": 2069,
+      "length": 64,
+      "max_order": 2,
+      "n_order_1": 1084,
+      "n_order_2": 985,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1084,
+        "2": 985
+      }
+    },
+    {
+      "assay": "BCHB_CHLTE_Tsuboyama_2023_2KRU",
+      "n": 1572,
+      "length": 52,
+      "max_order": 2,
+      "n_order_1": 890,
+      "n_order_2": 682,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 890,
+        "2": 682
+      }
+    },
+    {
+      "assay": "BLAT_ECOLX_Deng_2012",
+      "n": 4996,
+      "length": 286,
+      "max_order": 1,
+      "n_order_1": 4996,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4996
+      }
+    },
+    {
+      "assay": "BLAT_ECOLX_Firnberg_2014",
+      "n": 4783,
+      "length": 286,
+      "max_order": 1,
+      "n_order_1": 4783,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4783
+      }
+    },
+    {
+      "assay": "BLAT_ECOLX_Jacquier_2013",
+      "n": 989,
+      "length": 286,
+      "max_order": 1,
+      "n_order_1": 989,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 989
+      }
+    },
+    {
+      "assay": "BLAT_ECOLX_Stiffler_2015",
+      "n": 4996,
+      "length": 286,
+      "max_order": 1,
+      "n_order_1": 4996,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4996
+      }
+    },
+    {
+      "assay": "BRCA1_HUMAN_Findlay_2018",
+      "n": 1837,
+      "length": 1863,
+      "max_order": 1,
+      "n_order_1": 1837,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1837
+      }
+    },
+    {
+      "assay": "BRCA2_HUMAN_Erwood_2022_HEK293T",
+      "n": 265,
+      "length": 3418,
+      "max_order": 1,
+      "n_order_1": 265,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 265
+      }
+    },
+    {
+      "assay": "C6KNH7_9INFA_Lee_2018",
+      "n": 10754,
+      "length": 566,
+      "max_order": 1,
+      "n_order_1": 10754,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 10754
+      }
+    },
+    {
+      "assay": "CALM1_HUMAN_Weile_2017",
+      "n": 1813,
+      "length": 149,
+      "max_order": 1,
+      "n_order_1": 1813,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1813
+      }
+    },
+    {
+      "assay": "CAPSD_AAV2S_Sinai_2021",
+      "n": 42328,
+      "length": 735,
+      "max_order": 28,
+      "n_order_1": 532,
+      "n_order_2": 10833,
+      "n_order_ge3": 30963,
+      "histogram": {
+        "1": 532,
+        "2": 10833,
+        "3": 6906,
+        "4": 6646,
+        "5": 6298,
+        "6": 5396,
+        "7": 858,
+        "8": 739,
+        "9": 651,
+        "10": 583,
+        "11": 445,
+        "12": 407,
+        "13": 368,
+        "14": 328,
+        "15": 286,
+        "16": 236,
+        "17": 203,
+        "18": 159,
+        "19": 119,
+        "20": 93,
+        "21": 74,
+        "22": 56,
+        "23": 43,
+        "24": 29,
+        "25": 17,
+        "26": 12,
+        "27": 8,
+        "28": 3
+      }
+    },
+    {
+      "assay": "CAR11_HUMAN_Meitlis_2020_gof",
+      "n": 2374,
+      "length": 1154,
+      "max_order": 1,
+      "n_order_1": 2374,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2374
+      }
+    },
+    {
+      "assay": "CAR11_HUMAN_Meitlis_2020_lof",
+      "n": 2395,
+      "length": 1154,
+      "max_order": 1,
+      "n_order_1": 2395,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2395
+      }
+    },
+    {
+      "assay": "CAS9_STRP1_Spencer_2017_positive",
+      "n": 8117,
+      "length": 1368,
+      "max_order": 1,
+      "n_order_1": 8117,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 8117
+      }
+    },
+    {
+      "assay": "CASP3_HUMAN_Roychowdhury_2020",
+      "n": 1567,
+      "length": 258,
+      "max_order": 1,
+      "n_order_1": 1567,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1567
+      }
+    },
+    {
+      "assay": "CASP7_HUMAN_Roychowdhury_2020",
+      "n": 1680,
+      "length": 281,
+      "max_order": 1,
+      "n_order_1": 1680,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1680
+      }
+    },
+    {
+      "assay": "CATR_CHLRE_Tsuboyama_2023_2AMI",
+      "n": 1903,
+      "length": 72,
+      "max_order": 2,
+      "n_order_1": 1340,
+      "n_order_2": 563,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1340,
+        "2": 563
+      }
+    },
+    {
+      "assay": "CBPA2_HUMAN_Tsuboyama_2023_1O6X",
+      "n": 2068,
+      "length": 72,
+      "max_order": 2,
+      "n_order_1": 1357,
+      "n_order_2": 711,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1357,
+        "2": 711
+      }
+    },
+    {
+      "assay": "CBS_HUMAN_Sun_2020",
+      "n": 7217,
+      "length": 551,
+      "max_order": 1,
+      "n_order_1": 7217,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7217
+      }
+    },
+    {
+      "assay": "CBX4_HUMAN_Tsuboyama_2023_2K28",
+      "n": 2282,
+      "length": 50,
+      "max_order": 2,
+      "n_order_1": 917,
+      "n_order_2": 1365,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 917,
+        "2": 1365
+      }
+    },
+    {
+      "assay": "CCDB_ECOLI_Adkar_2012",
+      "n": 1176,
+      "length": 101,
+      "max_order": 1,
+      "n_order_1": 1176,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1176
+      }
+    },
+    {
+      "assay": "CCDB_ECOLI_Tripathi_2016",
+      "n": 1663,
+      "length": 101,
+      "max_order": 1,
+      "n_order_1": 1663,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1663
+      }
+    },
+    {
+      "assay": "CCR5_HUMAN_Gill_2023",
+      "n": 6137,
+      "length": 352,
+      "max_order": 1,
+      "n_order_1": 6137,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6137
+      }
+    },
+    {
+      "assay": "CD19_HUMAN_Klesmith_2019_FMC_singles",
+      "n": 3761,
+      "length": 556,
+      "max_order": 1,
+      "n_order_1": 3761,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3761
+      }
+    },
+    {
+      "assay": "CP2C9_HUMAN_Amorosi_2021_abundance",
+      "n": 6370,
+      "length": 490,
+      "max_order": 1,
+      "n_order_1": 6370,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6370
+      }
+    },
+    {
+      "assay": "CP2C9_HUMAN_Amorosi_2021_activity",
+      "n": 6142,
+      "length": 490,
+      "max_order": 1,
+      "n_order_1": 6142,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6142
+      }
+    },
+    {
+      "assay": "CSN4_MOUSE_Tsuboyama_2023_1UFM",
+      "n": 3295,
+      "length": 72,
+      "max_order": 2,
+      "n_order_1": 1353,
+      "n_order_2": 1942,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1353,
+        "2": 1942
+      }
+    },
+    {
+      "assay": "CUE1_YEAST_Tsuboyama_2023_2MYX",
+      "n": 1580,
+      "length": 52,
+      "max_order": 2,
+      "n_order_1": 955,
+      "n_order_2": 625,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 955,
+        "2": 625
+      }
+    },
+    {
+      "assay": "D7PM05_CLYGR_Somermeyer_2022",
+      "n": 24515,
+      "length": 235,
+      "max_order": 23,
+      "n_order_1": 1169,
+      "n_order_2": 10148,
+      "n_order_ge3": 13198,
+      "histogram": {
+        "1": 1169,
+        "2": 10148,
+        "3": 6315,
+        "4": 3417,
+        "5": 1752,
+        "6": 935,
+        "7": 427,
+        "8": 220,
+        "9": 76,
+        "10": 33,
+        "11": 16,
+        "12": 3,
+        "13": 2,
+        "14": 1,
+        "23": 1
+      }
+    },
+    {
+      "assay": "DLG4_HUMAN_Faure_2021",
+      "n": 6976,
+      "length": 724,
+      "max_order": 2,
+      "n_order_1": 1280,
+      "n_order_2": 5696,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1280,
+        "2": 5696
+      }
+    },
+    {
+      "assay": "DLG4_RAT_McLaughlin_2012",
+      "n": 1576,
+      "length": 724,
+      "max_order": 1,
+      "n_order_1": 1576,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1576
+      }
+    },
+    {
+      "assay": "DN7A_SACS2_Tsuboyama_2023_1JIC",
+      "n": 1008,
+      "length": 55,
+      "max_order": 1,
+      "n_order_1": 1008,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1008
+      }
+    },
+    {
+      "assay": "DNJA1_HUMAN_Tsuboyama_2023_2LO1",
+      "n": 2264,
+      "length": 65,
+      "max_order": 2,
+      "n_order_1": 1216,
+      "n_order_2": 1048,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1216,
+        "2": 1048
+      }
+    },
+    {
+      "assay": "DOCK1_MOUSE_Tsuboyama_2023_2M0Y",
+      "n": 2915,
+      "length": 66,
+      "max_order": 2,
+      "n_order_1": 1213,
+      "n_order_2": 1702,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1213,
+        "2": 1702
+      }
+    },
+    {
+      "assay": "DYR_ECOLI_Nguyen_2023",
+      "n": 2916,
+      "length": 159,
+      "max_order": 1,
+      "n_order_1": 2916,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2916
+      }
+    },
+    {
+      "assay": "DYR_ECOLI_Thompson_2019",
+      "n": 2363,
+      "length": 159,
+      "max_order": 1,
+      "n_order_1": 2363,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2363
+      }
+    },
+    {
+      "assay": "ENVZ_ECOLI_Ghose_2023",
+      "n": 1121,
+      "length": 60,
+      "max_order": 1,
+      "n_order_1": 1121,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1121
+      }
+    },
+    {
+      "assay": "ENV_HV1B9_DuenasDecamp_2016",
+      "n": 375,
+      "length": 853,
+      "max_order": 1,
+      "n_order_1": 375,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 375
+      }
+    },
+    {
+      "assay": "ENV_HV1BR_Haddox_2016",
+      "n": 12863,
+      "length": 861,
+      "max_order": 1,
+      "n_order_1": 12863,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 12863
+      }
+    },
+    {
+      "assay": "EPHB2_HUMAN_Tsuboyama_2023_1F0M",
+      "n": 1960,
+      "length": 66,
+      "max_order": 2,
+      "n_order_1": 1239,
+      "n_order_2": 721,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1239,
+        "2": 721
+      }
+    },
+    {
+      "assay": "ERBB2_HUMAN_Elazar_2016",
+      "n": 326,
+      "length": 1255,
+      "max_order": 1,
+      "n_order_1": 326,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 326
+      }
+    },
+    {
+      "assay": "ESTA_BACSU_Nutschel_2020",
+      "n": 2172,
+      "length": 212,
+      "max_order": 1,
+      "n_order_1": 2172,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2172
+      }
+    },
+    {
+      "assay": "F7YBW8_MESOW_Aakre_2015",
+      "n": 9192,
+      "length": 93,
+      "max_order": 4,
+      "n_order_1": 37,
+      "n_order_2": 499,
+      "n_order_ge3": 8656,
+      "histogram": {
+        "1": 37,
+        "2": 499,
+        "3": 2798,
+        "4": 5858
+      }
+    },
+    {
+      "assay": "F7YBW8_MESOW_Ding_2023",
+      "n": 7922,
+      "length": 93,
+      "max_order": 10,
+      "n_order_1": 80,
+      "n_order_2": 86,
+      "n_order_ge3": 7756,
+      "histogram": {
+        "1": 80,
+        "2": 86,
+        "3": 603,
+        "4": 2159,
+        "5": 3240,
+        "6": 32,
+        "7": 60,
+        "8": 244,
+        "9": 653,
+        "10": 765
+      }
+    },
+    {
+      "assay": "FECA_ECOLI_Tsuboyama_2023_2D1U",
+      "n": 1886,
+      "length": 72,
+      "max_order": 2,
+      "n_order_1": 1219,
+      "n_order_2": 667,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1219,
+        "2": 667
+      }
+    },
+    {
+      "assay": "FKBP3_HUMAN_Tsuboyama_2023_2KFV",
+      "n": 1237,
+      "length": 69,
+      "max_order": 1,
+      "n_order_1": 1237,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1237
+      }
+    },
+    {
+      "assay": "GAL4_YEAST_Kitzman_2015",
+      "n": 1195,
+      "length": 881,
+      "max_order": 1,
+      "n_order_1": 1195,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1195
+      }
+    },
+    {
+      "assay": "GCN4_YEAST_Staller_2018",
+      "n": 2638,
+      "length": 281,
+      "max_order": 44,
+      "n_order_1": 33,
+      "n_order_2": 55,
+      "n_order_ge3": 2550,
+      "histogram": {
+        "1": 33,
+        "2": 55,
+        "3": 149,
+        "4": 380,
+        "5": 608,
+        "6": 406,
+        "7": 5,
+        "8": 14,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 2,
+        "13": 1,
+        "14": 3,
+        "15": 1,
+        "16": 5,
+        "17": 2,
+        "20": 2,
+        "22": 1,
+        "23": 1,
+        "24": 1,
+        "26": 1,
+        "29": 1,
+        "31": 3,
+        "32": 8,
+        "33": 17,
+        "34": 39,
+        "35": 80,
+        "36": 100,
+        "37": 146,
+        "38": 140,
+        "39": 124,
+        "40": 98,
+        "41": 80,
+        "42": 63,
+        "43": 54,
+        "44": 12
+      }
+    },
+    {
+      "assay": "GDIA_HUMAN_Silverstein_2021",
+      "n": 1154,
+      "length": 447,
+      "max_order": 1,
+      "n_order_1": 1154,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1154
+      }
+    },
+    {
+      "assay": "GFP_AEQVI_Sarkisyan_2016",
+      "n": 51714,
+      "length": 238,
+      "max_order": 15,
+      "n_order_1": 1084,
+      "n_order_2": 12777,
+      "n_order_ge3": 37853,
+      "histogram": {
+        "1": 1084,
+        "2": 12777,
+        "3": 12336,
+        "4": 9387,
+        "5": 6825,
+        "6": 4298,
+        "7": 2526,
+        "8": 1364,
+        "9": 627,
+        "10": 299,
+        "11": 118,
+        "12": 43,
+        "13": 23,
+        "14": 5,
+        "15": 2
+      }
+    },
+    {
+      "assay": "GLPA_HUMAN_Elazar_2016",
+      "n": 245,
+      "length": 150,
+      "max_order": 1,
+      "n_order_1": 245,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 245
+      }
+    },
+    {
+      "assay": "GRB2_HUMAN_Faure_2021",
+      "n": 63366,
+      "length": 217,
+      "max_order": 2,
+      "n_order_1": 1034,
+      "n_order_2": 62332,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1034,
+        "2": 62332
+      }
+    },
+    {
+      "assay": "HCP_LAMBD_Tsuboyama_2023_2L6Q",
+      "n": 1040,
+      "length": 55,
+      "max_order": 1,
+      "n_order_1": 1040,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1040
+      }
+    },
+    {
+      "assay": "HECD1_HUMAN_Tsuboyama_2023_3DKM",
+      "n": 5586,
+      "length": 72,
+      "max_order": 2,
+      "n_order_1": 1244,
+      "n_order_2": 4342,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1244,
+        "2": 4342
+      }
+    },
+    {
+      "assay": "HEM3_HUMAN_Loggerenberg_2023",
+      "n": 5689,
+      "length": 361,
+      "max_order": 1,
+      "n_order_1": 5689,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 5689
+      }
+    },
+    {
+      "assay": "HIS7_YEAST_Pokusaeva_2019",
+      "n": 496137,
+      "length": 220,
+      "max_order": 28,
+      "n_order_1": 168,
+      "n_order_2": 1475,
+      "n_order_ge3": 494494,
+      "histogram": {
+        "1": 168,
+        "2": 1475,
+        "3": 7627,
+        "4": 25927,
+        "5": 60263,
+        "6": 98869,
+        "7": 115751,
+        "8": 97639,
+        "9": 57139,
+        "10": 22942,
+        "11": 6370,
+        "12": 1354,
+        "13": 245,
+        "14": 71,
+        "15": 40,
+        "16": 39,
+        "17": 29,
+        "18": 35,
+        "19": 38,
+        "20": 24,
+        "21": 18,
+        "22": 16,
+        "23": 14,
+        "24": 16,
+        "25": 10,
+        "26": 11,
+        "27": 4,
+        "28": 3
+      }
+    },
+    {
+      "assay": "HMDH_HUMAN_Jiang_2019",
+      "n": 16853,
+      "length": 888,
+      "max_order": 1,
+      "n_order_1": 16853,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 16853
+      }
+    },
+    {
+      "assay": "HSP82_YEAST_Cote-Hammarlof_2020_growth-H2O2",
+      "n": 2252,
+      "length": 709,
+      "max_order": 1,
+      "n_order_1": 2252,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2252
+      }
+    },
+    {
+      "assay": "HSP82_YEAST_Flynn_2019",
+      "n": 13294,
+      "length": 709,
+      "max_order": 1,
+      "n_order_1": 13294,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 13294
+      }
+    },
+    {
+      "assay": "HSP82_YEAST_Mishra_2016",
+      "n": 4323,
+      "length": 709,
+      "max_order": 1,
+      "n_order_1": 4323,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4323
+      }
+    },
+    {
+      "assay": "HXK4_HUMAN_Gersing_2022_activity",
+      "n": 8570,
+      "length": 465,
+      "max_order": 1,
+      "n_order_1": 8570,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 8570
+      }
+    },
+    {
+      "assay": "HXK4_HUMAN_Gersing_2023_abundance",
+      "n": 8396,
+      "length": 465,
+      "max_order": 1,
+      "n_order_1": 8396,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 8396
+      }
+    },
+    {
+      "assay": "I6TAH8_I68A0_Doud_2015",
+      "n": 9462,
+      "length": 498,
+      "max_order": 1,
+      "n_order_1": 9462,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 9462
+      }
+    },
+    {
+      "assay": "IF1_ECOLI_Kelsic_2016",
+      "n": 1367,
+      "length": 72,
+      "max_order": 1,
+      "n_order_1": 1367,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1367
+      }
+    },
+    {
+      "assay": "ILF3_HUMAN_Tsuboyama_2023_2L33",
+      "n": 1329,
+      "length": 71,
+      "max_order": 1,
+      "n_order_1": 1329,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1329
+      }
+    },
+    {
+      "assay": "ISDH_STAAW_Tsuboyama_2023_2LHR",
+      "n": 1944,
+      "length": 55,
+      "max_order": 2,
+      "n_order_1": 940,
+      "n_order_2": 1004,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 940,
+        "2": 1004
+      }
+    },
+    {
+      "assay": "KCNE1_HUMAN_Muhammad_2023_expression",
+      "n": 2339,
+      "length": 129,
+      "max_order": 1,
+      "n_order_1": 2339,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2339
+      }
+    },
+    {
+      "assay": "KCNE1_HUMAN_Muhammad_2023_function",
+      "n": 2315,
+      "length": 129,
+      "max_order": 1,
+      "n_order_1": 2315,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2315
+      }
+    },
+    {
+      "assay": "KCNH2_HUMAN_Kozek_2020",
+      "n": 200,
+      "length": 1159,
+      "max_order": 1,
+      "n_order_1": 200,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 200
+      }
+    },
+    {
+      "assay": "KCNJ2_MOUSE_Coyote-Maestas_2022_function",
+      "n": 6963,
+      "length": 428,
+      "max_order": 1,
+      "n_order_1": 6963,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6963
+      }
+    },
+    {
+      "assay": "KCNJ2_MOUSE_Coyote-Maestas_2022_surface",
+      "n": 6917,
+      "length": 428,
+      "max_order": 1,
+      "n_order_1": 6917,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6917
+      }
+    },
+    {
+      "assay": "KKA2_KLEPN_Melnikov_2014",
+      "n": 4960,
+      "length": 264,
+      "max_order": 1,
+      "n_order_1": 4960,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4960
+      }
+    },
+    {
+      "assay": "LGK_LIPST_Klesmith_2015",
+      "n": 7890,
+      "length": 439,
+      "max_order": 1,
+      "n_order_1": 7890,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7890
+      }
+    },
+    {
+      "assay": "LYAM1_HUMAN_Elazar_2016",
+      "n": 359,
+      "length": 372,
+      "max_order": 1,
+      "n_order_1": 359,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 359
+      }
+    },
+    {
+      "assay": "MAFG_MOUSE_Tsuboyama_2023_1K1V",
+      "n": 1429,
+      "length": 41,
+      "max_order": 2,
+      "n_order_1": 762,
+      "n_order_2": 667,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 762,
+        "2": 667
+      }
+    },
+    {
+      "assay": "MBD11_ARATH_Tsuboyama_2023_6ACV",
+      "n": 2116,
+      "length": 66,
+      "max_order": 2,
+      "n_order_1": 1155,
+      "n_order_2": 961,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1155,
+        "2": 961
+      }
+    },
+    {
+      "assay": "MET_HUMAN_Estevam_2023",
+      "n": 5393,
+      "length": 287,
+      "max_order": 1,
+      "n_order_1": 5393,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 5393
+      }
+    },
+    {
+      "assay": "MK01_HUMAN_Brenan_2016",
+      "n": 6809,
+      "length": 360,
+      "max_order": 1,
+      "n_order_1": 6809,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6809
+      }
+    },
+    {
+      "assay": "MLAC_ECOLI_MacRae_2023",
+      "n": 4007,
+      "length": 211,
+      "max_order": 1,
+      "n_order_1": 4007,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4007
+      }
+    },
+    {
+      "assay": "MSH2_HUMAN_Jia_2020",
+      "n": 16749,
+      "length": 934,
+      "max_order": 1,
+      "n_order_1": 16749,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 16749
+      }
+    },
+    {
+      "assay": "MTH3_HAEAE_RockahShmuel_2015",
+      "n": 1777,
+      "length": 330,
+      "max_order": 1,
+      "n_order_1": 1777,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1777
+      }
+    },
+    {
+      "assay": "MTHR_HUMAN_Weile_2021",
+      "n": 12464,
+      "length": 656,
+      "max_order": 1,
+      "n_order_1": 12464,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 12464
+      }
+    },
+    {
+      "assay": "MYO3_YEAST_Tsuboyama_2023_2BTT",
+      "n": 3297,
+      "length": 61,
+      "max_order": 2,
+      "n_order_1": 947,
+      "n_order_2": 2350,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 947,
+        "2": 2350
+      }
+    },
+    {
+      "assay": "NCAP_I34A1_Doud_2015",
+      "n": 9462,
+      "length": 498,
+      "max_order": 1,
+      "n_order_1": 9462,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 9462
+      }
+    },
+    {
+      "assay": "NKX31_HUMAN_Tsuboyama_2023_2L9R",
+      "n": 2482,
+      "length": 61,
+      "max_order": 2,
+      "n_order_1": 1149,
+      "n_order_2": 1333,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1149,
+        "2": 1333
+      }
+    },
+    {
+      "assay": "NPC1_HUMAN_Erwood_2022_HEK293T",
+      "n": 637,
+      "length": 1278,
+      "max_order": 1,
+      "n_order_1": 637,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 637
+      }
+    },
+    {
+      "assay": "NPC1_HUMAN_Erwood_2022_RPE1",
+      "n": 63,
+      "length": 1278,
+      "max_order": 1,
+      "n_order_1": 63,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 63
+      }
+    },
+    {
+      "assay": "NRAM_I33A0_Jiang_2016",
+      "n": 298,
+      "length": 453,
+      "max_order": 1,
+      "n_order_1": 298,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 298
+      }
+    },
+    {
+      "assay": "NUD15_HUMAN_Suiter_2020",
+      "n": 2844,
+      "length": 164,
+      "max_order": 1,
+      "n_order_1": 2844,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2844
+      }
+    },
+    {
+      "assay": "NUSA_ECOLI_Tsuboyama_2023_1WCL",
+      "n": 2028,
+      "length": 69,
+      "max_order": 2,
+      "n_order_1": 1306,
+      "n_order_2": 722,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1306,
+        "2": 722
+      }
+    },
+    {
+      "assay": "NUSG_MYCTU_Tsuboyama_2023_2MI6",
+      "n": 1380,
+      "length": 55,
+      "max_order": 2,
+      "n_order_1": 1019,
+      "n_order_2": 361,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1019,
+        "2": 361
+      }
+    },
+    {
+      "assay": "OBSCN_HUMAN_Tsuboyama_2023_1V1C",
+      "n": 3197,
+      "length": 65,
+      "max_order": 2,
+      "n_order_1": 1213,
+      "n_order_2": 1984,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1213,
+        "2": 1984
+      }
+    },
+    {
+      "assay": "ODP2_GEOSE_Tsuboyama_2023_1W4G",
+      "n": 1134,
+      "length": 44,
+      "max_order": 2,
+      "n_order_1": 669,
+      "n_order_2": 465,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 669,
+        "2": 465
+      }
+    },
+    {
+      "assay": "OPSD_HUMAN_Wan_2019",
+      "n": 165,
+      "length": 348,
+      "max_order": 1,
+      "n_order_1": 165,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 165
+      }
+    },
+    {
+      "assay": "OTC_HUMAN_Lo_2023",
+      "n": 1570,
+      "length": 354,
+      "max_order": 1,
+      "n_order_1": 1570,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1570
+      }
+    },
+    {
+      "assay": "OTU7A_HUMAN_Tsuboyama_2023_2L2D",
+      "n": 635,
+      "length": 42,
+      "max_order": 1,
+      "n_order_1": 635,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 635
+      }
+    },
+    {
+      "assay": "OXDA_RHOTO_Vanella_2023_activity",
+      "n": 6396,
+      "length": 364,
+      "max_order": 1,
+      "n_order_1": 6396,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6396
+      }
+    },
+    {
+      "assay": "OXDA_RHOTO_Vanella_2023_expression",
+      "n": 6769,
+      "length": 364,
+      "max_order": 1,
+      "n_order_1": 6769,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 6769
+      }
+    },
+    {
+      "assay": "P53_HUMAN_Giacomelli_2018_Null_Etoposide",
+      "n": 7467,
+      "length": 393,
+      "max_order": 1,
+      "n_order_1": 7467,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7467
+      }
+    },
+    {
+      "assay": "P53_HUMAN_Giacomelli_2018_Null_Nutlin",
+      "n": 7467,
+      "length": 393,
+      "max_order": 1,
+      "n_order_1": 7467,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7467
+      }
+    },
+    {
+      "assay": "P53_HUMAN_Giacomelli_2018_WT_Nutlin",
+      "n": 7467,
+      "length": 393,
+      "max_order": 1,
+      "n_order_1": 7467,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7467
+      }
+    },
+    {
+      "assay": "P53_HUMAN_Kotler_2018",
+      "n": 1048,
+      "length": 393,
+      "max_order": 1,
+      "n_order_1": 1048,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1048
+      }
+    },
+    {
+      "assay": "P84126_THETH_Chan_2017",
+      "n": 1519,
+      "length": 254,
+      "max_order": 1,
+      "n_order_1": 1519,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1519
+      }
+    },
+    {
+      "assay": "PABP_YEAST_Melamed_2013",
+      "n": 37708,
+      "length": 577,
+      "max_order": 2,
+      "n_order_1": 1187,
+      "n_order_2": 36521,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1187,
+        "2": 36521
+      }
+    },
+    {
+      "assay": "PAI1_HUMAN_Huttinger_2021",
+      "n": 5345,
+      "length": 402,
+      "max_order": 1,
+      "n_order_1": 5345,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 5345
+      }
+    },
+    {
+      "assay": "PA_I34A1_Wu_2015",
+      "n": 1820,
+      "length": 716,
+      "max_order": 1,
+      "n_order_1": 1820,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1820
+      }
+    },
+    {
+      "assay": "PHOT_CHLRE_Chen_2023",
+      "n": 167529,
+      "length": 118,
+      "max_order": 15,
+      "n_order_1": 2122,
+      "n_order_2": 176,
+      "n_order_ge3": 165231,
+      "histogram": {
+        "1": 2122,
+        "2": 176,
+        "3": 978,
+        "4": 3565,
+        "5": 9603,
+        "6": 19193,
+        "7": 29255,
+        "8": 34230,
+        "9": 30925,
+        "10": 21167,
+        "11": 11022,
+        "12": 4093,
+        "13": 1031,
+        "14": 159,
+        "15": 10
+      }
+    },
+    {
+      "assay": "PIN1_HUMAN_Tsuboyama_2023_1I6C",
+      "n": 802,
+      "length": 39,
+      "max_order": 2,
+      "n_order_1": 686,
+      "n_order_2": 116,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 686,
+        "2": 116
+      }
+    },
+    {
+      "assay": "PITX2_HUMAN_Tsuboyama_2023_2L7M",
+      "n": 1824,
+      "length": 52,
+      "max_order": 2,
+      "n_order_1": 938,
+      "n_order_2": 886,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 938,
+        "2": 886
+      }
+    },
+    {
+      "assay": "PKN1_HUMAN_Tsuboyama_2023_1URF",
+      "n": 1301,
+      "length": 71,
+      "max_order": 1,
+      "n_order_1": 1301,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1301
+      }
+    },
+    {
+      "assay": "POLG_CXB3N_Mattenberger_2021",
+      "n": 15711,
+      "length": 2185,
+      "max_order": 1,
+      "n_order_1": 15711,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 15711
+      }
+    },
+    {
+      "assay": "POLG_DEN26_Suphatrakul_2023",
+      "n": 16897,
+      "length": 900,
+      "max_order": 1,
+      "n_order_1": 16897,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 16897
+      }
+    },
+    {
+      "assay": "POLG_HCVJF_Qi_2014",
+      "n": 1630,
+      "length": 3033,
+      "max_order": 1,
+      "n_order_1": 1630,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1630
+      }
+    },
+    {
+      "assay": "POLG_PESV_Tsuboyama_2023_2MXD",
+      "n": 5130,
+      "length": 53,
+      "max_order": 2,
+      "n_order_1": 995,
+      "n_order_2": 4135,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 995,
+        "2": 4135
+      }
+    },
+    {
+      "assay": "PPARG_HUMAN_Majithia_2016",
+      "n": 9576,
+      "length": 505,
+      "max_order": 1,
+      "n_order_1": 9576,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 9576
+      }
+    },
+    {
+      "assay": "PPM1D_HUMAN_Miller_2022",
+      "n": 7889,
+      "length": 605,
+      "max_order": 1,
+      "n_order_1": 7889,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7889
+      }
+    },
+    {
+      "assay": "PR40A_HUMAN_Tsuboyama_2023_1UZC",
+      "n": 2033,
+      "length": 63,
+      "max_order": 2,
+      "n_order_1": 1163,
+      "n_order_2": 870,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1163,
+        "2": 870
+      }
+    },
+    {
+      "assay": "PRKN_HUMAN_Clausen_2023",
+      "n": 8756,
+      "length": 465,
+      "max_order": 1,
+      "n_order_1": 8756,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 8756
+      }
+    },
+    {
+      "assay": "PSAE_PICP2_Tsuboyama_2023_1PSE",
+      "n": 1579,
+      "length": 68,
+      "max_order": 2,
+      "n_order_1": 1219,
+      "n_order_2": 360,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1219,
+        "2": 360
+      }
+    },
+    {
+      "assay": "PTEN_HUMAN_Matreyek_2021",
+      "n": 5083,
+      "length": 403,
+      "max_order": 1,
+      "n_order_1": 5083,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 5083
+      }
+    },
+    {
+      "assay": "PTEN_HUMAN_Mighell_2018",
+      "n": 7260,
+      "length": 403,
+      "max_order": 1,
+      "n_order_1": 7260,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 7260
+      }
+    },
+    {
+      "assay": "Q2N0S5_9HIV1_Haddox_2018",
+      "n": 12729,
+      "length": 860,
+      "max_order": 1,
+      "n_order_1": 12729,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 12729
+      }
+    },
+    {
+      "assay": "Q53Z42_HUMAN_McShan_2019_binding-TAPBPR",
+      "n": 3344,
+      "length": 365,
+      "max_order": 1,
+      "n_order_1": 3344,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3344
+      }
+    },
+    {
+      "assay": "Q53Z42_HUMAN_McShan_2019_expression",
+      "n": 3344,
+      "length": 365,
+      "max_order": 1,
+      "n_order_1": 3344,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3344
+      }
+    },
+    {
+      "assay": "Q59976_STRSQ_Romero_2015",
+      "n": 2999,
+      "length": 501,
+      "max_order": 1,
+      "n_order_1": 2999,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2999
+      }
+    },
+    {
+      "assay": "Q6WV12_9MAXI_Somermeyer_2022",
+      "n": 31401,
+      "length": 222,
+      "max_order": 13,
+      "n_order_1": 1141,
+      "n_order_2": 15992,
+      "n_order_ge3": 14268,
+      "histogram": {
+        "1": 1141,
+        "2": 15992,
+        "3": 8762,
+        "4": 3575,
+        "5": 1300,
+        "6": 409,
+        "7": 159,
+        "8": 45,
+        "9": 9,
+        "10": 6,
+        "11": 1,
+        "12": 1,
+        "13": 1
+      }
+    },
+    {
+      "assay": "Q837P4_ENTFA_Meier_2023",
+      "n": 697,
+      "length": 589,
+      "max_order": 1,
+      "n_order_1": 697,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 697
+      }
+    },
+    {
+      "assay": "Q837P5_ENTFA_Meier_2023",
+      "n": 747,
+      "length": 571,
+      "max_order": 1,
+      "n_order_1": 747,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 747
+      }
+    },
+    {
+      "assay": "Q8WTC7_9CNID_Somermeyer_2022",
+      "n": 33510,
+      "length": 238,
+      "max_order": 43,
+      "n_order_1": 1201,
+      "n_order_2": 11260,
+      "n_order_ge3": 21049,
+      "histogram": {
+        "1": 1201,
+        "2": 11260,
+        "3": 11641,
+        "4": 5762,
+        "5": 2324,
+        "6": 857,
+        "7": 277,
+        "8": 98,
+        "9": 27,
+        "10": 20,
+        "11": 10,
+        "12": 4,
+        "13": 2,
+        "14": 6,
+        "16": 2,
+        "17": 3,
+        "18": 4,
+        "19": 1,
+        "20": 1,
+        "21": 4,
+        "22": 1,
+        "24": 1,
+        "41": 1,
+        "42": 2,
+        "43": 1
+      }
+    },
+    {
+      "assay": "R1AB_SARS2_Flynn_2022",
+      "n": 5725,
+      "length": 306,
+      "max_order": 1,
+      "n_order_1": 5725,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 5725
+      }
+    },
+    {
+      "assay": "RAD_ANTMA_Tsuboyama_2023_2CJJ",
+      "n": 912,
+      "length": 54,
+      "max_order": 2,
+      "n_order_1": 774,
+      "n_order_2": 138,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 774,
+        "2": 138
+      }
+    },
+    {
+      "assay": "RAF1_HUMAN_Zinkus-Boltz_2019",
+      "n": 297,
+      "length": 648,
+      "max_order": 1,
+      "n_order_1": 297,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 297
+      }
+    },
+    {
+      "assay": "RASH_HUMAN_Bandaru_2017",
+      "n": 3134,
+      "length": 189,
+      "max_order": 1,
+      "n_order_1": 3134,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3134
+      }
+    },
+    {
+      "assay": "RASK_HUMAN_Weng_2022_abundance",
+      "n": 26012,
+      "length": 188,
+      "max_order": 2,
+      "n_order_1": 3066,
+      "n_order_2": 22946,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3066,
+        "2": 22946
+      }
+    },
+    {
+      "assay": "RASK_HUMAN_Weng_2022_binding-DARPin_K55",
+      "n": 24873,
+      "length": 188,
+      "max_order": 2,
+      "n_order_1": 3084,
+      "n_order_2": 21789,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3084,
+        "2": 21789
+      }
+    },
+    {
+      "assay": "RBP1_HUMAN_Tsuboyama_2023_2KWH",
+      "n": 1332,
+      "length": 52,
+      "max_order": 2,
+      "n_order_1": 975,
+      "n_order_2": 357,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 975,
+        "2": 357
+      }
+    },
+    {
+      "assay": "RCD1_ARATH_Tsuboyama_2023_5OAO",
+      "n": 1261,
+      "length": 57,
+      "max_order": 2,
+      "n_order_1": 988,
+      "n_order_2": 273,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 988,
+        "2": 273
+      }
+    },
+    {
+      "assay": "RCRO_LAMBD_Tsuboyama_2023_1ORC",
+      "n": 2278,
+      "length": 63,
+      "max_order": 2,
+      "n_order_1": 1195,
+      "n_order_2": 1083,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1195,
+        "2": 1083
+      }
+    },
+    {
+      "assay": "RD23A_HUMAN_Tsuboyama_2023_1IFY",
+      "n": 1019,
+      "length": 44,
+      "max_order": 2,
+      "n_order_1": 798,
+      "n_order_2": 221,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 798,
+        "2": 221
+      }
+    },
+    {
+      "assay": "RDRP_I33A0_Li_2023",
+      "n": 12003,
+      "length": 757,
+      "max_order": 1,
+      "n_order_1": 12003,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 12003
+      }
+    },
+    {
+      "assay": "REV_HV1H2_Fernandes_2016",
+      "n": 2147,
+      "length": 116,
+      "max_order": 1,
+      "n_order_1": 2147,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2147
+      }
+    },
+    {
+      "assay": "RFAH_ECOLI_Tsuboyama_2023_2LCL",
+      "n": 1326,
+      "length": 55,
+      "max_order": 2,
+      "n_order_1": 969,
+      "n_order_2": 357,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 969,
+        "2": 357
+      }
+    },
+    {
+      "assay": "RL20_AQUAE_Tsuboyama_2023_1GYZ",
+      "n": 1461,
+      "length": 59,
+      "max_order": 2,
+      "n_order_1": 1121,
+      "n_order_2": 340,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1121,
+        "2": 340
+      }
+    },
+    {
+      "assay": "RL40A_YEAST_Mavor_2016",
+      "n": 1253,
+      "length": 128,
+      "max_order": 1,
+      "n_order_1": 1253,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1253
+      }
+    },
+    {
+      "assay": "RL40A_YEAST_Roscoe_2013",
+      "n": 1195,
+      "length": 128,
+      "max_order": 1,
+      "n_order_1": 1195,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1195
+      }
+    },
+    {
+      "assay": "RL40A_YEAST_Roscoe_2014",
+      "n": 1380,
+      "length": 128,
+      "max_order": 1,
+      "n_order_1": 1380,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1380
+      }
+    },
+    {
+      "assay": "RNC_ECOLI_Weeks_2023",
+      "n": 4277,
+      "length": 226,
+      "max_order": 1,
+      "n_order_1": 4277,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 4277
+      }
+    },
+    {
+      "assay": "RPC1_BP434_Tsuboyama_2023_1R69",
+      "n": 1459,
+      "length": 61,
+      "max_order": 2,
+      "n_order_1": 1124,
+      "n_order_2": 335,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1124,
+        "2": 335
+      }
+    },
+    {
+      "assay": "RPC1_LAMBD_Li_2019_high-expression",
+      "n": 351,
+      "length": 237,
+      "max_order": 1,
+      "n_order_1": 351,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 351
+      }
+    },
+    {
+      "assay": "RPC1_LAMBD_Li_2019_low-expression",
+      "n": 351,
+      "length": 237,
+      "max_order": 1,
+      "n_order_1": 351,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 351
+      }
+    },
+    {
+      "assay": "RS15_GEOSE_Tsuboyama_2023_1A32",
+      "n": 1195,
+      "length": 63,
+      "max_order": 1,
+      "n_order_1": 1195,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1195
+      }
+    },
+    {
+      "assay": "S22A1_HUMAN_Yee_2023_abundance",
+      "n": 9803,
+      "length": 553,
+      "max_order": 1,
+      "n_order_1": 9803,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 9803
+      }
+    },
+    {
+      "assay": "S22A1_HUMAN_Yee_2023_activity",
+      "n": 10094,
+      "length": 553,
+      "max_order": 1,
+      "n_order_1": 10094,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 10094
+      }
+    },
+    {
+      "assay": "SAV1_MOUSE_Tsuboyama_2023_2YSB",
+      "n": 965,
+      "length": 43,
+      "max_order": 2,
+      "n_order_1": 679,
+      "n_order_2": 286,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 679,
+        "2": 286
+      }
+    },
+    {
+      "assay": "SBI_STAAM_Tsuboyama_2023_2JVG",
+      "n": 1025,
+      "length": 56,
+      "max_order": 1,
+      "n_order_1": 1025,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1025
+      }
+    },
+    {
+      "assay": "SC6A4_HUMAN_Young_2021",
+      "n": 11576,
+      "length": 630,
+      "max_order": 1,
+      "n_order_1": 11576,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 11576
+      }
+    },
+    {
+      "assay": "SCIN_STAAR_Tsuboyama_2023_2QFF",
+      "n": 1212,
+      "length": 70,
+      "max_order": 1,
+      "n_order_1": 1212,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1212
+      }
+    },
+    {
+      "assay": "SCN5A_HUMAN_Glazer_2019",
+      "n": 224,
+      "length": 2016,
+      "max_order": 1,
+      "n_order_1": 224,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 224
+      }
+    },
+    {
+      "assay": "SDA_BACSU_Tsuboyama_2023_1PV0",
+      "n": 2770,
+      "length": 44,
+      "max_order": 2,
+      "n_order_1": 834,
+      "n_order_2": 1936,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 834,
+        "2": 1936
+      }
+    },
+    {
+      "assay": "SERC_HUMAN_Xie_2023",
+      "n": 1914,
+      "length": 370,
+      "max_order": 1,
+      "n_order_1": 1914,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1914
+      }
+    },
+    {
+      "assay": "SHOC2_HUMAN_Kwon_2022",
+      "n": 10972,
+      "length": 582,
+      "max_order": 1,
+      "n_order_1": 10972,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 10972
+      }
+    },
+    {
+      "assay": "SOX30_HUMAN_Tsuboyama_2023_7JJK",
+      "n": 1010,
+      "length": 57,
+      "max_order": 1,
+      "n_order_1": 1010,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1010
+      }
+    },
+    {
+      "assay": "SPA_STAAU_Tsuboyama_2023_1LP1",
+      "n": 2105,
+      "length": 55,
+      "max_order": 2,
+      "n_order_1": 1035,
+      "n_order_2": 1070,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1035,
+        "2": 1070
+      }
+    },
+    {
+      "assay": "SPG1_STRSG_Olson_2014",
+      "n": 536962,
+      "length": 448,
+      "max_order": 2,
+      "n_order_1": 1045,
+      "n_order_2": 535917,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1045,
+        "2": 535917
+      }
+    },
+    {
+      "assay": "SPG1_STRSG_Wu_2016",
+      "n": 149360,
+      "length": 448,
+      "max_order": 4,
+      "n_order_1": 76,
+      "n_order_2": 2091,
+      "n_order_ge3": 147193,
+      "histogram": {
+        "1": 76,
+        "2": 2091,
+        "3": 26019,
+        "4": 121174
+      }
+    },
+    {
+      "assay": "SPG2_STRSG_Tsuboyama_2023_5UBS",
+      "n": 1451,
+      "length": 56,
+      "max_order": 2,
+      "n_order_1": 1029,
+      "n_order_2": 422,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1029,
+        "2": 422
+      }
+    },
+    {
+      "assay": "SPIKE_SARS2_Starr_2020_binding",
+      "n": 3802,
+      "length": 1273,
+      "max_order": 1,
+      "n_order_1": 3802,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3802
+      }
+    },
+    {
+      "assay": "SPIKE_SARS2_Starr_2020_expression",
+      "n": 3798,
+      "length": 1273,
+      "max_order": 1,
+      "n_order_1": 3798,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3798
+      }
+    },
+    {
+      "assay": "SPTN1_CHICK_Tsuboyama_2023_1TUD",
+      "n": 3201,
+      "length": 60,
+      "max_order": 2,
+      "n_order_1": 1051,
+      "n_order_2": 2150,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1051,
+        "2": 2150
+      }
+    },
+    {
+      "assay": "SQSTM_MOUSE_Tsuboyama_2023_2RRU",
+      "n": 707,
+      "length": 40,
+      "max_order": 1,
+      "n_order_1": 707,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 707
+      }
+    },
+    {
+      "assay": "SR43C_ARATH_Tsuboyama_2023_2N88",
+      "n": 1583,
+      "length": 48,
+      "max_order": 2,
+      "n_order_1": 889,
+      "n_order_2": 694,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 889,
+        "2": 694
+      }
+    },
+    {
+      "assay": "SRBS1_HUMAN_Tsuboyama_2023_2O2W",
+      "n": 1556,
+      "length": 67,
+      "max_order": 2,
+      "n_order_1": 1211,
+      "n_order_2": 345,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1211,
+        "2": 345
+      }
+    },
+    {
+      "assay": "SRC_HUMAN_Ahler_2019",
+      "n": 3372,
+      "length": 536,
+      "max_order": 1,
+      "n_order_1": 3372,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3372
+      }
+    },
+    {
+      "assay": "SRC_HUMAN_Chakraborty_2023_binding-DAS_25uM",
+      "n": 3637,
+      "length": 536,
+      "max_order": 1,
+      "n_order_1": 3637,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3637
+      }
+    },
+    {
+      "assay": "SRC_HUMAN_Nguyen_2022",
+      "n": 3366,
+      "length": 536,
+      "max_order": 1,
+      "n_order_1": 3366,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3366
+      }
+    },
+    {
+      "assay": "SUMO1_HUMAN_Weile_2017",
+      "n": 1700,
+      "length": 101,
+      "max_order": 1,
+      "n_order_1": 1700,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1700
+      }
+    },
+    {
+      "assay": "SYUA_HUMAN_Newberry_2020",
+      "n": 2497,
+      "length": 140,
+      "max_order": 1,
+      "n_order_1": 2497,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2497
+      }
+    },
+    {
+      "assay": "TADBP_HUMAN_Bolognesi_2019",
+      "n": 1196,
+      "length": 414,
+      "max_order": 1,
+      "n_order_1": 1196,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1196
+      }
+    },
+    {
+      "assay": "TAT_HV1BR_Fernandes_2016",
+      "n": 1577,
+      "length": 86,
+      "max_order": 1,
+      "n_order_1": 1577,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1577
+      }
+    },
+    {
+      "assay": "TCRG1_MOUSE_Tsuboyama_2023_1E0L",
+      "n": 1058,
+      "length": 37,
+      "max_order": 2,
+      "n_order_1": 621,
+      "n_order_2": 437,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 621,
+        "2": 437
+      }
+    },
+    {
+      "assay": "THO1_YEAST_Tsuboyama_2023_2WQG",
+      "n": 1279,
+      "length": 41,
+      "max_order": 2,
+      "n_order_1": 656,
+      "n_order_2": 623,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 656,
+        "2": 623
+      }
+    },
+    {
+      "assay": "TNKS2_HUMAN_Tsuboyama_2023_5JRT",
+      "n": 1479,
+      "length": 59,
+      "max_order": 2,
+      "n_order_1": 1118,
+      "n_order_2": 361,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1118,
+        "2": 361
+      }
+    },
+    {
+      "assay": "TPK1_HUMAN_Weile_2017",
+      "n": 3181,
+      "length": 243,
+      "max_order": 1,
+      "n_order_1": 3181,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3181
+      }
+    },
+    {
+      "assay": "TPMT_HUMAN_Matreyek_2018",
+      "n": 3648,
+      "length": 245,
+      "max_order": 1,
+      "n_order_1": 3648,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 3648
+      }
+    },
+    {
+      "assay": "TPOR_HUMAN_Bridgford_2020",
+      "n": 562,
+      "length": 635,
+      "max_order": 1,
+      "n_order_1": 562,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 562
+      }
+    },
+    {
+      "assay": "TRPC_SACS2_Chan_2017",
+      "n": 1519,
+      "length": 248,
+      "max_order": 1,
+      "n_order_1": 1519,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1519
+      }
+    },
+    {
+      "assay": "TRPC_THEMA_Chan_2017",
+      "n": 1519,
+      "length": 252,
+      "max_order": 1,
+      "n_order_1": 1519,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1519
+      }
+    },
+    {
+      "assay": "UBC9_HUMAN_Weile_2017",
+      "n": 2563,
+      "length": 159,
+      "max_order": 1,
+      "n_order_1": 2563,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2563
+      }
+    },
+    {
+      "assay": "UBE4B_HUMAN_Tsuboyama_2023_3L1X",
+      "n": 3622,
+      "length": 69,
+      "max_order": 2,
+      "n_order_1": 1118,
+      "n_order_2": 2504,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1118,
+        "2": 2504
+      }
+    },
+    {
+      "assay": "UBE4B_MOUSE_Starita_2013",
+      "n": 899,
+      "length": 1173,
+      "max_order": 1,
+      "n_order_1": 899,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 899
+      }
+    },
+    {
+      "assay": "UBR5_HUMAN_Tsuboyama_2023_1I2T",
+      "n": 1453,
+      "length": 58,
+      "max_order": 2,
+      "n_order_1": 1094,
+      "n_order_2": 359,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1094,
+        "2": 359
+      }
+    },
+    {
+      "assay": "VG08_BPP22_Tsuboyama_2023_2GP8",
+      "n": 723,
+      "length": 40,
+      "max_order": 1,
+      "n_order_1": 723,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 723
+      }
+    },
+    {
+      "assay": "VILI_CHICK_Tsuboyama_2023_1YU5",
+      "n": 2568,
+      "length": 65,
+      "max_order": 2,
+      "n_order_1": 1202,
+      "n_order_2": 1366,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1202,
+        "2": 1366
+      }
+    },
+    {
+      "assay": "VKOR1_HUMAN_Chiasson_2020_abundance",
+      "n": 2695,
+      "length": 163,
+      "max_order": 1,
+      "n_order_1": 2695,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 2695
+      }
+    },
+    {
+      "assay": "VKOR1_HUMAN_Chiasson_2020_activity",
+      "n": 697,
+      "length": 163,
+      "max_order": 1,
+      "n_order_1": 697,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 697
+      }
+    },
+    {
+      "assay": "VRPI_BPT7_Tsuboyama_2023_2WNM",
+      "n": 1047,
+      "length": 56,
+      "max_order": 1,
+      "n_order_1": 1047,
+      "n_order_2": 0,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 1047
+      }
+    },
+    {
+      "assay": "YAIA_ECOLI_Tsuboyama_2023_2KVT",
+      "n": 1890,
+      "length": 52,
+      "max_order": 2,
+      "n_order_1": 928,
+      "n_order_2": 962,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 928,
+        "2": 962
+      }
+    },
+    {
+      "assay": "YAP1_HUMAN_Araya_2012",
+      "n": 10075,
+      "length": 504,
+      "max_order": 2,
+      "n_order_1": 362,
+      "n_order_2": 9713,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 362,
+        "2": 9713
+      }
+    },
+    {
+      "assay": "YNZC_BACSU_Tsuboyama_2023_2JVD",
+      "n": 2300,
+      "length": 39,
+      "max_order": 2,
+      "n_order_1": 714,
+      "n_order_2": 1586,
+      "n_order_ge3": 0,
+      "histogram": {
+        "1": 714,
+        "2": 1586
+      }
+    }
+  ],
+  "banned": [
+    "DYR_ECOLI_Nguyen_2023",
+    "DYR_ECOLI_Thompson_2019",
+    "F7YBW8_MESOW_Aakre_2015",
+    "F7YBW8_MESOW_Ding_2023",
+    "HIS7_YEAST_Pokusaeva_2019",
+    "SPG1_STRSG_Olson_2014",
+    "SPG1_STRSG_Wu_2016",
+    "SPG2_STRSG_Tsuboyama_2023_5UBS"
+  ],
+  "budgets": {
+    "proteingym_all_variants": {
+      "residues": 972380198.0,
+      "eflop": 1.2640942574,
+      "gpu_hours_at_30_tflops": 11.704576457407407,
+      "laptop_hours_at_0.27_tflops": 1300.5084952674897,
+      "cache_gb_d1280": 2489.29330688,
+      "cache_gb_d128": 248.929330688
+    },
+    "h1_train_and_test": {
+      "residues": 63879415.0,
+      "eflop": 0.0830432395,
+      "gpu_hours_at_30_tflops": 0.7689188842592592,
+      "laptop_hours_at_0.27_tflops": 85.43543158436214,
+      "cache_gb_d1280": 163.5313024,
+      "cache_gb_d128": 16.35313024
+    },
+    "all_singles_and_doubles_unbanned": {
+      "residues": 489986268.0,
+      "eflop": 0.6369821484,
+      "gpu_hours_at_30_tflops": 5.897982855555556,
+      "laptop_hours_at_0.27_tflops": 655.3314283950618,
+      "cache_gb_d1280": 1254.36484608,
+      "cache_gb_d128": 125.436484608
+    }
+  },
+  "h1_assays": [
+    "CAPSD_AAV2S_Sinai_2021",
+    "D7PM05_CLYGR_Somermeyer_2022",
+    "GCN4_YEAST_Staller_2018",
+    "GFP_AEQVI_Sarkisyan_2016",
+    "PHOT_CHLRE_Chen_2023",
+    "Q6WV12_9MAXI_Somermeyer_2022",
+    "Q8WTC7_9CNID_Somermeyer_2022"
+  ]
+}

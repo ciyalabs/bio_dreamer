@@ -8,6 +8,8 @@ poisoned split would mean the firewall is decorative.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
 import yaml
@@ -26,6 +28,7 @@ REGISTRY = "splits/heldout.yaml"
 PG_REF = "data/raw/proteingym/DMS_substitutions_reference.csv"
 
 # verified by mmseqs in step 0.3; see splits/heldout.yaml
+# found by homology search against the five held-out landscapes
 KNOWN_LEAKS = [
     "SPG1_STRSG_Olson_2014",
     "SPG1_STRSG_Wu_2016",
@@ -35,6 +38,9 @@ KNOWN_LEAKS = [
     "DYR_ECOLI_Nguyen_2023",
     "DYR_ECOLI_Thompson_2019",
 ]
+# banned for a different reason: not homologous to a held-out landscape, but the
+# source of the hypercubes that ARE evaluation data. No identity search finds this.
+BANNED_AS_EVALUATION_SOURCE = ["HIS7_YEAST_Pokusaeva_2019"]
 
 
 @pytest.fixture(scope="module")
@@ -59,7 +65,7 @@ def test_registry_loads_and_is_complete(registry):
     assert registry.identity_threshold == pytest.approx(0.70)
     names = {e["name"] for e in registry.held_out}
     assert {"TrpB4", "TEV", "GB1", "ParD2", "ParD3"} <= names
-    assert set(KNOWN_LEAKS) == registry.banned_assays
+    assert set(KNOWN_LEAKS) | set(BANNED_AS_EVALUATION_SOURCE) == registry.banned_assays
     assert registry.banned_flip2 == {"gb1", "trpb"}
 
 
@@ -172,3 +178,59 @@ def test_unknown_instance_is_refused(registry):
 
 def test_registry_file_is_valid_yaml():
     yaml.safe_load(open(REGISTRY).read())
+
+
+# ---- evaluation sources must be banned from training (added 2026-11-26) ----
+
+
+def _registry_yaml() -> dict:
+    import yaml
+
+    return yaml.safe_load(Path("splits/heldout.yaml").read_text())
+
+
+def test_every_evaluation_source_is_banned_from_training():
+    """The invariant the HIS3 gap violated.
+
+    HIS3 was a legitimate training assay until Step 0.2 extracted 13.5M
+    combinatorially complete hypercubes from it and Step 1.1 made those the
+    project's only >=5-step path-level evaluation data. Nothing re-checked the ban
+    list, and the identity search could not have caught it -- HIS3 is not one of
+    the five held-out landscapes, so there was nothing to match it against.
+    """
+    d = _registry_yaml()
+    banned = set(d["banned_proteingym_assays"])
+    missing = {
+        dataset: [a for a in assays if a not in banned]
+        for dataset, assays in d["evaluation_sources"].items()
+        if any(a not in banned for a in assays)
+    }
+    assert not missing, (
+        f"evaluation data is reachable from a training split: {missing}. "
+        "Add each id to banned_proteingym_assays."
+    )
+
+
+def test_his3_specifically_is_banned():
+    """Named explicitly because it is 494,494 of the order>=3 variants in
+    ProteinGym -- it would dominate any training set built by taking assays that
+    have higher-order mutants, which is precisely what H1's protocol selects for."""
+    d = _registry_yaml()
+    assert "HIS7_YEAST_Pokusaeva_2019" in d["banned_proteingym_assays"]
+
+
+def test_held_out_landscapes_all_appear_in_the_evaluation_map():
+    """A held-out landscape with no row in the map has never been checked against
+    ProteinGym by name, which is how two of the three unanticipated leaks arose."""
+    d = _registry_yaml()
+    named = {e["name"] for e in d["held_out"]}
+    mapped = set(d["evaluation_sources"])
+    assert named <= mapped, f"held out but unmapped: {sorted(named - mapped)}"
+
+
+def test_the_plan_and_the_registry_agree_on_his3():
+    """RESEARCH_PLAN.md step 0.3 listed HIS7 as held out; the registry did not.
+    The two drifted apart silently for a month."""
+    plan = Path("RESEARCH_PLAN.md").read_text()
+    assert "HIS7_YEAST_Pokusaeva_2019" in plan
+    assert "HIS7_YEAST_Pokusaeva_2019" in _registry_yaml()["banned_proteingym_assays"]

@@ -81,6 +81,34 @@ banned_proteingym_assays:
   - F7YBW8_MESOW_Ding_2023
   - DYR_ECOLI_Nguyen_2023
   - DYR_ECOLI_Thompson_2019
+  # Added 2026-11-26. Not a homology leak -- a leak that opened later. HIS3 was a
+  # training assay when this file was written, and nothing was wrong. Step 0.2 then
+  # extracted 13.5M combinatorially complete hypercubes from it, and Step 1.1 made
+  # those the project's only >=5-step path-level EVALUATION data (steps 1.1, 4.2,
+  # 6.4 and phase 7). Training on HIS7 and evaluating error growth on HIS3
+  # hypercubes is the exact failure the firewall exists to stop. The identity
+  # search could never have caught this: HIS3 is not one of the five held-out
+  # landscapes, so there was nothing to match it against.
+  - HIS7_YEAST_Pokusaeva_2019
+
+# Datasets used as EVALUATION data, mapped to the ProteinGym assay ids that
+# contain them. Every id listed here MUST appear in banned_proteingym_assays, and
+# tests/unit/test_firewall.py enforces that. Add a row the moment a dataset becomes
+# evaluation data -- skipping that step is exactly how HIS3 went unbanned for a
+# month after its hypercubes became the project's path-level ground truth.
+evaluation_sources:
+  GB1: [SPG1_STRSG_Olson_2014, SPG1_STRSG_Wu_2016, SPG2_STRSG_Tsuboyama_2023_5UBS]
+  ParD2: [F7YBW8_MESOW_Aakre_2015, F7YBW8_MESOW_Ding_2023]
+  ParD3: [F7YBW8_MESOW_Aakre_2015, F7YBW8_MESOW_Ding_2023]
+  DHFR: [DYR_ECOLI_Nguyen_2023, DYR_ECOLI_Thompson_2019]
+  HIS3: [HIS7_YEAST_Pokusaeva_2019]
+  TrpB4: []   # no ProteinGym assay contains it; it leaks into FLIP2 trpb instead
+  TEV: []     # no ProteinGym assay contains it
+  # Step 1.1 dropped T7 as a landscape (structured epistasis +0.003 -- pure noise),
+  # so it is no longer evaluation data. Left in held_out anyway: holding out more is
+  # the safe direction, and reclaiming it as training data is a decision to take
+  # deliberately, not a side effect of an audit.
+  T7: []
 
 banned_flip2_datasets:
   - gb1

@@ -5,6 +5,58 @@
 
 ---
 
+## ⚠ Correction, 2026-11-26 (same day)
+
+**`Landscape` was using a dead variant as the wild type on every landscape.** It
+inferred the wild type as the modal residue per site, which is close to arbitrary on a
+combinatorially complete landscape — every residue appears at every site by design — and
+in practice returns something non-functional:
+
+| landscape | true wild type | fitness | inferred (modal) | fitness |
+|---|---|---:|---|---:|
+| GB1 | `VDGV` *(HD==0 row)* | **1.0000** | `WLVS` | 0.0039 |
+| TEV | `TDHS` *(Mutation Distance==0)* | 0.4144 | `FLPP` | −0.0162 |
+| TrpB4 | `VFVS` *(Johnston 2024, verified present)* | 0.4081 | `GSHL` | 0.0099 |
+
+**Unaffected:** both gate metrics (`nonadditive_variance_fraction` uses no wild type;
+`greedy_optimum_hit_rate`'s min is still TEV at 0.00), the whole interaction-order
+decomposition and every `+pair` figure, the landscape-set decisions, and the HIS3 depth
+curve — hypercube landscapes construct their wild type explicitly from the corner
+geometry, never by the modal rule.
+
+**Corrected**, for the three landscapes whose wild type could be verified:
+
+| metric | GB1 | TEV | TrpB4 |
+|---|---:|---:|---:|
+| greedy@1 | 0.0 ← 0.0 | 0.0 ← 0.0 | **0.0 ← 1.0** |
+| greedy@5 | 0.7 ← 0.7 | 0.0 ← 0.0 | **0.4 ← 1.0** |
+| path accessibility | **0.208** ← 0.583 | **0.000** ← 0.042 | **0.000** ← 0.625 |
+| reciprocal-sign pairs | **14** ← 87 | **19** ← 372 | **30** ← 67 |
+| stack-top-k gain | **0.39** ← 0.07 | **0.12** ← 0.08 | **0.40** ← 0.03 |
+| singles→order≥2 ρ | **0.245** ← 0.476 | **0.134** ← −0.005 | **0.196** ← 0.070 |
+| fraction above wild type | **2.4%** ← 45.2% | **0.4%** ← 50.5% | **0.7%** ← 56.8% |
+
+That last row was the visible tell, and it was in the Step 0.2 audit the whole time: a
+four-site combinatorial landscape in which **half the variants beat the wild type** is
+not biologically plausible. From the verified wild type it is 0.4–2.4%.
+
+The corrected numbers make the case for planning **stronger**, not weaker: no monotone
+shortest path reaches the optimum on TEV or TrpB4 at all, and 5-restart greedy solves
+none of the three reliably. But the Step 0.5 measurement that drove H4's reframing —
+"greedy with 5 restarts solves 4 of 5 landscapes" — was an artifact of walking from a
+dead variant. H4's per-oracle-budget framing survives and is better supported; its
+stated justification does not.
+
+**Still provisional.** ParD2, ParD3, DHFR, T7 and the nine TrpB 3-site landscapes have
+no distance column, no registry entry, and alphabetically sorted CSVs, so their wild
+type cannot be recovered from shipped data. `Landscape` now warns and sets
+`wild_type_source="modal"` for them. Their `+pair` figures are unaffected — so their
+roles in the landscape set, including ParD2/ParD3 as near-additive controls, stand —
+but every wild-type-anchored column below is suspect for them. Resolving ParD2/ParD3 is
+a prerequisite for H4, since a negative control needs a correct starting point.
+
+---
+
 ## Verdict
 
 **Gate: GO**, on both pre-registered conditions.

@@ -13,6 +13,8 @@ use constructed cases so a broken metric fails rather than looking plausible.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -352,3 +354,73 @@ def test_path_accessibility_on_a_constructed_valley_is_zero():
     """Reciprocal sign epistasis: every shortest path goes down before it goes up."""
     ls = Landscape.synthetic_sign_epistasis()
     assert path_accessibility(ls) == 0.0
+
+
+# ---- wild-type resolution (added 2026-11-26) ----
+
+SSMULA_DIR = Path("data/raw/ssmula/extracted/data")
+
+
+def _csv(rel: str) -> Path:
+    return SSMULA_DIR / rel
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+@pytest.mark.parametrize(
+    "name,rel,wt,fitness",
+    [
+        ("GB1", "GB1/fitness_landscape/GB1.csv", "VDGV", 1.0),
+        ("TEV", "TEV/fitness_landscape/TEV.csv", "TDHS", 0.4144),
+        ("TrpB4", "TrpB/fitness_landscape/TrpB4.csv", "VFVS", 0.4081),
+    ],
+)
+def test_the_real_wild_type_is_recovered_not_the_modal_variant(name, rel, wt, fitness):
+    """The modal residue per site is meaningless on a combinatorially complete
+    landscape -- every residue appears at every site by design -- and in practice it
+    returns a dead variant. It gave WLVS at fitness 0.0039 for GB1 instead of VDGV at
+    1.0000, and FLPP at -0.0162 for TEV instead of TDHS at 0.4144. Every
+    wild-type-anchored metric was computed from a dead variant."""
+    ls = Landscape.from_csv(_csv(rel), name)
+    assert ls.wild_type == wt
+    assert ls.wild_type_source != "modal"
+    assert ls.wild_type_fitness() == pytest.approx(fitness, abs=1e-3)
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_the_modal_wild_type_would_have_been_a_dead_variant():
+    """Pins the magnitude of the error, so nobody reintroduces the shortcut."""
+    ls = Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1")
+    idx = ls.index()
+    assert idx["WLVS"] < 0.01, "the modal variant is dead"
+    assert idx["VDGV"] == pytest.approx(1.0), "the real wild type is the reference"
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_an_unresolvable_wild_type_warns_and_is_marked(caplog):
+    """ParD2's CSV is alphabetically sorted with no distance column, so its wild type
+    cannot be recovered from shipped data. That must be loud, not silent."""
+    import logging
+
+    with caplog.at_level(logging.WARNING):
+        ls = Landscape.from_csv(_csv("ParD2/fitness_landscape/ParD2.csv"), "ParD2")
+    assert ls.wild_type_source == "modal"
+    assert "modal residue" in caplog.text
+
+
+def test_an_explicit_wild_type_overrides_inference():
+    v = np.array([list(s) for s in ("AA", "AB", "BA", "BB")])
+    ls = Landscape("x", v, np.array([1.0, 2.0, 3.0, 4.0]), "BB", wild_type_source="explicit")
+    assert ls.wild_type == "BB"
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_explicit_wild_type_is_honoured_by_from_csv():
+    ls = Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1", wild_type="WLVS")
+    assert ls.wild_type == "WLVS"
+    assert ls.wild_type_source == "explicit"
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_a_wrong_length_wild_type_is_rejected():
+    with pytest.raises(ValueError, match="has 3 sites, landscape has 4"):
+        Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1", wild_type="ABC")

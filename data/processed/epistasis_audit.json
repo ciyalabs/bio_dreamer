@@ -9,18 +9,18 @@
       "alphabet_size": 20.0,
       "additive_r2_full": 0.2568300210184721,
       "nonadditive_variance_fraction": 0.7431699789815279,
-      "additive_spearman_higher_order": 0.0695816221318937,
+      "additive_spearman_higher_order": 0.19584088379019562,
       "frac_order_ge2": 0.9995161158556894,
       "frac_dead": 2.5136838665485235e-05,
-      "frac_above_wild_type": 0.5676338065343212,
+      "frac_above_wild_type": 0.0068623569556774695,
       "nonadditive_variance_fraction_alive": 0.74318030210199,
       "n_alive": 159125.0
     },
     "timing_s": {
-      "additive_fit": 1.8,
-      "pairwise_fit": 17.4,
+      "additive_fit": 1.7,
+      "pairwise_fit": 16.9,
       "greedy_reachability": 9.6,
-      "stack_topk_headroom": 1.0,
+      "stack_topk_headroom": 0.7,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -35,33 +35,33 @@
     },
     "greedy_reachability": {
       "n_seeds": 10.0,
-      "greedy_hit_rate_restarts_1": 1.0,
-      "greedy_oracle_calls_restarts_1": 468.0,
-      "greedy_hit_rate_restarts_5": 1.0,
-      "greedy_oracle_calls_restarts_5": 1346.2,
-      "greedy_optimum_hit_rate": 1.0,
-      "greedy_oracle_calls": 1346.2,
+      "greedy_hit_rate_restarts_1": 0.0,
+      "greedy_oracle_calls_restarts_1": 190.0,
+      "greedy_hit_rate_restarts_5": 0.4,
+      "greedy_oracle_calls_restarts_5": 1095.9,
+      "greedy_optimum_hit_rate": 0.4,
+      "greedy_oracle_calls": 1095.9,
       "greedy_hit_rate_restarts_20": 1.0,
-      "greedy_oracle_calls_restarts_20": 4452.8,
+      "greedy_oracle_calls_restarts_20": 4250.9,
       "greedy_hit_rate_restarts_100": 1.0,
-      "greedy_oracle_calls_restarts_100": 17344.6,
-      "path_accessibility": 0.625,
+      "greedy_oracle_calls_restarts_100": 17181.8,
+      "path_accessibility": 0.0,
       "n_singles_available": 76.0
     },
     "stack_topk_headroom": {
       "stack_topk_oracle_calls": 76.0,
       "additive_null_fitting_cost": 77.0,
-      "stack_topk_gain_fraction": 0.0301028148110983,
+      "stack_topk_gain_fraction": 0.3970171372069397,
       "stack_topk_hit_rate": 0.0,
       "additive_null_hit_rate_b100": 0.0,
-      "additive_null_gain_fraction_b100": 0.039957297527154094,
-      "wild_type_fitness": 0.009906062512173517,
+      "additive_null_gain_fraction_b100": 0.5825404227475813,
+      "wild_type_fitness": 0.4080739252340478,
       "global_optimum_fitness": 1.0
     },
     "rse_count": {
-      "rse_pairs": 67.0,
+      "rse_pairs": 30.0,
       "rse_pairs_examined": 2166.0,
-      "rse_fraction": 0.030932594644506
+      "rse_fraction": 0.013850415512465374
     }
   },
   {
@@ -74,10 +74,10 @@
       "alphabet_size": 20.0,
       "additive_r2_full": 0.04796077169700075,
       "nonadditive_variance_fraction": 0.9520392283029993,
-      "additive_spearman_higher_order": -0.004951062843386078,
+      "additive_spearman_higher_order": 0.13400809835303948,
       "frac_order_ge2": 0.9995161249780057,
       "frac_dead": 0.00257019329864515,
-      "frac_above_wild_type": 0.5052535002387954,
+      "frac_above_wild_type": 0.004172636553301662,
       "nonadditive_variance_fraction_alive": 0.9546253079480514,
       "n_alive": 158723.0,
       "noise_fraction": 0.33164627217445136,
@@ -85,10 +85,10 @@
       "noise_fraction_median": 0.03467433978393708
     },
     "timing_s": {
-      "additive_fit": 1.8,
-      "pairwise_fit": 36.5,
-      "greedy_reachability": 10.1,
-      "stack_topk_headroom": 0.8,
+      "additive_fit": 1.7,
+      "pairwise_fit": 25.6,
+      "greedy_reachability": 13.4,
+      "stack_topk_headroom": 1.0,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -111,30 +111,30 @@
       "greedy_hit_rate_restarts_1": 0.0,
       "greedy_oracle_calls_restarts_1": 134.0,
       "greedy_hit_rate_restarts_5": 0.0,
-      "greedy_oracle_calls_restarts_5": 904.5,
+      "greedy_oracle_calls_restarts_5": 895.0,
       "greedy_optimum_hit_rate": 0.0,
-      "greedy_oracle_calls": 904.5,
+      "greedy_oracle_calls": 895.0,
       "greedy_hit_rate_restarts_20": 0.0,
-      "greedy_oracle_calls_restarts_20": 3993.0,
+      "greedy_oracle_calls_restarts_20": 3955.1,
       "greedy_hit_rate_restarts_100": 0.6,
-      "greedy_oracle_calls_restarts_100": 17609.1,
-      "path_accessibility": 0.041666666666666664,
+      "greedy_oracle_calls_restarts_100": 17501.9,
+      "path_accessibility": 0.0,
       "n_singles_available": 76.0
     },
     "stack_topk_headroom": {
       "stack_topk_oracle_calls": 76.0,
       "additive_null_fitting_cost": 77.0,
-      "stack_topk_gain_fraction": 0.07928487714660865,
+      "stack_topk_gain_fraction": 0.12420117953532864,
       "stack_topk_hit_rate": 0.0,
       "additive_null_hit_rate_b100": 0.0,
-      "additive_null_gain_fraction_b100": 0.20349866541688577,
-      "wild_type_fitness": -0.016226802,
+      "additive_null_gain_fraction_b100": 0.03645376638445516,
+      "wild_type_fitness": 0.414362,
       "global_optimum_fitness": 1.4044468
     },
     "rse_count": {
-      "rse_pairs": 372.0,
+      "rse_pairs": 19.0,
       "rse_pairs_examined": 2166.0,
-      "rse_fraction": 0.17174515235457063
+      "rse_fraction": 0.008771929824561403
     }
   },
   {
@@ -147,18 +147,18 @@
       "alphabet_size": 20.0,
       "additive_r2_full": 0.1943975540707007,
       "nonadditive_variance_fraction": 0.8056024459292993,
-      "additive_spearman_higher_order": 0.4760439405698523,
+      "additive_spearman_higher_order": 0.24510262116502454,
       "frac_order_ge2": 0.9994844705110437,
       "frac_dead": 0.9195171430293049,
-      "frac_above_wild_type": 0.4518314687234285,
+      "frac_above_wild_type": 0.02439057049698382,
       "nonadditive_variance_fraction_alive": 0.6340538370154217,
       "n_alive": 12021.0
     },
     "timing_s": {
       "additive_fit": 1.1,
-      "pairwise_fit": 90.2,
+      "pairwise_fit": 61.2,
       "greedy_reachability": 9.9,
-      "stack_topk_headroom": 0.7,
+      "stack_topk_headroom": 0.6,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -179,32 +179,32 @@
     "greedy_reachability": {
       "n_seeds": 10.0,
       "greedy_hit_rate_restarts_1": 0.0,
-      "greedy_oracle_calls_restarts_1": 299.0,
+      "greedy_oracle_calls_restarts_1": 243.0,
       "greedy_hit_rate_restarts_5": 0.7,
-      "greedy_oracle_calls_restarts_5": 1353.0,
+      "greedy_oracle_calls_restarts_5": 1265.5,
       "greedy_optimum_hit_rate": 0.7,
-      "greedy_oracle_calls": 1353.0,
+      "greedy_oracle_calls": 1265.5,
       "greedy_hit_rate_restarts_20": 1.0,
-      "greedy_oracle_calls_restarts_20": 4403.2,
+      "greedy_oracle_calls_restarts_20": 4284.0,
       "greedy_hit_rate_restarts_100": 1.0,
-      "greedy_oracle_calls_restarts_100": 16637.3,
-      "path_accessibility": 0.5833333333333334,
+      "greedy_oracle_calls_restarts_100": 16509.1,
+      "path_accessibility": 0.20833333333333334,
       "n_singles_available": 76.0
     },
     "stack_topk_headroom": {
       "stack_topk_oracle_calls": 76.0,
       "additive_null_fitting_cost": 77.0,
-      "stack_topk_gain_fraction": 0.06685826239136859,
+      "stack_topk_gain_fraction": 0.39242128308638835,
       "stack_topk_hit_rate": 0.0,
       "additive_null_hit_rate_b100": 0.0,
-      "additive_null_gain_fraction_b100": 0.30728926177364463,
-      "wild_type_fitness": 0.003890273,
+      "additive_null_gain_fraction_b100": 0.8024591101076627,
+      "wild_type_fitness": 1.0,
       "global_optimum_fitness": 8.761965656
     },
     "rse_count": {
-      "rse_pairs": 87.0,
-      "rse_pairs_examined": 2163.0,
-      "rse_fraction": 0.04022191400832178
+      "rse_pairs": 14.0,
+      "rse_pairs_examined": 2091.0,
+      "rse_fraction": 0.006695361071257772
     }
   },
   {
@@ -228,9 +228,9 @@
       "noise_fraction_median": 0.09471224616578074
     },
     "timing_s": {
-      "additive_fit": 0.0,
-      "pairwise_fit": 0.7,
-      "greedy_reachability": 0.5,
+      "additive_fit": 0.1,
+      "pairwise_fit": 0.5,
+      "greedy_reachability": 0.4,
       "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
@@ -298,10 +298,10 @@
       "n_alive": 261332.0
     },
     "timing_s": {
-      "additive_fit": 6.0,
-      "pairwise_fit": 109.4,
-      "greedy_reachability": 26.1,
-      "stack_topk_headroom": 2.1,
+      "additive_fit": 5.6,
+      "pairwise_fit": 105.8,
+      "greedy_reachability": 27.3,
+      "stack_topk_headroom": 2.8,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -363,10 +363,10 @@
       "n_alive": 7970.0
     },
     "timing_s": {
-      "additive_fit": 0.1,
+      "additive_fit": 0.2,
       "pairwise_fit": 0.3,
-      "greedy_reachability": 0.9,
-      "stack_topk_headroom": 0.1,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -496,7 +496,7 @@
       "additive_fit": 0.1,
       "pairwise_fit": 0.3,
       "greedy_reachability": 0.5,
-      "stack_topk_headroom": 0.1,
+      "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -560,7 +560,7 @@
     "timing_s": {
       "additive_fit": 0.1,
       "pairwise_fit": 0.3,
-      "greedy_reachability": 0.9,
+      "greedy_reachability": 0.6,
       "stack_topk_headroom": 0.1,
       "rse_count": 0.0
     },
@@ -623,9 +623,9 @@
       "n_alive": 7963.0
     },
     "timing_s": {
-      "additive_fit": 0.1,
-      "pairwise_fit": 0.3,
-      "greedy_reachability": 0.5,
+      "additive_fit": 0.2,
+      "pairwise_fit": 0.5,
+      "greedy_reachability": 0.6,
       "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
@@ -755,8 +755,8 @@
     "timing_s": {
       "additive_fit": 0.1,
       "pairwise_fit": 0.3,
-      "greedy_reachability": 0.9,
-      "stack_topk_headroom": 0.1,
+      "greedy_reachability": 0.5,
+      "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
     "pairwise_fit": {
@@ -820,7 +820,7 @@
     "timing_s": {
       "additive_fit": 0.1,
       "pairwise_fit": 0.4,
-      "greedy_reachability": 0.6,
+      "greedy_reachability": 0.5,
       "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
@@ -884,8 +884,8 @@
     },
     "timing_s": {
       "additive_fit": 0.1,
-      "pairwise_fit": 0.3,
-      "greedy_reachability": 0.6,
+      "pairwise_fit": 0.5,
+      "greedy_reachability": 0.9,
       "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
@@ -949,8 +949,8 @@
     },
     "timing_s": {
       "additive_fit": 0.1,
-      "pairwise_fit": 0.5,
-      "greedy_reachability": 0.8,
+      "pairwise_fit": 0.3,
+      "greedy_reachability": 0.5,
       "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },
@@ -1015,7 +1015,7 @@
     "timing_s": {
       "additive_fit": 0.1,
       "pairwise_fit": 0.3,
-      "greedy_reachability": 0.6,
+      "greedy_reachability": 0.5,
       "stack_topk_headroom": 0.0,
       "rse_count": 0.0
     },

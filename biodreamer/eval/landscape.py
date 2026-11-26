@@ -8,6 +8,7 @@ extracted from HIS3.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -15,7 +16,19 @@ import numpy as np
 import pandas as pd
 
 SEQ_ALIASES = ("variants", "variant", "aas", "muts", "sequences", "sequence", "seq", "genotype")
+logger = logging.getLogger(__name__)
+
 FIT_ALIASES = ("fitness", "fitness mean", "score", "y", "value", "activity")
+# a column counting substitutions from the wild type; its zero row IS the wild type
+DIST_ALIASES = ("hd", "mutation distance", "distance", "n_mut", "num_mutations")
+
+# Wild types that cannot be inferred from the file alone. Each is verified, not
+# assumed -- the modal rule below picks a DEAD variant on every one of them.
+KNOWN_WILD_TYPES = {
+    "GB1": ("VDGV", "HD==0 row of the shipped SSMuLA CSV; fitness 1.0000"),
+    "TEV": ("TDHS", "Mutation Distance==0 row of the shipped SSMuLA CSV; fitness 0.4144"),
+    "TrpB4": ("VFVS", "Johnston 2024; verified present in the landscape at fitness 0.4081"),
+}
 
 
 @dataclass
@@ -26,6 +39,9 @@ class Landscape:
     variants: np.ndarray  # (n, n_sites) of single-character residues
     fitness: np.ndarray  # (n,)
     wild_type: str
+    # where `wild_type` came from. "modal" means it was guessed and is probably
+    # wrong: see from_csv.
+    wild_type_source: str = "explicit"
 
     _index: dict[str, float] | None = field(default=None, repr=False, compare=False)
     _alphabet: list[str] | None = field(default=None, repr=False, compare=False)
@@ -114,8 +130,19 @@ class Landscape:
     # ---- loading ----
 
     @classmethod
-    def from_csv(cls, path: str | Path, name: str | None = None) -> "Landscape":
-        """Read an SSMuLA-style landscape CSV, de-duplicating repeated genotypes."""
+    def from_csv(
+        cls,
+        path: str | Path,
+        name: str | None = None,
+        wild_type: str | None = None,
+    ) -> "Landscape":
+        """Read an SSMuLA-style landscape CSV, de-duplicating repeated genotypes.
+
+        `wild_type` overrides inference. Without it the wild type comes from a
+        substitution-distance column if the file has one, then from
+        `KNOWN_WILD_TYPES`, and only then from the modal residue per site -- which
+        warns, because it is usually wrong. Check `wild_type_source` to see which.
+        """
         path = Path(path)
         df = pd.read_csv(path)
         df.columns = [str(c).replace("﻿", "").strip() for c in df.columns]
@@ -137,8 +164,49 @@ class Landscape:
             .mean()
         )
         variants = np.array([list(s) for s in dedup["seq"]])
-        wt = "".join(pd.Series(variants[:, i]).mode()[0] for i in range(modal))
-        return cls(name or path.stem, variants, dedup["fit"].to_numpy(), wt)
+        label = name or path.stem
+
+        # Resolving the wild type, in order of trustworthiness.
+        #
+        # The modal residue per site -- what this used to do unconditionally -- is
+        # meaningless on a combinatorially complete landscape: every residue appears
+        # at every site by design, so the mode is whichever one survived
+        # de-duplication most often. In practice it picks a DEAD variant. On GB1 it
+        # returned WLVS at fitness 0.0039 instead of VDGV at 1.0000, and on TEV FLPP
+        # at -0.0162 instead of TDHS at 0.4144. Everything anchored on the wild type
+        # -- singles(), fit_on_singles, greedy from the wild type, path accessibility,
+        # reciprocal sign epistasis, stack-top-k -- was measured from a dead variant.
+        wt, source = None, ""
+        if wild_type is not None:
+            wt, source = wild_type.strip().upper(), "explicit"
+        else:
+            dist_col = next((cols[a] for a in DIST_ALIASES if a in cols), None)
+            if dist_col is not None:
+                d = pd.to_numeric(df[dist_col], errors="coerce")
+                zero = df.loc[d == 0, seq_col].astype(str).str.strip().str.upper()
+                if len(zero):
+                    wt, source = zero.iloc[0], f"{dist_col}==0"
+            if wt is None and label in KNOWN_WILD_TYPES:
+                wt, source = KNOWN_WILD_TYPES[label][0], KNOWN_WILD_TYPES[label][1]
+
+        if wt is None:
+            wt = "".join(pd.Series(variants[:, i]).mode()[0] for i in range(modal))
+            source = "modal"
+            logger.warning(
+                "%s: no wild type given, no distance column, and no registry entry -- "
+                "falling back to the modal residue per site (%s). On a combinatorially "
+                "complete landscape this is close to arbitrary and is usually a dead "
+                "variant. Every wild-type-anchored metric on this landscape is "
+                "provisional; pass wild_type= to fix it.",
+                label,
+                wt,
+            )
+        elif len(wt) != modal:
+            raise ValueError(
+                f"{label}: wild type {wt!r} has {len(wt)} sites, landscape has {modal}"
+            )
+
+        return cls(label, variants, dedup["fit"].to_numpy(), wt, wild_type_source=source)
 
     @classmethod
     def synthetic_additive(

@@ -158,6 +158,34 @@ landscapes must be used. `greedy@5` = optimum hit rate at 5 restarts, 10 seeds, 
 
 Full write-up and the dimension 3–9 depth curve: `diagnostics/epistasis_audit.md`.
 
+### ⚠ Wild-type provenance (2026-11-26)
+
+`Landscape.from_csv` inferred the wild type as the **modal residue per site**. On a
+combinatorially complete landscape every residue appears at every site by design, so the
+mode is close to arbitrary — and on all three landscapes where it could be checked it
+returned a **dead** variant (GB1 `WLVS` at 0.0039 instead of `VDGV` at 1.0000; TEV `FLPP`
+at −0.0162 instead of `TDHS` at 0.4144; TrpB4 `GSHL` at 0.0099 instead of `VFVS` at
+0.4081). Resolution order is now: explicit argument → a substitution-distance column's
+zero row → `KNOWN_WILD_TYPES` → modal **with a warning**, and `wild_type_source` records
+which was used.
+
+| landscape | wild type | source | status |
+|---|---|---|---|
+| GB1 | `VDGV` | `HD==0` row of the shipped CSV | verified |
+| TEV | `TDHS` | `Mutation Distance==0` row | verified |
+| TrpB4 | `VFVS` | Johnston 2024; present at fitness 0.4081 | verified |
+| ParD2, ParD3 | — | no distance column, CSV sorted alphabetically | **unresolved** |
+| DHFR, T7, TrpB3A–I | — | same | **unresolved** |
+
+**Open item, blocking H4:** ParD2 and ParD3 are the negative controls, and a control with
+the wrong starting point cannot do its job. Their ProteinGym counterpart
+`F7YBW8_MESOW` covers 4 and 10 variable positions against SSMuLA's 3, so it does not map
+directly. Source needed from Ding et al. 2023.
+
+**Diagnostic for the next case:** `frac_above_wild_type`. It is 0.4–2.4% on the verified
+landscapes and 34–97% on the unresolved ones. A functional wild type is not beaten by
+most of its own neighbourhood.
+
 ### FLIP2 — splits
 
 | | |
