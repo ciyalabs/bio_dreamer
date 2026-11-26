@@ -25,12 +25,21 @@ import argparse
 PROTEINGYM_RESIDUES = 972_380_198   # sum(variants * seq_len) from the reference file
 LOCAL_TFLOPS = 0.27                 # laptop GTX 1650, measured in step 0.4
 
-# (effective TFLOP/s for 650M inference, $/GPU-hour on-demand, late Oct 2026)
+# (effective TFLOP/s for 650M inference, currency/GPU-hour on-demand, late Oct 2026)
 GPUS = {
     "rtx4090": (50.0, 0.89),
     "a100": (100.0, 1.16),
     "h100": (250.0, 2.90),
+    # Hetzner GEX45: RTX PRO 4000 Blackwell SFF, 24 GB, EUR 0.3429/h capped at
+    # EUR 214/mo, plus a EUR 209 one-time setup fee PER ORDER. Rate is EUR, not USD.
+    # The 30 TFLOP/s is an ESTIMATE -- an SFF card is roughly a third of a 4090 by
+    # power budget. Replace it with a measurement from scripts/bench_encoder.py on
+    # the first day of the rental, exactly as step 0.4 did for the laptop.
+    "hetzner-gex45": (30.0, 0.3429),
 }
+# one-time charge per ORDER, not per month: re-ordering repeatedly pays it again
+SETUP_FEE = {"hetzner-gex45": 209.0}
+MONTHLY_CAP = {"hetzner-gex45": 214.0}
 
 # EFLOP (1e18). Training uses 6*N*D, inference 2*N*D.
 WORKLOAD = {
@@ -69,6 +78,8 @@ def main() -> int:
     ap.add_argument("--cache-gb", type=int, default=30,
                     help="persistent storage kept between sessions")
     ap.add_argument("--spot", action="store_true", help="assume ~45%% spot discount")
+    ap.add_argument("--orders", type=int, default=1,
+                    help="separate rentals; each pays the provider's setup fee again")
     a = ap.parse_args()
 
     tflops, usd_hr = GPUS[a.gpu]
@@ -101,11 +112,30 @@ def main() -> int:
     print(f"{'':<3} {f'  implied GPU utilisation':<46} "
           f"{'':>6} {'':>7} {100 * tot_floph / inst:>6.0f}% {'':>7}")
 
+    # A per-order setup fee punishes short rentals, and a monthly cap rewards long
+    # ones. Both apply at Hetzner, and together they decide the whole strategy.
+    setup = SETUP_FEE.get(a.gpu, 0.0) * a.orders
+    hourly_cost = inst * usd_hr
+    cap = MONTHLY_CAP.get(a.gpu)
+    if cap is not None:
+        capped = min(hourly_cost, cap * max(1, round(inst / 730 + 0.5)))
+        if capped < hourly_cost:
+            print(f"{'':<3} {'  monthly cap applies instead of hourly':<46} "
+                  f"{'':>6} {'':>7} {'':>7} {capped:>7.0f}")
+        hourly_cost = capped
+    if setup:
+        print(f"{'':<3} {f'Setup fee x {a.orders} order(s)':<46} "
+              f"{'':>6} {'':>7} {'':>7} {setup:>7.0f}")
+        breakeven = SETUP_FEE[a.gpu] / usd_hr
+        print(f"{'':<3} {'  = hours of runtime the fee is worth':<46} "
+              f"{'':>6} {'':>7} {breakeven:>7.0f} {'':>7}")
+
     storage = a.cache_gb / 1000 * STORAGE_USD_PER_TB_MONTH * a.months
     print(f"{'':<3} {f'Storage {a.cache_gb} GB x {a.months} mo @ ${STORAGE_USD_PER_TB_MONTH}/TB/mo':<46} "
           f"{'':>6} {'':>7} {'':>7} {storage:>7.0f}")
     print("-" * 80)
-    print(f"{'':<3} {'TOTAL':<46} {'':>6} {'':>7} {inst:>7.0f} {inst * usd_hr + storage:>7.0f}")
+    print(f"{'':<3} {'TOTAL':<46} {'':>6} {'':>7} {inst:>7.0f} "
+          f"{hourly_cost + storage + setup:>7.0f}")
 
     # the non-obvious one
     reenc = (0.90 + 0.31) * 1e18 / (tflops * 1e12) / 3600 * usd_hr

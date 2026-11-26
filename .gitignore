@@ -218,6 +218,13 @@ loghman_samani_cv.pdf
 loghman_samani_cv.out
 loghman_samani_cv.aux
 loghman_samani_cv.log
+
+# LaTeX build products of proposal.tex -- regenerate with three pdflatex passes
+# (needs texlive-science for algorithm.sty). The .tex is the source of record.
+proposal.pdf
+proposal.aux
+proposal.out
+proposal.toc
 init.txt
 .codex
 phd_proposal.tex

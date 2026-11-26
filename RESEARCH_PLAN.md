@@ -178,7 +178,7 @@ PhoQ withdrawn (only 1,659 of 160,000 functional, binary selection).
 ## Step 0.3 — Leakage firewall `S` ⚠️
 
 **Why.** **This is the step most likely to be forgotten and most destructive if it is.**
-GB1 appears in ProteinGym *and* is the valley-crossing benchmark. TrpB and PhoQ may appear in
+GB1 appears in ProteinGym *and* is the valley-crossing benchmark. TrpB and TEV may appear in
 curated epistasis collections. If the reward head trains on ProteinGym's GB1 assays and
 planning is then "tested" on the GB1 four-site landscape, every H4 number is meaningless —
 and nothing in the pipeline will warn you. There is published precedent for this being a real
@@ -192,7 +192,7 @@ never cross-reported:
 | Instance | Trained on | Used for |
 |---|---|---|
 | **`benchmark`** | FLIP protocol, GB1 included | Literature comparability only (Step 2.2) |
-| **`planning`** | GB1, TrpB, PhoQ fully held out | Everything in Phase 6, including H4 |
+| **`planning`** | GB1, TrpB4, TEV, ParD2, ParD3, DHFR fully held out | Everything in Phase 6, including H4 |
 
 **Work.**
 - [ ] Freeze the held-out set: **GB1, TrpB4, TEV, ParD2, ParD3** — excluded from reward-head
@@ -263,7 +263,9 @@ accidentally pooled anywhere (unit test on tensor rank).
 **Go / no-go.** Proceed when a full pass over the smallest dataset runs from cache.
 
 **✅ DONE (2026-10-27).** SaProt fits comfortably — 1,243 MiB of weights, 1,363 MiB peak even
-for T7 at 883 aa, against 3,707 MiB. Per-residue output enforced in both `encode` and
+for T7 at 883 aa, against 3,707 MiB. *T7 was dropped from the landscape set by Step 1.1, so
+883 aa is no longer the longest sequence in it — the storage budget derived from it is
+conservative rather than wrong.* Per-residue output enforced in both `encode` and
 `Cache.put`. Cache gives a **1,449× speedup** on a warm pass.
 
 **⚠ Hardware constraint discovered, and it changes Phase 2 scheduling.** The GPU is a
@@ -299,7 +301,8 @@ this baseline. Build the judge before the defendant.
       statistics; calibration curves; risk–coverage.
 - [ ] **Additive null**: linear model over single-mutant effects, fit per landscape.
 - [ ] **"Stack top-*k* beneficial singles"** heuristic.
-- [ ] Greedy single-step optimiser (will later run on the project's own reward head).
+- [ ] Greedy optimiser (will later run on the project's own reward head). *Built single-step;
+      superseded the same day by the 5-restart definition — see the results below.*
 - [ ] Experiment tracking: config hash, git SHA, seed, dataset manifest hash on every run.
 - [ ] A `report_additive_comparison()` helper that every planning experiment must call, emitting
       both the null's score **and** the correlation between model and null predictions.
@@ -322,10 +325,27 @@ it in 2/5 seeds, reaching 87% of maximum.
 | Landscape | additive R² | null Spearman on order ≥2 | greedy@1 | greedy@5 | greedy@100 |
 |---|---:|---:|---:|---:|---:|
 | **TEV** | 0.048 | **−0.005** | 0/5 | **0/5** | 2/5 |
-| TrpB4 | 0.257 | 0.070 | 0/5 | 5/5 | 5/5 |
+| TrpB4 | 0.257 | 0.070 | 0/5 ‡ | 5/5 | 5/5 |
 | GB1 | 0.194 | 0.476 | 0/5 | 5/5 | 5/5 |
-| ParD2 | 0.842 | 0.844 | 0/5 | 5/5 | 5/5 |
+| ParD2 | 0.842 | 0.844 | **1/1** † | 5/5 | 5/5 |
 | ParD3 | 0.852 | 0.890 | 0/5 | 5/5 | 5/5 |
+
+**⚠ SUPERSEDED (2026-11-26) by Step 1.1 — read that section before using any number above.**
+Two corrections and one reversal:
+
+- **†** ParD2's greedy@1 was transcribed as 0/5 here; the tracker recorded **1**. With one
+  restart the walk is deterministic, so the cell is 1/1, not 0/5.
+- **‡** This column was measured at **max_steps = 5**. The pre-registered limit is **20**, at
+  which TrpB4's greedy@1 is **1** — the walk reaches the optimum from the wild type in 7 steps,
+  wandering through intermediate residues rather than taking a shortest path. So single-restart
+  greedy solves **2 of 5** landscapes under the registered definition, not 0 of 5.
+- The `additive R²` column is a full-data fit, which Step 1.1 showed measures noise and
+  censoring as much as epistasis. TEV's 0.048 and the −0.005 beside it are read-noise
+  artifacts: on the above-median-depth subset TEV's additive out-of-fold R² is 0.235.
+
+The **definition** that came out of this step — greedy means 5 restarts, not single-step — is
+unaffected and still correct. Restarts are what make the baseline strong: TEV goes 0.0 → 0.6
+between 5 and 100 restarts. Only the supporting numbers were wrong.
 
 Three consequences:
 
@@ -333,18 +353,29 @@ Three consequences:
    Greedy needs only ~30 true evaluations to solve TrpB4. The honest question is whether
    planning finds better variants *per oracle call*, which is also the question a real
    campaign asks.
-2. **The baseline is greedy-with-restarts, not greedy single-step.** A single greedy walk
-   never finds the optimum anywhere (0/5 on every landscape); restarts are what make it
-   strong, and omitting them would have produced a flattering comparison.
+2. **The baseline is greedy-with-restarts, not greedy single-step.** Restarts are what make it
+   strong, and omitting them would have produced a flattering comparison. *The original claim
+   here — "a single greedy walk never finds the optimum anywhere (0/5 on every landscape)" —
+   was wrong on two counts; see the corrections above. Single-restart greedy solves 2 of 5
+   under the registered 20-step limit. The conclusion holds, the number did not.*
 3. **TEV should be the primary landscape, not TrpB4.** It is the only one where planning has
    visible room: near-zero additive signal (null Spearman −0.005 on higher orders) *and*
    greedy fails. TrpB4 and GB1 become secondary, ParD2/ParD3 stay as near-additive controls
    where greedy succeeding is the expected result.
+   *Right call, wrong reason. Step 1.1 found TEV's "near-zero additive signal" to be read
+   noise — its own error bars cap any R² at 0.668, and at above-median depth its additive
+   out-of-fold R² is 0.235 with a pairwise increment of +0.257. TEV stays primary because
+   greedy failure there is total while real structured epistasis is present, and it must be
+   used depth-filtered.*
 
 Also measured: fitting the additive null on singles alone and extrapolating gives Spearman
 **0.07 on TrpB4** and **−0.005 on TEV**, so single-mutant effects carry almost no information
 about higher-order fitness there — genuine epistatic headroom. On ParD2/ParD3 the same
 procedure gives 0.84–0.89, confirming them as additive controls.
+*Superseded for TEV: "almost no information" was almost no signal. A near-zero extrapolation
+Spearman is produced equally by epistasis and by noise, and Step 1.1 separated them. TrpB4's
+0.07 does mean headroom (+0.344 structured); TEV's −0.005 did not, until the landscape was
+depth-filtered.*
 
 34 tests, every metric validated against a case with an analytic answer.
 
@@ -390,7 +421,9 @@ cannot drift apart silently — verified by renaming one threshold and watching 
 Step 1.1's gate was corrected here too: its aggregates were `all`, which would have **failed
 by design** on the near-additive ParD controls. The gate is existential — one landscape with
 headroom suffices — so they are now `max`/`min`. Checked against measured data: it passes on
-TEV alone (non-additive 0.952, greedy 0/5), exactly as predicted.
+TEV alone (non-additive 0.952, greedy 0/5), exactly as predicted. *And for the wrong reason —
+Step 1.1 showed that 0.952 to be read noise. The gate did pass on TEV, but the landscape
+carrying real headroom at the registered threshold is TrpB4 at 0.743.*
 
 ---
 
@@ -412,7 +445,8 @@ exact additive-null numbers the paper will need in every later table.
 **Work.**
 - [ ] Fit additive models to: **TrpB4 and TEV (primary), GB1 (third)**, GB1 all-doubles, the
       nine TrpB 3-site landscapes, and a stratified sample of HIS3 hypercubes (dimensions 3–9).
-- [ ] **Negative controls: ParD2 and ParD3** (non-additive fraction 0.148–0.158, near-additive).
+- [ ] **Negative controls: ParD2, ParD3** (non-additive fraction 0.148–0.158, near-additive)
+      **and protein-level DHFR** (added by this step: 78% additive, greedy 0.9).
       A planner whose advantage is real should show little or none on these.
 - [ ] A first pass is already done in 0.2 (`scripts/audit_landscapes.py`,
       `data/processed/landscape_audit.json`); 1.1 extends it with path-level analysis.
@@ -429,7 +463,9 @@ exact additive-null numbers the paper will need in every later table.
 **⚠ Read the dead fraction before the R².** 0.2 measured GB1 at **92% dead** — a large part of
 what its additive model fails to explain is a floor-dominated distribution, not exploitable
 epistasis. TrpB4 (0% dead) and TEV (0.3% dead) do not have this problem, which is why they
-are primary. Never quote a non-additive fraction without the dead fraction beside it.
+are primary. Never quote a non-additive fraction without the dead fraction beside it —
+**or without the reliability ceiling**, which is the artifact this step actually tripped over:
+TEV is 0.3% dead and still had a third of its "epistasis" come from read noise.
 
 **Go / no-go.**
 - **Go** if a material fraction of variance is non-additive **and** greedy fails to reach the

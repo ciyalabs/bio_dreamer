@@ -24,7 +24,7 @@ Ambiguity here is how a threshold gets reinterpreted later.
 
 | Term | Fixed meaning |
 |---|---|
-| **Greedy** | Hill-climbing with **5 random restarts**, max 20 steps, on the same oracle as the method under test. *Not* single-step. Step 0.5 measured single-step greedy finding the optimum on **0 of 5** landscapes and 5-restart greedy on **4 of 5** — the restart count decides the comparison, so it is fixed here. |
+| **Greedy** | Hill-climbing with **5 random restarts**, max 20 steps, on the same oracle as the method under test. *Not* single-step. Single-restart greedy finds the optimum on **2 of 5** landscapes and 5-restart greedy on **4 of 5**; on the primary landscape TEV the rate goes from 0.0 at 5 restarts to 0.6 at 100. The restart count decides the comparison, so it is fixed here. *Corrected 2026-11-26: the figure registered here was "0 of 5", measured at max_steps = 5 rather than the 20 fixed in this same row, and with one landscape transcribed wrong. The definition is unchanged.* |
 | **Additive null** | `AdditiveNull.fit_on_singles`: a site-independent linear model fitted on the wild type and single mutants only, extrapolated to higher orders. |
 | **Strongest baseline** | The **maximum** over {greedy, additive null, stack-top-k, random} on the metric in question. Not a chosen comparator. |
 | **Oracle budget** | Number of *true* fitness evaluations a method may request. Headline budget **B = 100**, swept over {30, 100, 300}. |
@@ -187,6 +187,7 @@ threshold stays visible.
 | 2026-11-26 | **DHFR** | candidate landscape | **third negative control**, protein level only | Step 1.1: at protein level DHFR is 78% additive (cv1 0.784) and greedy solves it 0.9. Its nucleotide-level epistasis is a noise-averaging artifact of 16 synonymous codons per protein |
 | 2026-11-26 | **Landscape set** | all 16 SSMuLA landscapes | **T7, TrpB3A/B/C/F/H dropped** | Out-of-fold pairwise increment ≤ 0.043. A method cannot be shown to use epistasis on a landscape whose epistasis is not measurable |
 | 2026-11-26 | **Reporting metric for epistasis** | `1 − additive R²` (full fit) | out-of-fold pairwise increment | `1 − additive R²` is rank-correlated with real epistasis at ρ = −0.49 (p = 0.052, n = 16). **Gate thresholds are unchanged**; this governs reporting and landscape selection only |
+| 2026-11-26 | **Single-restart greedy's hit rate** | 0 of 5 landscapes | **2 of 5** | The registered figure was measured at max_steps = 5, not the 20 fixed in the same row, and ParD2 was transcribed as a miss when the tracker recorded a hit. TrpB4's greedy walk reaches the optimum from the wild type in 7 steps. The 5-restart definition is unaffected |
 | 2026-11-26 | **Greedy's oracle cost** | unspecified | **counted, and must be reconciled with B** | The registered greedy (5 restarts × 20 steps) costs order 10³ evaluations on a four-site landscape, against a registered budget of B = 100. Blocking requirement on Step 6.3 |
 
 **No threshold was edited.** All six entries correct a measurement error or a definition.

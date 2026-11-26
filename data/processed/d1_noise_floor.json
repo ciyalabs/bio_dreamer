@@ -1,0 +1,72 @@
+{
+  "TEV": {
+    "noise_identical_call": 0.0,
+    "noise_batch_position_nostruct": 0.0,
+    "noise_batch_size": 0.0,
+    "noise_floor": 0.0,
+    "n_mutants": 20.0,
+    "mutation_displacement_median": 0.07360031083226204,
+    "mutation_displacement_min": 0.05149056762456894,
+    "mutation_displacement_max": 0.11617487668991089,
+    "frac_displacement_within_5_residues": 0.3275591082491376,
+    "length": 229.0,
+    "noise_floor_below_float_resolution": 1.0,
+    "signal_to_noise": NaN
+  },
+  "TrpB": {
+    "noise_identical_call": 0.0,
+    "noise_batch_position_nostruct": 0.0,
+    "noise_batch_size": 0.0,
+    "noise_floor": 0.0,
+    "n_mutants": 20.0,
+    "mutation_displacement_median": 0.05042891204357147,
+    "mutation_displacement_min": 0.033481527119874954,
+    "mutation_displacement_max": 0.06729157269001007,
+    "frac_displacement_within_5_residues": 0.25891972467583624,
+    "length": 389.0,
+    "noise_floor_below_float_resolution": 1.0,
+    "signal_to_noise": NaN
+  },
+  "ParD2": {
+    "noise_identical_call": 0.0,
+    "noise_batch_position_nostruct": 0.00137475342489779,
+    "noise_batch_size": 0.0013808278599753976,
+    "noise_floor": 0.0013808278599753976,
+    "n_mutants": 20.0,
+    "mutation_displacement_median": 0.11961059644818306,
+    "mutation_displacement_min": 0.09156958013772964,
+    "mutation_displacement_max": 0.14124463498592377,
+    "frac_displacement_within_5_residues": 0.44174197754255096,
+    "length": 87.0,
+    "noise_floor_below_float_resolution": 0.0,
+    "signal_to_noise": 86.62238061326065
+  },
+  "ParD3": {
+    "noise_identical_call": 0.0,
+    "noise_batch_position_nostruct": 0.001396617037244141,
+    "noise_batch_size": 0.0013644789578393102,
+    "noise_floor": 0.001396617037244141,
+    "n_mutants": 20.0,
+    "mutation_displacement_median": 0.12007774785161018,
+    "mutation_displacement_min": 0.07402262091636658,
+    "mutation_displacement_max": 0.18198542296886444,
+    "frac_displacement_within_5_residues": 0.44343143626591275,
+    "length": 85.0,
+    "noise_floor_below_float_resolution": 0.0,
+    "signal_to_noise": 85.97757627857115
+  },
+  "GB1": {
+    "noise_identical_call": 0.0,
+    "noise_batch_position_nostruct": 0.0013579666847363114,
+    "noise_batch_size": 0.0014450764283537865,
+    "noise_floor": 0.0014450764283537865,
+    "n_mutants": 20.0,
+    "mutation_displacement_median": 0.13184991478919983,
+    "mutation_displacement_min": 0.11020640283823013,
+    "mutation_displacement_max": 0.24828943610191345,
+    "frac_displacement_within_5_residues": 0.3977916969126415,
+    "length": 56.0,
+    "noise_floor_below_float_resolution": 0.0,
+    "signal_to_noise": 91.24078990022808
+  }
+}
