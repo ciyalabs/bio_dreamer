@@ -97,15 +97,42 @@ def h1_sequences(limit_assays: int | None = None) -> dict[str, list[str]]:
 
 
 def landscape_sequences() -> dict[str, list[str]]:
-    """Full combinatorial landscapes. Phase 6 scores every candidate, so all of them."""
-    from biodreamer.eval.landscape import Landscape  # noqa: PLC0415
+    """Full combinatorial landscapes, as whole proteins. Phase 6 scores every candidate.
 
-    out = {}
+    The CSVs store only the variable residues, so this must splice them into the
+    parent -- `Landscape.sequences()` returns 4-character fragments for TrpB4, and a
+    protein language model will happily embed those and return nothing useful. TEV
+    ships a `Complete Sequence` column and is read from that directly; GB1 and TrpB4
+    are spliced at their verified variable positions; ParD2 and ParD3 have no known
+    positions and are skipped rather than silently encoded as fragments.
+    """
+    import pandas as pd  # noqa: PLC0415
+
+    from biodreamer.eval.landscape import VARIABLE_POSITIONS, Landscape  # noqa: PLC0415
+
+    out, skipped = {}, []
     for name, path in LANDSCAPES.items():
         if not path.exists():
             print(f"  {name}: MISSING {path}")
             continue
-        out[name] = Landscape.from_csv(path, name).sequences()
+        if name == "TEV":
+            df = pd.read_csv(path)
+            df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
+            seqs = (
+                df["Complete Sequence"].astype(str).str.strip().str.upper().unique().tolist()
+            )
+            out[name] = [s for s in seqs if s.isalpha()]
+            continue
+        if name not in VARIABLE_POSITIONS:
+            skipped.append(name)
+            continue
+        out[name] = Landscape.from_csv(path, name).full_sequences()
+
+    if skipped:
+        print(f"  SKIPPED {skipped}: variable positions unknown, so the variants cannot")
+        print("    be spliced into the parent. Encoding the fragments would produce")
+        print("    embeddings of 3-residue 'proteins'. See VARIABLE_POSITIONS in")
+        print("    biodreamer/eval/landscape.py -- needs the Ding 2023 site list.")
     return out
 
 

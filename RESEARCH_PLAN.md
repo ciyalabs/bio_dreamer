@@ -565,6 +565,30 @@ central claim about the latent. If both fail, stop and reconsider the encoder be
 
 **Outputs.** `diagnostics/d2_latent.md`; chosen `d` and backbone, with the numbers behind the choice.
 
+**✅ DONE (2026-11-26) — verdict: go, but the stated reason does not survive.** See
+`diagnostics/d2_latent.md`. 1,000 Tsuboyama mutants with measured ddG, on the laptop.
+
+The go/no-go asked whether per-residue tracks |ddG| **where pooled does not**. Both track it,
+about equally: Spearman against |ddG| is **+0.459 per-residue (Frobenius) versus +0.410 pooled**
+on SaProt, and +0.445 versus +0.361 on ESM-2. A 0.05–0.08 advantage is real but not the
+categorical difference the proposal describes.
+
+The attenuation *mechanism* is confirmed as a different claim: pooled displacement shrinks with
+length (ρ = −0.174 SaProt, −0.307 ESM-2 against L) while per-residue displacement at the
+substituted site does not. So pooling dilutes a point mutation as O(1/L) predicts — but over
+36–72 residues the dilution still leaves ρ ≈ 0.4. **Per-residue latents stay, on Step 1.4's
+position argument, not this one.**
+
+**`d` is fixed at 128.** The out-of-fold projected sweep gives SaProt 0.449 / 0.473 / 0.493 /
+0.511 and ESM-2 0.503 / 0.502 / 0.506 / 0.511 at d = 64 / 128 / 256 / 512, against 0.459 and
+0.445 unprojected. d=128 already matches or beats the raw 1280-dimensional norm — PCA is
+discarding directions that carry no stability signal — and 4× larger buys ≤ 0.04. This unlocks
+the 10× cache reduction the rental plan depends on (1.7 TiB → 170 GiB for ProteinGym).
+
+**No backbone winner is reported.** SaProt ran with *no* 3Di tokens, because the Tsuboyama
+domains have no structures, so this compared ESM-2 against a deliberately hobbled SaProt.
+Re-run after Step 1.2's folds exist.
+
 ---
 
 ## Step 1.4 — D4: Inverse-dynamics feasibility probe `S`
@@ -585,6 +609,28 @@ and the anchor cannot do its job.
 adapter and latent dimension before Phase 3.
 
 **Outputs.** `diagnostics/d4_inverse.md`.
+
+**✅ DONE (2026-11-26) — verdict: go, decisively.** See `diagnostics/d4_inverse.md`. 1,080
+pairs over 54 proteins (36–390 residues), on the laptop.
+
+**Position top-1 = 0.999 against a chance of 0.019 — 53×**, and it is *parameter-free*:
+residues are ranked by how far they moved and the substituted one read off the top, so nothing
+is fitted and the number cannot be a capacity artifact. Median rank of the true position is 0.
+New-residue top-1 is 0.999 out of fold. The precondition for the inverse-dynamics anchor holds
+with a wide margin.
+
+**The pooling claim is narrower than the proposal states.** For *position*, pooling is not worse
+but impossible — a pooled latent has no per-position structure to rank, and this is the
+architecturally decisive half. For *residue identity* pooling costs almost nothing: 0.942 against
+0.999 top-1, same mutants and classifier. Pooling shrinks the difference vector's magnitude but
+preserves its direction, and a linear classifier reads the direction. Attenuation is not
+destruction. The attenuation itself shows up as the share of movement at the substituted residue
+falling from 11.8% (L<50) to 6.3% (L>100) — while position top-1 stays at 1.000 throughout.
+
+**Design note for Phase 3:** the anchor's task is nearly free at this difficulty, so an
+inverse-dynamics loss on single substitutions will contribute little gradient. If it is meant to
+shape the latent it may need a harder variant — multi-step actions, or prediction from a noised
+latent.
 
 ---
 

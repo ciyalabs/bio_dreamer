@@ -397,12 +397,13 @@ def test_the_modal_wild_type_would_have_been_a_dead_variant():
 
 @pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
 def test_an_unresolvable_wild_type_warns_and_is_marked(caplog):
-    """ParD2's CSV is alphabetically sorted with no distance column, so its wild type
-    cannot be recovered from shipped data. That must be loud, not silent."""
+    """TrpB3A has no distance column, no registry entry, and no unique 1.0 anchor, so
+    its wild type cannot be recovered from shipped data. That must be loud, not silent.
+    ParD2 used to be the example here until the normalisation anchor resolved it."""
     import logging
 
     with caplog.at_level(logging.WARNING):
-        ls = Landscape.from_csv(_csv("ParD2/fitness_landscape/ParD2.csv"), "ParD2")
+        ls = Landscape.from_csv(_csv("TrpB/fitness_landscape/TrpB3A.csv"), "TrpB3A")
     assert ls.wild_type_source == "modal"
     assert "modal residue" in caplog.text
 
@@ -424,3 +425,115 @@ def test_explicit_wild_type_is_honoured_by_from_csv():
 def test_a_wrong_length_wild_type_is_rejected():
     with pytest.raises(ValueError, match="has 3 sites, landscape has 4"):
         Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1", wild_type="ABC")
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+@pytest.mark.parametrize(
+    "name,rel,wt", [("ParD2", "ParD2/fitness_landscape/ParD2.csv", "ILK"),
+                    ("ParD3", "ParD3/fitness_landscape/ParD3.csv", "DKE")]
+)
+def test_pard_wild_types_come_from_the_normalisation_anchor(name, rel, wt):
+    """Neither ships a distance column. Both have exactly one variant at the literal
+    float 1.0, and in neither case is it the maximum -- so the 1.0 is a reference
+    point, not a ceiling. The same signature identifies GB1's VDGV, where the HD==0
+    column confirms it independently."""
+    ls = Landscape.from_csv(_csv(rel), name)
+    assert ls.wild_type == wt
+    assert ls.wild_type_source != "modal"
+    assert ls.wild_type_fitness() == 1.0
+    assert ls.global_optimum()[1] > 1.0, "the anchor must not also be the maximum"
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_the_anchor_rule_declines_to_fire_where_it_should():
+    """On TrpB4 the unique 1.0 IS the maximum, so it is a ceiling and says nothing
+    about the wild type; TEV has no variant at exactly 1.0 at all. Both are resolved
+    by other means, and a rule that fired here would be wrong."""
+    trpb = Landscape.from_csv(_csv("TrpB/fitness_landscape/TrpB4.csv"), "TrpB4")
+    assert trpb.global_optimum()[1] == 1.0
+    assert trpb.wild_type_fitness() < 1.0
+    tev = Landscape.from_csv(_csv("TEV/fitness_landscape/TEV.csv"), "TEV")
+    assert not any(f == 1.0 for f in tev.index().values())
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_a_plausible_wild_type_is_not_beaten_by_most_of_its_landscape():
+    """The diagnostic that would have caught the dead-variant bug a month earlier.
+    The Step 0.2 audit reported 45-57% and nobody looked."""
+    for name, rel in [
+        ("GB1", "GB1/fitness_landscape/GB1.csv"),
+        ("TEV", "TEV/fitness_landscape/TEV.csv"),
+        ("TrpB4", "TrpB/fitness_landscape/TrpB4.csv"),
+        ("ParD2", "ParD2/fitness_landscape/ParD2.csv"),
+        ("ParD3", "ParD3/fitness_landscape/ParD3.csv"),
+    ]:
+        ls = Landscape.from_csv(_csv(rel), name)
+        frac = float((ls.fitness > ls.wild_type_fitness()).mean())
+        assert frac < 0.20, f"{name}: {frac:.1%} of variants beat the wild type"
+
+
+def test_variable_positions_spell_the_registered_wild_type():
+    """Only landscapes whose positions are actually determined are registered."""
+    from biodreamer.eval.landscape import KNOWN_WILD_TYPES, VARIABLE_POSITIONS
+
+    assert set(VARIABLE_POSITIONS) == {"GB1", "TrpB4"}
+    for name in VARIABLE_POSITIONS:
+        assert len(VARIABLE_POSITIONS[name]) == len(KNOWN_WILD_TYPES[name][0])
+
+
+# ---- full-sequence splicing ----
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+@pytest.mark.parametrize(
+    "name,rel,parent_len", [("GB1", "GB1/fitness_landscape/GB1.csv", 56),
+                            ("TrpB4", "TrpB/fitness_landscape/TrpB4.csv", 390)]
+)
+def test_variants_are_spliced_into_the_whole_parent_protein(name, rel, parent_len):
+    """`sequences()` returns 3-4 character fragments. A protein language model embeds
+    those without complaining and returns nothing useful, so the error is silent."""
+    ls = Landscape.from_csv(_csv(rel), name)
+    full = ls.full_sequences()
+    assert len(full) == ls.n
+    assert all(len(s) == parent_len for s in full[:50])
+    assert len(ls.sequences()[0]) == ls.n_sites  # the fragment, for contrast
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_splicing_the_wild_type_reproduces_the_parent():
+    """The round trip that proves the positions are right, not merely consistent."""
+    from biodreamer.eval.landscape import PARENT_FASTA, read_fasta
+
+    ls = Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1")
+    parent = read_fasta(PARENT_FASTA["GB1"])
+    i = ls.sequences().index(ls.wild_type)
+    assert ls.full_sequences()[i] == parent
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_splicing_changes_exactly_the_variable_positions():
+    from biodreamer.eval.landscape import VARIABLE_POSITIONS, PARENT_FASTA, read_fasta
+
+    ls = Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1")
+    parent = read_fasta(PARENT_FASTA["GB1"])
+    at = {p - 1 for p in VARIABLE_POSITIONS["GB1"]}
+    for s in ls.full_sequences()[:200]:
+        differing = {i for i, (x, y) in enumerate(zip(parent, s)) if x != y}
+        assert differing <= at
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_splicing_refuses_when_the_positions_are_unknown():
+    """Silently encoding fragments is the failure this guards."""
+    ls = Landscape.from_csv(_csv("ParD2/fitness_landscape/ParD2.csv"), "ParD2")
+    with pytest.raises(KeyError, match="variable positions unknown"):
+        ls.full_sequences()
+
+
+@pytest.mark.skipif(not SSMULA_DIR.exists(), reason="SSMuLA data not downloaded")
+def test_splicing_refuses_a_parent_that_disagrees_with_the_wild_type():
+    """Catches a wrong position set or a mismatched parent, rather than producing
+    plausible-looking sequences with the wrong residues."""
+    ls = Landscape.from_csv(_csv("GB1/fitness_landscape/GB1.csv"), "GB1")
+    with pytest.raises(ValueError, match="positions and parent disagree"):
+        ls.full_sequences(parent="A" * 56)

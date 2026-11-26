@@ -24,11 +24,58 @@ DIST_ALIASES = ("hd", "mutation distance", "distance", "n_mut", "num_mutations")
 
 # Wild types that cannot be inferred from the file alone. Each is verified, not
 # assumed -- the modal rule below picks a DEAD variant on every one of them.
+#
+# ParD2 and ParD3 ship no distance column and alphabetically sorted CSVs, so they
+# were resolved by the normalisation reference instead: **on a landscape where
+# exactly one variant has fitness exactly 1.0 and that variant is not the global
+# maximum, the 1.0 is a reference point rather than a ceiling, and the reference is
+# the wild type.** That rule is independently confirmed on GB1, where the unique
+# 1.0000 variant is VDGV and the HD==0 row agrees, while the maximum is 8.7620. It
+# correctly declines to fire on TrpB4 (the unique 1.0 IS the maximum, AIKG) and on
+# TEV (no variant is exactly 1.0). ParD3's answer is corroborated a second way:
+# positions 52/64/80 of its parent spell DKE, and its numbering aligns with
+# ProteinGym F7YBW8_MESOW at 10/10 Ding 2023 and 4/4 Aakre 2015 positions.
 KNOWN_WILD_TYPES = {
     "GB1": ("VDGV", "HD==0 row of the shipped SSMuLA CSV; fitness 1.0000"),
     "TEV": ("TDHS", "Mutation Distance==0 row of the shipped SSMuLA CSV; fitness 0.4144"),
     "TrpB4": ("VFVS", "Johnston 2024; verified present in the landscape at fitness 0.4081"),
+    "ParD2": ("ILK", "unique fitness==1.0000 variant, max 1.0268; normalisation reference"),
+    "ParD3": ("DKE", "unique fitness==1.0000 variant, max 1.0175; parent positions 52/64/80"),
 }
+
+# Variable positions in the parent sequence, 1-indexed. Needed to splice a landscape
+# variant into its full protein before encoding -- the CSVs store only the variable
+# residues (four characters for TrpB4), and a four-residue "protein" means nothing to
+# a protein language model. Each set is from the literature AND verified to spell the
+# wild type above at those positions in the shipped parent FASTA.
+VARIABLE_POSITIONS = {
+    "GB1": (39, 40, 41, 54),        # Olson 2014 / Wu 2016; parent residues spell VDGV
+    "TrpB4": (183, 184, 227, 228),  # Johnston 2024; parent residues spell VFVS
+}
+# ParD2 and ParD3 are deliberately absent. Spelling the wild type does not pin the
+# positions: 32 increasing triples of the ParD2 parent spell ILK and 35 of the ParD3
+# parent spell DKE, so "these positions spell the wild type" is necessary and nowhere
+# near sufficient. An alignment of the two parents (66.7% identity) maps ParD3's
+# 52/64/80 onto ParD2's 52/64/80, where the ParD2 parent spells ELK -- its *maximum*,
+# not its wild type -- so the two landscapes do not target homologous sites and the
+# mapping route fails as well. Needs the site list from Ding et al. 2023 or the
+# SSMuLA release. Blocks only full-sequence encoding of these two landscapes
+# (Phase 6); their wild types above are settled, so their Step 1.1 role is not.
+
+
+PARENT_FASTA = {
+    "GB1": "data/raw/ssmula/extracted/data/GB1/GB1.fasta",
+    "TrpB4": "data/raw/ssmula/extracted/data/TrpB/TrpB.fasta",
+    "TEV": "data/raw/ssmula/extracted/data/TEV/TEV.fasta",
+    "ParD2": "data/raw/ssmula/extracted/data/ParD2/ParD2.fasta",
+    "ParD3": "data/raw/ssmula/extracted/data/ParD3/ParD3.fasta",
+}
+
+
+def read_fasta(path: str | Path) -> str:
+    """Single-record FASTA to an uppercase sequence, headers dropped."""
+    text = Path(path).read_text().splitlines()
+    return "".join(l.strip() for l in text if l and not l.startswith(">")).upper()
 
 
 @dataclass
@@ -99,6 +146,50 @@ class Landscape:
                 self, "_index", dict(zip(self.sequences(), self.fitness.tolist(), strict=True))
             )
         return self._index
+
+    def full_sequences(self, parent: str | None = None) -> list[str]:
+        """Variants spliced into the parent protein, ready for an encoder.
+
+        The CSVs store only the variable residues -- four characters for TrpB4 -- so
+        `sequences()` returns fragments, not proteins. Encoding a four-residue
+        "protein" through a protein language model is meaningless, and the error is
+        silent: the model accepts it and returns embeddings. This splices each
+        variant's residues into the parent at `VARIABLE_POSITIONS`.
+
+        Needs the variable positions, which are known only for GB1 and TrpB4. TEV
+        ships a `Complete Sequence` column and should be read from that instead;
+        ParD2 and ParD3 are unresolved -- see the note on VARIABLE_POSITIONS.
+        """
+        if self.name not in VARIABLE_POSITIONS:
+            raise KeyError(
+                f"variable positions unknown for {self.name!r}; known: "
+                f"{sorted(VARIABLE_POSITIONS)}. Encoding the variant fragments "
+                "instead would silently produce embeddings of 3-4 residue 'proteins'."
+            )
+        pos = VARIABLE_POSITIONS[self.name]
+        if len(pos) != self.n_sites:
+            raise ValueError(
+                f"{self.name}: {len(pos)} variable positions for {self.n_sites} sites"
+            )
+        seq = parent or read_fasta(PARENT_FASTA[self.name])
+        at = [p - 1 for p in pos]
+        if max(at) >= len(seq):
+            raise ValueError(
+                f"{self.name}: position {max(pos)} is past the parent (L={len(seq)})"
+            )
+        expected = "".join(seq[i] for i in at)
+        if expected != self.wild_type:
+            raise ValueError(
+                f"{self.name}: parent spells {expected!r} at {pos} but the wild type "
+                f"is {self.wild_type!r} -- positions and parent disagree"
+            )
+        out = []
+        for row in self.variants:
+            chars = list(seq)
+            for i, r in zip(at, row):
+                chars[i] = r
+            out.append("".join(chars))
+        return out
 
     def singles(self) -> "Landscape":
         """The order<=1 sub-landscape: what an additive null is allowed to see."""

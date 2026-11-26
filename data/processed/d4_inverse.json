@@ -1,0 +1,56 @@
+{
+  "metrics": {
+    "n_pairs": 1080.0,
+    "n_proteins": 54.0,
+    "position_top1": 0.9990740740740741,
+    "position_top5": 1.0,
+    "position_top1_chance": 0.01878960725782282,
+    "position_top5_chance": 0.09394803628911408,
+    "position_top1_over_chance": 53.17163154956962,
+    "median_rank_of_true_position": 0.0,
+    "median_shift_share_at_position": 0.10628936067223549,
+    "aa_top1_per_residue": 0.9990740740740741,
+    "aa_top5_per_residue": 1.0,
+    "aa_top1_pooled": 0.9416666666666667,
+    "aa_top5_pooled": 0.9833333333333333,
+    "aa_top1_chance": 0.05,
+    "pooled_penalty_top1": 0.05740740740740746,
+    "position_top1_L_0-50": 0.9979166666666667,
+    "position_top1_L_50-60": 1.0,
+    "position_top1_L_60-70": 1.0,
+    "position_top1_L_70-100": 1.0,
+    "position_top1_L_100-inf": 1.0
+  },
+  "by_length": {
+    "0-50": {
+      "n": 480.0,
+      "position_top1": 0.9979166666666667,
+      "chance": 0.023009385220402388,
+      "shift_share": 0.11849774792790413
+    },
+    "50-60": {
+      "n": 260.0,
+      "position_top1": 1.0,
+      "chance": 0.01785427689011785,
+      "shift_share": 0.10660744830965996
+    },
+    "60-70": {
+      "n": 220.0,
+      "position_top1": 1.0,
+      "chance": 0.015499523452058845,
+      "shift_share": 0.09466138854622841
+    },
+    "70-100": {
+      "n": 80.0,
+      "position_top1": 1.0,
+      "chance": 0.013252949597224927,
+      "shift_share": 0.08058652654290199
+    },
+    "100-inf": {
+      "n": 40.0,
+      "position_top1": 1.0,
+      "chance": 0.0034006953498478916,
+      "shift_share": 0.06327821686863899
+    }
+  }
+}
