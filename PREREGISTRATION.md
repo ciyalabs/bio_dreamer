@@ -69,6 +69,15 @@ capacity, loss (ranking vs regression), per-assay normalisation.
 >
 > `vs_zeroshot` and a matched-assay `vs_literature` comparison were **not run**, and are
 > recorded as not done rather than estimated.
+>
+> **Follow-up, same day: the encoder diagnosis is now closed.** The suspected cause —
+> mean-pooling the 1280-d latent — was tested on a $0.70 A40 rental and **cleared**.
+> Four readouts of the same frozen latents (pooled / mutated-position / displacement /
+> both) land within **0.005** of each other, against an init spread of ±0.012, and the
+> gain from reading mutated positions correlates **−0.484** with sequence length when the
+> hypothesis required a positive correlation. `pool_first` is exonerated. Every item in
+> the prescribed diagnosis order is now resolved, which leaves the frozen encoder's
+> representation itself. See `diagnostics/positional_readout.md`.
 
 ---
 

@@ -1,0 +1,97 @@
+{
+  "benchmark": {
+    "groups": {
+      "CAPSD_AAV2S_Sinai_2021": {
+        "n_variants": 30300,
+        "n_train": 300,
+        "n_test": 30000,
+        "residues": 22270500,
+        "seconds": 820.1,
+        "mb": 484.2
+      },
+      "D7PM05_CLYGR_Somermeyer_2022": {
+        "n_variants": 13498,
+        "n_train": 300,
+        "n_test": 13198,
+        "residues": 3172030,
+        "seconds": 120.3,
+        "mb": 159.8
+      },
+      "F7YBW8_MESOW_Aakre_2015": {
+        "n_variants": 8956,
+        "n_train": 300,
+        "n_test": 8656,
+        "residues": 832908,
+        "seconds": 38.2,
+        "mb": 98.3
+      },
+      "F7YBW8_MESOW_Ding_2023": {
+        "n_variants": 7922,
+        "n_train": 166,
+        "n_test": 7756,
+        "residues": 736746,
+        "seconds": 34.8,
+        "mb": 120.8
+      },
+      "GCN4_YEAST_Staller_2018": {
+        "n_variants": 2638,
+        "n_train": 88,
+        "n_test": 2550,
+        "residues": 741278,
+        "seconds": 33.0,
+        "mb": 113.6
+      },
+      "GFP_AEQVI_Sarkisyan_2016": {
+        "n_variants": 30300,
+        "n_train": 300,
+        "n_test": 30000,
+        "residues": 7211400,
+        "seconds": 274.1,
+        "mb": 401.2
+      },
+      "HIS7_YEAST_Pokusaeva_2019": {
+        "n_variants": 30300,
+        "n_train": 300,
+        "n_test": 30000,
+        "residues": 6666000,
+        "seconds": 267.8,
+        "mb": 570.8
+      },
+      "PHOT_CHLRE_Chen_2023": {
+        "n_variants": 30300,
+        "n_train": 300,
+        "n_test": 30000,
+        "residues": 3575400,
+        "seconds": 165.4,
+        "mb": 646.8
+      },
+      "Q6WV12_9MAXI_Somermeyer_2022": {
+        "n_variants": 14568,
+        "n_train": 300,
+        "n_test": 14268,
+        "residues": 3234096,
+        "seconds": 126.7,
+        "mb": 157.9
+      },
+      "Q8WTC7_9CNID_Somermeyer_2022": {
+        "n_variants": 21349,
+        "n_train": 300,
+        "n_test": 21049,
+        "residues": 5081062,
+        "seconds": 189.9,
+        "mb": 239.2
+      },
+      "SPG1_STRSG_Wu_2016": {
+        "n_variants": 30300,
+        "n_train": 300,
+        "n_test": 30000,
+        "residues": 13574400,
+        "seconds": 514.0,
+        "mb": 346.3
+      }
+    },
+    "total_seconds": 2593.7,
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "test_cap": 30000
+  }
+}

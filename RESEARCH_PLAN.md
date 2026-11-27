@@ -932,12 +932,46 @@ increasing per-assay rescaling. What remains is the representation — every con
 reads the same 1280-d **mean-pooled** vector, a linear model on it matches a trained head,
 and within-order ρ ceilings at ~+0.21 everywhere.
 
-**Carried forward: the pooled cache is the leading suspect and was never tested on
-fitness.** `pool_first` was adopted because it cost nothing on *stability* (+0.337 vs
-+0.329) — measured on 1,000 Tsuboyama single mutants of 36–72 residue domains, then
-generalised to multi-mutant fitness on proteins up to 735 residues. Re-encoding
-per-residue costs a GPU rental and 170 GiB instead of 2.25 GB. **Not done:**
-`vs_zeroshot` (ProSST / VenusREM need those checkpoints run) and a strict
+**❌ The pooled-cache suspect was TESTED AND CLEARED (2026-11-27).** See
+`diagnostics/positional_readout.md`. A40 rental, 43 min, **$0.70**: four readouts of the
+same frozen latents, same head, recipe, seed and capped test subsample, only the input
+vector differing.
+
+| readout | mean ρ |
+|---|---:|
+| `pooled` (baseline) | +0.410 |
+| `mut_mean` (latents at the mutated positions) | +0.413 |
+| `displacement` (variant − wild type, at those positions) | +0.408 |
+| `pooled+displacement` | +0.413 |
+
+**Spread 0.005, against an init spread of ±0.012 — one number.** Reading the mutated
+positions, exactly what mean-pooling cannot do, changes nothing.
+
+**And the length test fails in the wrong direction.** If pooling were the constraint its
+damage would grow with length, so `displacement` should gain most on long proteins.
+Measured: **Spearman(length, gain) = −0.484**, Pearson −0.575. The worst case for
+`displacement` is `CAPSD` at 735 residues, the longest in the corpus (+0.658 pooled
+against +0.562). Pooling helps *more* on long proteins — plausibly because a mean over
+735 residues is a low-variance estimate of a global property while 5 mutated positions
+are a high-variance estimate of a local one. This is not a null result; it points the
+opposite way from the hypothesis.
+
+**`pool_first` is exonerated and the 2.25 GB pooled cache stays.** The untested
+generalisation from stability to fitness was correct. The cap is validated too: `pooled`
+scores +0.410 here against H1's +0.409 uncapped, reproducing it to 0.001.
+
+**So the encoder's representation is the ceiling, and every pre-registered diagnosis item
+is now resolved** — capacity swept at 1.3, loss tied against a ridge, per-assay
+normalisation provably irrelevant, readout shown not to matter. The remaining lever is
+fine-tuning SaProt or moving to a backbone trained for variant effects. That is
+materially larger than a $0.70 rental and **Phase 2 should be re-scoped against what a
+fine-tune could plausibly buy before it starts.**
+
+One exception worth remembering, not acting on: `PHOT_CHLRE` gains **+0.174** from
+displacement, and it was the assay with no within-depth signal under pooling. One assay
+of eleven, 118 residues, does not move the mean.
+
+**Not done:** `vs_zeroshot` (ProSST / VenusREM need those checkpoints run) and a strict
 `vs_literature` comparison on matched assays — both reported as not done rather than
 estimated.
 
