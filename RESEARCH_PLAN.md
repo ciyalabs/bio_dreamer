@@ -1197,6 +1197,91 @@ same run. No rental: Kermut does three CV schemes on four datasets in ~10 minute
 
 ---
 
+## Phase 2 gate — consolidate and decide `S` ⚠️ **GATE**
+
+**❌ H1 FAILED. Phase 3 stays blocked, and the pre-registration's instruction stands: fix
+the reward model before a planner is built on it.**
+
+The reward model was rebuilt once during Phase 2 and the gate was re-read against the
+replacement, because the gate asks about *the reward model* and that is no longer the 266k
+head. Thresholds come from `plan.yaml`; baselines are reused from the Step 2.2 run rather
+than recomputed, so only the model column moves.
+
+| condition | threshold | head (2.2) | GP, zero-shot mean | GP, composite |
+|---|---|---:|---:|---:|
+| `spearman_mean` | ≥ 0.55 | +0.409 ❌ | +0.428 ❌ | **+0.479 ❌** |
+| `margin_over_additive_null` | > 0.05 | +0.085 ✅ | +0.104 ✅ | +0.155 ✅ |
+| `frac_assays_beating_null` | ≥ 0.70 | 0.636 ❌ | 0.545 ❌ | **0.818 ✅** |
+| `spearman_mean_vs_frozen_regression` | > 0 | +0.108 ✅ | +0.127 ✅ | +0.178 ✅ |
+
+**Three of four now pass. The one that fails is the headline, by 0.071.**
+
+### What the phase established
+
+**The reward model improved 2.6× on the metric that measures skill.** Within-order ρ — ρ at
+fixed mutation depth, where depth carries no information — went from the head's **+0.161**
+to the composite GP's **+0.417**. Total ρ moved only +0.070 over the same span, because
+**61% of the head's +0.409 was its depth penalty** against 13% for the GP. The head's
+headline number was mostly a mutation counter; nobody had compared it to a plain ridge on
+the depth-free diagnostic, and the ridge was already reading the sequence nearly twice as
+well (+0.300).
+
+**Four levers measured, one of them worth most of the gain.** In within-order skill:
+composite kernel **+0.046**, zero-shot prior **+0.04 … +0.05**, predictor class over a
+ridge **+0.02 … +0.03**, ProteinMPNN structure as a mean term **−0.002 … −0.006**, encoder
+fine-tune **+0.003** (published, never run here). The fine-tune that Step 2.2 named as the
+next lever is the second-worst thing on the list.
+
+**The failure is clean, because none of the three available excuses survives.**
+- *Broken implementation?* No. On the literature's own 5 datasets and protocol our
+  Kermut-sequence reproduction scores **+0.631 at n = 128 against its published +0.614**,
+  and matches or leads at every training size.
+- *Unfair assay list?* Partly, and it is quantified. The 3 assays the literature also
+  benchmarks score **+0.522**; the 8 it never uses score **+0.463**. Worth about 0.06.
+- *Mis-set threshold?* No. Excluding `GCN4_YEAST` — the registered secondary, justified on
+  sample size alone — the remaining ten reach **+0.510**, still **0.040 short**.
+
+**The uncertainty estimate does not work, and that is a Phase 6 constraint.** Step 2.3
+found that no source — GP predictive variance, a 5-member independent ensemble, or a
+shared-trunk ensemble — ranks error better than chance, and that keeping only the most
+confident quarter is *worse* than keeping everything on 8 of 11 assays. H3's
+uncertainty-guided exploration cannot assume an epistemic estimate that locates ignorance.
+
+### The decision
+
+**Do not start Phase 3 on this reward model.** The pre-registration's rule is that a
+planner cannot rescue a bad oracle, and +0.479 against a registered 0.55 is the same
+verdict Step 2.2 reached, reached again after the obvious repairs were made and measured.
+
+What has changed is that the remaining distance is now small and the direction is known.
+Three options, in the order they should be weighed, and the choice belongs to the project
+owner rather than to this document:
+
+1. **Close the last 0.04–0.07 on the reward model.** The untried items are a real
+   **structure kernel** rather than the mean term tested here (Kermut's largest ablation,
+   −0.065, and the form matters), and an **MSA-based zero-shot** in place of the
+   single-sequence one (published multi-mutant gap: 0.534 against 0.493). Neither needs a
+   fine-tune. Both are bounded work with a bounded payoff, and together they are plausibly
+   worth the 0.04.
+2. **Amend the threshold, with the reason stated first and before any re-run.** 0.55 was
+   taken from published means on other assay lists, and this phase has now measured what
+   that assumption was worth: about 0.06 on our eleven. An amendment is defensible; doing
+   it after seeing +0.510 is not, unless it is recorded as exactly that.
+3. **Re-scope the thesis.** Phase 2 was meant to supply an oracle good enough for a planner
+   to exploit. It supplies one that ranks unseen triple-plus mutants at ρ ≈ 0.48–0.51,
+   beats a per-substitution null on 9 of 11 assays, and cannot say where it is wrong. That
+   is a publishable reward-model result on its own terms and a weak foundation for H3/H4.
+
+**One condition on all three:** the order ≥ 3 test set has now been read eight times, and
+`PREREGISTRATION.md` records what that costs. Any re-run that claims a pass needs a
+genuinely held-out assay set, not another reading of this one.
+
+**Outputs.** `results/reward_benchmark.md`, `results/calibration.md`,
+`diagnostics/finetune_scoping.md`, `data/processed/h1_verdict_gp.json`,
+`data/processed/matched_literature.json`.
+
+---
+
 # Phase 3 — World model B (deterministic)
 
 Simpler of the two architectures. Establishes the pipeline, the collapse diagnostics, and the

@@ -404,7 +404,61 @@ the registered 0.55.
 
 ---
 
-## 7. The comparability problem, which is now blocking
+## 7. The comparability problem — RESOLVED, and it does not excuse the gap
+
+`scripts/matched_literature.py` runs this project's estimators on the **5 multi-mutant
+ProteinGym datasets the fine-tuning literature benchmarks**, under **its** protocol: n
+sequences sampled at random for training, 5,000 more for test, averaged over 3 seeds. Two
+of those datasets (GRB2, PABP) top out at order 2 and had never been in this corpus.
+
+### 7.1 The implementation is correct
+
+| n | 24 | 32 | 48 | 128 | 512 |
+|---|---:|---:|---:|---:|---:|
+| **ours, `gp_zeroshot`** | **+0.433** | **+0.468** | **+0.506** | **+0.631** | **+0.733** |
+| published Kermut-sequence | +0.397 | +0.426 | +0.504 | +0.614 | +0.724 |
+| difference | +0.036 | +0.042 | +0.002 | +0.017 | +0.009 |
+
+**Our reproduction matches published Kermut-sequence at every training size, slightly
+ahead throughout.** That is the check this whole comparison exists for: the estimator is
+not broken, and the shortfall on our own assays is not an implementation bug.
+
+### 7.2 The harness control says we are, if anything, pessimistic
+
+| n | 24 | 32 | 48 | 128 | 512 |
+|---|---:|---:|---:|---:|---:|
+| our one-hot | +0.191 | +0.206 | +0.240 | +0.387 | +0.625 |
+| their one-hot | +0.255 | +0.268 | +0.314 | +0.473 | +0.664 |
+| gap | −0.064 | −0.062 | −0.074 | **−0.086** | −0.039 |
+
+Our one-hot baseline runs **0.04 … 0.09 below** theirs at every n. The offset is consistent
+in sign and size, so it is a property of the harness — most plausibly our exact train/test
+draw — rather than noise. It cuts **against** us: our numbers are measured on a slightly
+harder setup than theirs, and the GP still comes out ahead of published Kermut.
+
+This is why the control was included. Had our one-hot landed *above* theirs, every other
+row would have been suspect and that would have been the finding.
+
+### 7.3 So how much of the shortfall is the assay list?
+
+| assay set | composite GP |
+|---|---:|
+| the 3 of our 11 the literature also benchmarks (CAPSD, GFP, HIS7) | **+0.522** |
+| the 8 it never uses | **+0.463** |
+| all 11 | +0.479 |
+
+**Our assay list is harder, and it accounts for about 0.06 — not for the 0.071 shortfall.**
+Excluding `GCN4_YEAST` — the registered secondary, justified at Step 2.1 on sample size
+alone (88 training variants against the protocol's 300, and a tuned RidgeCV finds no
+in-sample signal in it) — the remaining ten score **+0.510**, which is **0.040 short** of
+0.55.
+
+**The comparability question is answered and it does not rescue H1.** The implementation
+reproduces the published method; the assay list is somewhat harder and explains part of
+the gap; and after both are accounted for the model is still short of the registered
+threshold. That is a cleaner failure than Step 2.2's, because none of the three available
+excuses — broken code, an unfair assay list, a mis-set threshold — survives contact with
+the measurement.
 
 Every published number above is a mean over **its own assay list**. This project's +0.409 is
 a mean over **our** 11. Those are not the same quantity, and the registered 0.55 threshold
