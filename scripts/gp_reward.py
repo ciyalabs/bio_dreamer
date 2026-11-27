@@ -56,8 +56,9 @@ from biodreamer.protein_dreamer.cache import sequence_hash
 from biodreamer.reward.data import assays_for, detection_limits, h1_split, load_assay
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from encode_positional import resolve_wild_type  # noqa: E402
 from h1_benchmark import substitution_design  # noqa: E402
-from zeroshot_baseline import cache_path, within_order_rho  # noqa: E402
+from zeroshot_baseline import cache_path, score_from_matrix, within_order_rho  # noqa: E402
 
 CACHE = Path("data/processed/pooled_cache")
 BACKBONE = "westlake-repl_SaProt_650M_AF2"
@@ -78,7 +79,8 @@ class ExactGP(torch.nn.Module):
     rather than configured.
     """
 
-    def __init__(self, zero_shot_mean: bool, n_seq: int | None = None) -> None:
+    def __init__(self, zero_shot_mean: bool, n_seq: int | None = None,
+                 n_mean: int = 1) -> None:
         super().__init__()
         self.log_lengthscale = torch.nn.Parameter(torch.zeros(1))
         self.log_outputscale = torch.nn.Parameter(torch.zeros(1))
@@ -98,12 +100,20 @@ class ExactGP(torch.nn.Module):
             self.logit_pi = torch.nn.Parameter(torch.zeros(1))
         # alpha exists only in the zero-shot variant; a constant-mean GP must not be able
         # to read f0 through a back door, or the ablation measures nothing
-        self.alpha = torch.nn.Parameter(torch.zeros(1)) if zero_shot_mean else None
+        # `n_mean` > 1 when a second zero-shot term is supplied -- the ProteinMPNN
+        # structure score alongside the sequence one. Kermut uses structure in its KERNEL
+        # rather than its mean, but as a mean term it is the cheapest honest test of
+        # whether inverse-folding information carries signal this model does not have.
+        self.alpha = (
+            torch.nn.Parameter(torch.zeros(max(n_mean, 1))) if zero_shot_mean else None
+        )
 
     def mean(self, f0: torch.Tensor) -> torch.Tensor:
         if self.alpha is None:
             return self.beta.expand(f0.shape[0])
-        return self.alpha * f0 + self.beta
+        if f0.ndim == 1:
+            return self.alpha[0] * f0 + self.beta
+        return f0 @ self.alpha + self.beta
 
     def kernel(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         if self.n_seq is None:
@@ -172,7 +182,8 @@ class ExactGP(torch.nn.Module):
 def fit(xtr, ytr, f0tr, zero_shot_mean: bool, steps: int, lr: float, seed: int,
         n_seq: int | None = None) -> ExactGP:
     torch.manual_seed(seed)
-    gp = ExactGP(zero_shot_mean, n_seq).double()
+    n_mean = 1 if f0tr.ndim == 1 else f0tr.shape[1]
+    gp = ExactGP(zero_shot_mean, n_seq, n_mean).double()
     # a sensible lengthscale start: the median pairwise distance. Starting at 1.0 on
     # 1280-d standardised vectors puts every off-diagonal kernel entry at ~0, the
     # gradient at ~0, and the GP never leaves its prior.
@@ -212,6 +223,12 @@ def main() -> int:
              "is the primary; esm2 is a SENSITIVITY, and it is method-specified rather "
              "than test-selected because Kermut names ESM-2 for its mean function.",
     )
+    ap.add_argument(
+        "--structure-mean", action="store_true",
+        help="add the ProteinMPNN structure score as a SECOND mean-function term, so "
+             "m(x) = a1*f0_seq(x) + a2*f0_struct(x) + b. Needs "
+             "data/processed/mpnn_matrix.npz from scripts/structure_score.py.",
+    )
     ap.add_argument("--chunk", type=int, default=20000,
                     help="test rows per block; 20k x 1281 float64 is ~205 MB")
     ap.add_argument("--dry-run", action="store_true")
@@ -223,6 +240,8 @@ def main() -> int:
     tag = "" if args.instance == "benchmark" else f"_{args.instance}"
     if args.zs_backbone != ZS_BACKBONE:
         tag += f"_zs-{args.zs_backbone}"
+    if args.structure_mean:
+        tag += "_struct"
     if tag:
         OUT = OUT.with_name(f"gp_reward{tag}.json")
         PRED = PRED.with_name(f"gp_predictions{tag}.npz")
@@ -234,6 +253,16 @@ def main() -> int:
 
     names = assays_for(args.instance)
     limits = detection_limits()
+    mpnn = None
+    if args.structure_mean:
+        mp = Path("data/processed/mpnn_matrix.npz")
+        if not mp.exists():
+            raise FileNotFoundError(f"{mp} missing -- run scripts/structure_score.py")
+        mpnn = np.load(mp)
+        missing = [n for n in names if n not in mpnn.files]
+        if missing:
+            raise KeyError(f"{mp} has no structure matrix for {missing}")
+        print(f"structure mean: {mp} covering {len(mpnn.files)} assays")
     # (label, zero_shot_mean, use_order)
     # (label, zero_shot_mean, use_order, composite)
     configs = [
@@ -269,6 +298,12 @@ def main() -> int:
         fm, fs = f0tr_raw.mean(), f0tr_raw.std() + 1e-12
         f0tr = torch.tensor((f0tr_raw - fm) / fs)
         f0te = torch.tensor((f0te_raw - fm) / fs)
+        if mpnn is not None:
+            wt = resolve_wild_type(a, n)
+            st = score_from_matrix(a.mutant, mpnn[n], wt)
+            sm, ss = st[tr].mean(), st[tr].std() + 1e-12
+            f0tr = torch.stack([f0tr, torch.tensor((st[tr] - sm) / ss)], dim=1)
+            f0te = torch.stack([f0te, torch.tensor((st[te] - sm) / ss)], dim=1)
         yt = torch.tensor(ytr_s)
 
         if args.dry_run:
