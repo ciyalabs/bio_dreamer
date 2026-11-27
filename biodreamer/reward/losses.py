@@ -59,12 +59,24 @@ def weighted_smooth_l1(
     return (per_point * w).mean()
 
 
+def _subsample(
+    i: torch.Tensor, j: torch.Tensor, k: int | None,
+    generator: torch.Generator | None,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    if k is None or i.numel() <= k:
+        return i, j
+    sel = torch.randperm(i.numel(), device=i.device, generator=generator)[:k]
+    return i[sel], j[sel]
+
+
 def ranking_pairs(
     target: torch.Tensor,
     assay: torch.Tensor,
     censored: torch.Tensor | None = None,
     max_pairs: int | None = 4096,
     generator: torch.Generator | None = None,
+    order: torch.Tensor | None = None,
+    equal_order_frac: float = 0.0,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Indices (i, j) of comparable pairs, with target[i] > target[j].
 
@@ -75,6 +87,19 @@ def ranking_pairs(
 
     `max_pairs` subsamples uniformly. A batch of n variants from one assay has O(n^2)
     pairs, which at n=1024 is a million comparisons per step for no extra signal.
+
+    **`equal_order_frac` reserves that share of the budget for pairs of EQUAL mutation
+    order**, and it exists because uniform sampling was measured to hand the head a
+    shortcut. H1 trains on order <= 2 and tests on order >= 3; fitness falls with depth
+    in every assay in the corpus (Spearman -0.125 to -0.505 against order alone). So
+    most uniformly drawn pairs are order-1-versus-order-2, whose correct answer is "the
+    shallower one", and a head that learns only that scores ~0.31 -- which is exactly
+    where the uniformly trained head landed. Equal-order pairs carry no depth
+    information at all, so the only way to rank them is to read the substitution.
+
+    With `equal_order_frac = 1.0` and no equal-order pairs present the result is empty
+    and the loss contributes no gradient; callers that stratify should check the pair
+    count rather than assume it.
     """
     if target.ndim != 1:
         raise ValueError(f"target must be 1-D, got {tuple(target.shape)}")
@@ -96,11 +121,24 @@ def ranking_pairs(
         both = censored[:, None] & censored[None, :]
         ok = ok & ~both
 
-    i, j = torch.nonzero(ok, as_tuple=True)
-    if max_pairs is not None and i.numel() > max_pairs:
-        sel = torch.randperm(i.numel(), device=i.device, generator=generator)[:max_pairs]
-        i, j = i[sel], j[sel]
-    return i, j
+    if order is None or equal_order_frac <= 0.0:
+        return _subsample(*torch.nonzero(ok, as_tuple=True), max_pairs, generator)
+
+    if order.shape != target.shape:
+        raise ValueError("order must have one entry per target")
+    if not 0.0 <= equal_order_frac <= 1.0:
+        raise ValueError(f"equal_order_frac must be in [0, 1], got {equal_order_frac}")
+
+    eq = order[:, None] == order[None, :]
+    i_eq, j_eq = torch.nonzero(ok & eq, as_tuple=True)
+    if equal_order_frac >= 1.0:
+        return _subsample(i_eq, j_eq, max_pairs, generator)
+
+    k_eq = None if max_pairs is None else int(round(max_pairs * equal_order_frac))
+    i_eq, j_eq = _subsample(i_eq, j_eq, k_eq, generator)
+    k_any = None if max_pairs is None else max(max_pairs - i_eq.numel(), 0)
+    i_any, j_any = _subsample(*torch.nonzero(ok, as_tuple=True), k_any, generator)
+    return torch.cat([i_eq, i_any]), torch.cat([j_eq, j_any])
 
 
 def pairwise_ranking_loss(
@@ -110,6 +148,8 @@ def pairwise_ranking_loss(
     censored: torch.Tensor | None = None,
     max_pairs: int | None = 4096,
     generator: torch.Generator | None = None,
+    order: torch.Tensor | None = None,
+    equal_order_frac: float = 0.0,
 ) -> torch.Tensor:
     """RankNet loss over comparable pairs: -log sigma(pred_i - pred_j).
 
@@ -118,7 +158,9 @@ def pairwise_ranking_loss(
     carries a gradient path when no pair is comparable, so a degenerate batch does not
     break the step.
     """
-    i, j = ranking_pairs(target, assay, censored, max_pairs, generator)
+    i, j = ranking_pairs(
+        target, assay, censored, max_pairs, generator, order, equal_order_frac
+    )
     if i.numel() == 0:
         return pred.sum() * 0.0
     return F.softplus(-(pred[i] - pred[j])).mean()

@@ -87,12 +87,17 @@ not large, and Phase 2 should not claim more than it shows.
 
 ## What is not done
 
-- **The fitness target is untrained.** It needs ProteinGym latents — 287,000 sequences,
-  0.8 GPU-hours. The losses and the head exist and are tested; only the data is missing.
-- **Neither the `benchmark` nor the `planning` instance exists yet.** Both are defined by
-  which ProteinGym assays they may train on (Step 0.3's two-instance rule), so both wait
-  on the same encoding.
-- Those are the first items of the next rental, together with H1 itself.
+> **Resolved, 2026-11-27.** All three items below are done — see
+> `diagnostics/fitness_head.md`. The corpus is encoded (946,365 pooled vectors) and both
+> instances are trained. Headline: the fitness target reaches mean ρ **+0.260** on
+> `planning` and **+0.290** on `benchmark`, clear of a 0.10 chance band but **tied with a
+> substitution-count predictor at 0.31**, against H1's registered 0.55. The stability
+> baseline below is unaffected.
+
+- ~~**The fitness target is untrained.**~~ Trained; the encoding cost ~$3 of A40.
+- ~~**Neither the `benchmark` nor the `planning` instance exists yet.**~~ Both exist, with
+  11 and 7 assays.
+- ~~Those are the first items of the next rental~~ — done, H1 (Step 2.2) remains.
 
 ---
 

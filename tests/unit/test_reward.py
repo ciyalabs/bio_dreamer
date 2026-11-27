@@ -351,3 +351,84 @@ def test_pool_first_matches_pooling_a_full_tensor():
         a = h(z)["stability"]
         b = h(masked_pool(z, None))["stability"]
     assert torch.allclose(a, b, atol=1e-5)
+
+
+# --- depth-stratified pair sampling -------------------------------------------------
+# The reason this exists: uniform sampling over an order<=2 training set draws mostly
+# order-1-vs-order-2 pairs, whose right answer is "the shallower one". A head that
+# learns only that scores ~0.31 on H1, which is where the uniformly trained head landed.
+
+
+def test_equal_order_frac_one_returns_only_equal_order_pairs():
+    target = torch.tensor([3.0, 2.0, 1.0, 0.0])
+    assay = torch.zeros(4, dtype=torch.long)
+    order = torch.tensor([1, 1, 2, 2])
+    i, j = ranking_pairs(target, assay, order=order, equal_order_frac=1.0,
+                         max_pairs=None)
+    assert i.numel() > 0
+    assert torch.equal(order[i], order[j])
+
+
+def test_equal_order_frac_zero_matches_the_unstratified_sampler():
+    target = torch.tensor([3.0, 2.0, 1.0, 0.0])
+    assay = torch.zeros(4, dtype=torch.long)
+    order = torch.tensor([1, 1, 2, 2])
+    a = ranking_pairs(target, assay, max_pairs=None)
+    b = ranking_pairs(target, assay, order=order, equal_order_frac=0.0, max_pairs=None)
+    assert torch.equal(a[0], b[0]) and torch.equal(a[1], b[1])
+
+
+def test_stratified_pairs_still_respect_assay_and_censoring():
+    target = torch.tensor([3.0, 2.0, 3.0, 2.0])
+    assay = torch.tensor([0, 0, 1, 1])
+    order = torch.tensor([2, 2, 2, 2])
+    censored = torch.tensor([True, True, False, False])
+    i, j = ranking_pairs(target, assay, censored=censored, order=order,
+                         equal_order_frac=1.0, max_pairs=None)
+    assert torch.equal(assay[i], assay[j])          # never across assays
+    assert not (censored[i] & censored[j]).any()     # never both censored
+    assert (target[i] > target[j]).all()
+
+
+def test_partial_frac_mixes_both_populations_within_budget():
+    g = torch.Generator().manual_seed(0)
+    n = 60
+    target = torch.linspace(1.0, 0.0, n)
+    assay = torch.zeros(n, dtype=torch.long)
+    order = torch.tensor([1] * (n // 2) + [2] * (n - n // 2))
+    i, j = ranking_pairs(target, assay, max_pairs=40, generator=g,
+                         order=order, equal_order_frac=0.5)
+    assert i.numel() == 40
+    same = (order[i] == order[j]).sum().item()
+    assert 20 <= same < 40  # the reserved half, plus whatever uniform adds
+
+
+def test_no_equal_order_pairs_yields_no_gradient_rather_than_a_wrong_one():
+    # a caller that stratifies must check the pair count; this documents the failure
+    target = torch.tensor([2.0, 1.0])
+    assay = torch.zeros(2, dtype=torch.long)
+    order = torch.tensor([1, 2])
+    i, _ = ranking_pairs(target, assay, order=order, equal_order_frac=1.0,
+                         max_pairs=None)
+    assert i.numel() == 0
+    pred = torch.zeros(2, requires_grad=True)
+    loss = pairwise_ranking_loss(pred, target, assay, order=order,
+                                 equal_order_frac=1.0)
+    assert float(loss.detach()) == 0.0
+    loss.backward()  # must not raise
+
+
+def test_equal_order_frac_outside_unit_interval_is_rejected():
+    target = torch.tensor([2.0, 1.0])
+    assay = torch.zeros(2, dtype=torch.long)
+    order = torch.tensor([1, 1])
+    with pytest.raises(ValueError, match="equal_order_frac"):
+        ranking_pairs(target, assay, order=order, equal_order_frac=1.5)
+
+
+def test_order_length_mismatch_is_rejected():
+    target = torch.tensor([2.0, 1.0])
+    assay = torch.zeros(2, dtype=torch.long)
+    with pytest.raises(ValueError, match="order"):
+        ranking_pairs(target, assay, order=torch.tensor([1, 1, 2]),
+                      equal_order_frac=1.0)

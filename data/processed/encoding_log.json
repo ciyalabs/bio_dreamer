@@ -11,5 +11,127 @@
     "total_seconds": 38.8,
     "backbone": "westlake-repl/SaProt_650M_AF2",
     "cache_dir": "models/cache"
+  },
+  "planning": {
+    "groups": {
+      "CAPSD_AAV2S_Sinai_2021": {
+        "n_sequences": 31263,
+        "residues": 22978305,
+        "seconds": 847.2,
+        "residues_per_second": 27122.0
+      },
+      "D7PM05_CLYGR_Somermeyer_2022": {
+        "n_sequences": 13498,
+        "residues": 3172030,
+        "seconds": 115.3,
+        "residues_per_second": 27503.4
+      },
+      "GCN4_YEAST_Staller_2018": {
+        "n_sequences": 2638,
+        "residues": 741278,
+        "seconds": 29.0,
+        "residues_per_second": 25531.7
+      },
+      "GFP_AEQVI_Sarkisyan_2016": {
+        "n_sequences": 38153,
+        "residues": 9080414,
+        "seconds": 329.1,
+        "residues_per_second": 27589.7
+      },
+      "PHOT_CHLRE_Chen_2023": {
+        "n_sequences": 165531,
+        "residues": 19532658,
+        "seconds": 774.7,
+        "residues_per_second": 25213.4
+      },
+      "Q6WV12_9MAXI_Somermeyer_2022": {
+        "n_sequences": 14568,
+        "residues": 3234096,
+        "seconds": 122.5,
+        "residues_per_second": 26411.5
+      },
+      "Q8WTC7_9CNID_Somermeyer_2022": {
+        "n_sequences": 21349,
+        "residues": 5081062,
+        "seconds": 184.3,
+        "residues_per_second": 27563.4
+      }
+    },
+    "total_seconds": 2402.2,
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "cache_dir": "models/cache"
+  },
+  "benchmark": {
+    "groups": {
+      "CAPSD_AAV2S_Sinai_2021": {
+        "n_sequences": 31263,
+        "residues": 22978305,
+        "seconds": 0.0,
+        "residues_per_second": 212286336067.7
+      },
+      "D7PM05_CLYGR_Somermeyer_2022": {
+        "n_sequences": 13498,
+        "residues": 3172030,
+        "seconds": 0.0,
+        "residues_per_second": 37904439080.1
+      },
+      "F7YBW8_MESOW_Aakre_2015": {
+        "n_sequences": 8956,
+        "residues": 832908,
+        "seconds": 40.3,
+        "residues_per_second": 20691.0
+      },
+      "F7YBW8_MESOW_Ding_2023": {
+        "n_sequences": 7922,
+        "residues": 736746,
+        "seconds": 30.6,
+        "residues_per_second": 24075.9
+      },
+      "GCN4_YEAST_Staller_2018": {
+        "n_sequences": 2638,
+        "residues": 741278,
+        "seconds": 0.0,
+        "residues_per_second": 4151061789.7
+      },
+      "GFP_AEQVI_Sarkisyan_2016": {
+        "n_sequences": 38153,
+        "residues": 9080414,
+        "seconds": 0.0,
+        "residues_per_second": 173118258008.4
+      },
+      "HIS7_YEAST_Pokusaeva_2019": {
+        "n_sequences": 494794,
+        "residues": 108854680,
+        "seconds": 4063.8,
+        "residues_per_second": 26786.5
+      },
+      "PHOT_CHLRE_Chen_2023": {
+        "n_sequences": 165531,
+        "residues": 19532658,
+        "seconds": 0.0,
+        "residues_per_second": 81925905580.0
+      },
+      "Q6WV12_9MAXI_Somermeyer_2022": {
+        "n_sequences": 14568,
+        "residues": 3234096,
+        "seconds": 0.0,
+        "residues_per_second": 36076547311.7
+      },
+      "Q8WTC7_9CNID_Somermeyer_2022": {
+        "n_sequences": 21349,
+        "residues": 5081062,
+        "seconds": 0.0,
+        "residues_per_second": 85933543027.6
+      },
+      "SPG1_STRSG_Wu_2016": {
+        "n_sequences": 147493,
+        "residues": 66076864,
+        "seconds": 2468.6,
+        "residues_per_second": 26767.1
+      }
+    },
+    "total_seconds": 6603.3,
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "cache_dir": "models/cache"
   }
 }

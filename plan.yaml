@@ -206,6 +206,8 @@ phases:
             name: Training runs, per-assay performance distribution
           - id: censoring_decision
             name: Censored regression versus exclusion for floored measurements
+          - id: fitness_training
+            name: Fitness target, per-assay standardisation plus pairwise ranking
         outputs: [reward module, benchmark and planning instances]
 
       - id: "2.2"

@@ -204,6 +204,12 @@ def pool_group(enc: ProteinEncoder, group: str, seqs: list[str], batch_size: int
 
     POOLED_DIR.mkdir(parents=True, exist_ok=True)
     dest = POOLED_DIR / f"{enc.name.replace('/', '_')}__{group}.npz"
+    # One file per assay, so the instances overlap: `benchmark` contains all 7 of
+    # `planning`'s assays plus 4 more. Re-encoding the shared ones would repeat 64M of
+    # 240M residues -- about an hour of rented GPU for a byte-identical result.
+    if dest.exists():
+        print(f"    {group}: already encoded, skipping ({dest.stat().st_size/1e6:.1f} MB)")
+        return dest
     vecs, keys = [], []
     for s in range(0, len(seqs), batch_size):
         chunk = seqs[s : s + batch_size]

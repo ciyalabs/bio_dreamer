@@ -718,22 +718,23 @@ generating confident nonsense, so this phase must clear its bar before Phase 3 s
 phase optimises.
 
 **Work.**
-- [ ] Shared trunk on pooled latent (pooling happens **here and only here**).
-- [ ] Stability target: SmoothL1 on ΔΔG / ΔG.
-- [ ] Fitness target: **per-assay standardisation + pairwise ranking loss** — never regress raw
+- [x] Shared trunk on pooled latent (pooling happens **here and only here**).
+- [x] Stability target: SmoothL1 on ΔΔG / ΔG.
+- [x] Fitness target: **per-assay standardisation + pairwise ranking loss** — never regress raw
       fitness across assays, the values are not comparable.
-- [ ] **Censoring, decided and documented.** The GB1 doubles have a measurement floor affecting
+- [x] **Censoring, decided and documented.** The GB1 doubles have a measurement floor affecting
       at least 30% of variants, and HIS3's growth assay has one too. Choose censored regression
       or principled exclusion, write down which and why. Silently regressing on floored values
       will corrupt every epistasis estimate downstream.
 
 **Experiments.** Training curves; per-assay performance distribution, not just the mean.
 
-**Go / no-go.** Proceed to 2.2 once stable.
+**Go / no-go.** Proceed to 2.2 once stable. **Met** — training is stable (ranking loss
+0.693 → 0.446, mean ρ spread ±0.012 over inits), and 2.2 is where the number is judged.
 
 **Outputs.** `reward/` module; trained `benchmark` and `planning` instances (Step 0.3).
 
-**✅ PARTLY DONE (2026-11-27).** See `diagnostics/reward_head.md`. Module
+**✅ DONE (2026-11-27).** See `diagnostics/reward_head.md` and `diagnostics/fitness_head.md`. Module
 `biodreamer/reward/` built (266k trainable params), censoring decided by measurement, and
 the stability target trained. No GPU needed — Steps 1.3/1.4 had already cached the latents.
 
@@ -759,10 +760,58 @@ would measure memorised protein identity — 20 mutants of a domain share 95% of
 regression > 0`) — no world model exists yet, so this *is* that comparator. Phase 3 must
 beat +0.337 / +0.753 to have added anything.
 
-**Not done:** the fitness target is untrained and neither the `benchmark` nor the
-`planning` instance exists, because both need ProteinGym latents — 287,000 sequences,
-0.8 GPU-hours. Losses and head are built and tested; only the data is missing. First items
-of the next rental, with H1.
+**✅ NOW COMPLETE (2026-11-27).** See `diagnostics/fitness_head.md`. The ProteinGym
+corpus is encoded (11 assays, 946,365 pooled SaProt vectors, 2.25 GB, ~$3 of A40) and
+both instances are trained. **The fitness target learns real signal and still ties with
+counting mutations:**
+
+| instance | assays | mean ρ | median | chance band | order-only control | H1 needs |
+|---|---:|---:|---:|---:|---:|---:|
+| **planning** | 7 | **+0.260 ± 0.012** | +0.370 | 0.098 | **0.312** | 0.55 |
+| **benchmark** | 11 | **+0.290** | +0.347 | 0.113 | **0.303** | 0.55 |
+
+Above chance on 6/7 and 10/11 assays, by 3–11× — so the head is not reading noise. But a
+predictor that ignores the protein and reads only substitution count scores 0.31, and the
+trained head does not beat it on average. Order-only ρ is negative on all 11 assays
+(−0.125 to −0.505): training is capped at order ≤2 and testing is order ≥3, so the
+dominant signal off the end of the training distribution is depth.
+
+Two assays fail outright — **PHOT_CHLRE** sits inside its chance band (+0.082 / +0.181)
+and is 58% of the planning test set; **GCN4_YEAST** ranks backwards on every run (−0.088
+to −0.313) from 88 training variants.
+
+**The control had to be fixed first.** One untrained head scored +0.517 on PHOT, implying
+training had destroyed it. Twenty random inits on PHOT give mean −0.031 with **sd 0.248**
+— that +0.517 was a draw from a wide null, not a result. The control is now mean |ρ| over
+10 seeds. Fifth instance in this project of an instrument artifact read as a finding; the
+standing rule is now that **a control which is a single draw needs its variance measured
+before its value is used.**
+
+**Depth-stratified pair sampling was tried and it fails.** Implemented as
+`equal_order_frac` with 7 tests; planning mean ρ goes +0.260 → +0.257 → +0.228 at
+fractions 0.0 / 0.5 / 1.0. The premise was wrong: 441 singles against 1,447 doubles means
+**84.6% of pairs are already equal-order**, so there was no depth shortcut in the sampler
+to remove. Default stays 0.0.
+
+**The real finding is that the head and depth are complementary.** Measured within a
+single mutation depth, where depth carries no information, the head ranks variants at
+**+0.18 to +0.36 on five of seven assays** — skill the order-only baseline has none of.
+A fixed 50/50 rank average of the two reaches mean ρ **+0.375** (CAPSD +0.637, GFP
++0.567, both at or above the 0.55 threshold) against +0.252 for the head and +0.312 for
+depth alone. `PHOT_CHLRE` is the exception: ρ(pred, order) = −0.472 and within-order ρ
+−0.028, so its apparent +0.094 was entirely depth, which is why stratifying hurt it most.
+
+So the aggregate tie understates what the head learned while correctly reporting it is
+not yet H1-competitive. **Making the reward depth-aware, with the blend weight fitted on
+the training split only, is the next step** — the 50/50 weight above is unfitted and
+therefore legitimate, but a weight chosen after seeing test numbers would not be.
+Depth-invariant input is the wrong idea and is recorded as such: depth is information the
+head is failing to use, not a confound to divide out.
+
+**This is not H1.** Step 2.2 still owes the additive null and the literature baselines.
+The order-only control is deliberately weaker than the additive null — it fits nothing —
+so the additive null should score above 0.31. The order ≥3 set was not tuned against; the
+recipe is the stability run's.
 
 ---
 
