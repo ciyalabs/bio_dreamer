@@ -54,6 +54,22 @@ instance** (Step 0.3 two-instance rule); H4 must not use it.
 weak oracle generates confident nonsense. Diagnose in this order: encoder (D2 result), adapter
 capacity, loss (ranking vs regression), per-assay normalisation.
 
+> **❌ OUTCOME, 2026-11-27: H1 MISSED.** `spearman_mean` **+0.409** against 0.55 and
+> `frac_assays_beating_null` **0.636** against 0.70 both fail; the additive-null margin
+> (+0.085) and the frozen-regression margin (+0.108) pass. **Phase 3 is blocked.** No
+> threshold was edited. Full report: `results/reward_benchmark.md`.
+>
+> The diagnosis follows the order prescribed above and stops at the first item. A plain
+> `RidgeCV(pooled_embedding ++ mutation_count)` scores **+0.390** — the trained 266k head
+> beats it by **+0.019** and loses on median. Adapter capacity, loss choice and per-assay
+> normalisation are all acquitted (the last provably: per-assay Spearman is invariant
+> under increasing per-assay rescaling). The encoder representation is the constraint,
+> and specifically the decision to mean-pool it: `pool_first` was validated on stability
+> with single mutants of 36–72 residue domains and never tested on multi-mutant fitness.
+>
+> `vs_zeroshot` and a matched-assay `vs_literature` comparison were **not run**, and are
+> recorded as not done rather than estimated.
+
 ---
 
 ## H2 — flow matching beats deterministic dynamics

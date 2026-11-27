@@ -208,6 +208,8 @@ phases:
             name: Censored regression versus exclusion for floored measurements
           - id: fitness_training
             name: Fitness target, per-assay standardisation plus pairwise ranking
+          - id: trainability_screen
+            name: Which assays carry in-sample signal, judged on the training split only
         outputs: [reward module, benchmark and planning instances]
 
       - id: "2.2"
@@ -227,6 +229,8 @@ phases:
             name: Versus regression head on the frozen encoder
           - id: higher_order_extrapolation
             name: Train on <300 singles+doubles, test on unseen 3+ mutants
+          - id: vs_additive_null_run
+            name: H1 gate run -- head, additive null, frozen ridge, verdict
         thresholds:
           # published band on the same protocol: ProteinNPT 0.56, MULTI-evolve
           # 0.61, Kermut 0.62, Cerebra 0.65

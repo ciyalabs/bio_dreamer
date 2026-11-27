@@ -41,6 +41,7 @@ from scipy.stats import spearmanr
 
 from biodreamer import tracking
 from biodreamer.protein_dreamer.cache import sequence_hash
+from biodreamer.protein_dreamer.encoder import ProteinEncoder
 from biodreamer.reward import RewardConfig, RewardHead
 from biodreamer.reward.data import (
     assays_for,
@@ -53,9 +54,12 @@ from biodreamer.reward.losses import (
     pairwise_ranking_loss,
     ranking_pairs,
     standardise_per_assay,
+    weighted_smooth_l1,
 )
 
 CACHE = Path("data/processed/pooled_cache")
+MANIFEST = Path("data/processed/d1_fold_manifest.json")
+STABILITY_BACKBONE = "saprot"
 BACKBONE = "westlake-repl/SaProt_650M_AF2"
 OUT = Path("data/processed/fitness_training.json")
 
@@ -92,6 +96,37 @@ def assay_rows(assay: str, limits: dict[str, float], seed: int):
     return a, tr, te, rows(tr), rows(te), z
 
 
+def load_stability(dim: int):
+    """Pooled Tsuboyama latents and ddG, for joint training on the shared trunk.
+
+    The stability cache is per-residue and the fitness cache is pooled, which is why
+    this was left undone in the first pass. Mean-pooling the per-residue latents is the
+    right bridge rather than a compromise: the reward head pools before the trunk
+    anyway, and Step 2.1 measured `pool_first` to cost nothing (+0.337 against +0.329).
+    """
+    entries = json.loads(MANIFEST.read_text())["proteins"]
+    enc = ProteinEncoder(STABILITY_BACKBONE)
+    xs, ys = [], []
+    for e in entries:
+        muts = [m for m in e["mutants"] if m["ddG"] is not None]
+        if not muts:
+            continue
+        zs = enc.encode([m["sequence"] for m in muts], batch_size=4, use_cache=True)
+        for z, m in zip(zs, muts):
+            if z.shape[1] != dim:
+                raise RuntimeError(
+                    f"stability latents are {z.shape[1]}-d but fitness cache is {dim}-d"
+                )
+            xs.append(z.astype(np.float32).mean(axis=0))
+            ys.append(float(m["ddG"]))
+    # The fold manifest carries no CI column, so this is unweighted SmoothL1 rather
+    # than the inverse-variance weighting Step 2.1 chose for stability-only training.
+    # Joint training is being tested for its effect on FITNESS; retrofitting CIs into
+    # the manifest is a separate change.
+    return (torch.from_numpy(np.stack(xs)),
+            torch.from_numpy(np.asarray(ys, np.float32)), None)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--instance", default="planning", choices=["planning", "benchmark"])
@@ -102,6 +137,12 @@ def main() -> int:
                     help="subtract a learned non-negative multiple of mutation count; "
                          "the weight is fitted on the TRAINING split like everything else")
     ap.add_argument("--depth-transform", default="linear", choices=["linear", "log"])
+    ap.add_argument("--per-assay-depth", action="store_true",
+                    help="one depth weight per assay instead of one shared")
+    ap.add_argument("--joint-stability", action="store_true",
+                    help="train the stability head in the same loop, on pooled "
+                         "Tsuboyama latents; the trunk is shared so this may regularise")
+    ap.add_argument("--stability-weight", type=float, default=1.0)
     ap.add_argument("--depth-beta-init", type=float, default=None,
                     help="initial VALUE of softplus(depth_beta); the default init is "
                          "beta=0, i.e. 0.693. Exposed because the fitted beta moves "
@@ -177,9 +218,15 @@ def main() -> int:
         raise RuntimeError("stratified sampling requested but no equal-order pair exists")
     print(f"  equal_order_frac = {args.equal_order_frac}")
 
+    stab = load_stability(X.shape[1]) if args.joint_stability else None
+    if stab is not None:
+        print(f"  joint stability: {len(stab[0]):,} Tsuboyama mutants, "
+              f"weight {args.stability_weight}")
+
     cfg = RewardConfig(backbone_dim=X.shape[1], pool_first=True,
                        depth_aware=args.depth_aware,
-                       depth_transform=args.depth_transform)
+                       depth_transform=args.depth_transform,
+                       n_assays=len(names) if args.per_assay_depth else 0)
     head = RewardHead(cfg)
     if args.depth_beta_init is not None:
         if not args.depth_aware:
@@ -204,15 +251,25 @@ def main() -> int:
     head.train()
     for e in range(args.epochs):
         loss = pairwise_ranking_loss(
-            head(X, order=order_t)["fitness"], y, assay, censored=cens,
+            head(X, order=order_t, assay=assay)["fitness"], y, assay, censored=cens,
             max_pairs=args.max_pairs, generator=gen,
             order=order_t, equal_order_frac=args.equal_order_frac,
         )
+        if stab is not None:
+            Xs, ys, cis = stab
+            # the manifest's mutants are single substitutions, so order 1 is the true
+            # value, not a placeholder; the depth penalty does not touch `stability`
+            out_s = head(Xs, order=torch.ones(len(Xs), dtype=torch.long),
+                         assay=torch.zeros(len(Xs), dtype=torch.long))
+            loss = loss + args.stability_weight * weighted_smooth_l1(
+                out_s["stability"], ys, cis
+            )
         opt.zero_grad()
         loss.backward()
         opt.step()
         if e % 25 == 0 or e == args.epochs - 1:
-            beta = float(F.softplus(head.depth_beta).detach()) if args.depth_aware else 0.0
+            beta = (float(F.softplus(head.depth_beta).detach().mean())
+                    if args.depth_aware else 0.0)
             curve.append({"epoch": e, "loss": float(loss.detach()), "depth_beta": beta})
             print(f"  epoch {e:>4}  ranking loss {float(loss.detach()):.4f}"
                   + (f"  depth_beta {beta:.4f}" if args.depth_aware else ""), flush=True)
@@ -240,7 +297,8 @@ def main() -> int:
                     b = rte[s : s + args.eval_batch]
                     xb = torch.from_numpy(emb[b].astype(np.float32))
                     ob = od_t[s : s + len(b)]
-                    o = head(xb, order=ob)
+                    ab = torch.full((len(b),), k, dtype=torch.long)
+                    o = head(xb, order=ob, assay=ab)
                     pt[s : s + len(b)] = o["fitness"].numpy()
                     ps[s : s + len(b)] = o["fitness_sequence_only"].numpy()
             truth = a.score[te]
@@ -265,9 +323,11 @@ def main() -> int:
             rs = []
             with torch.no_grad():
                 oc = od_t[sub]
+                ac = torch.full((len(sub),), k, dtype=torch.long)
                 for m in controls:
-                    rs.append(float(spearmanr(m(xc, order=oc)["fitness"].numpy(),
-                                              truth[sub]).statistic))
+                    rs.append(float(spearmanr(
+                        m(xc, order=oc, assay=ac)["fitness"].numpy(),
+                        truth[sub]).statistic))
             rs = np.array(rs)
             ct_[n], cs_[n] = float(np.abs(rs).mean()), float(rs.std())
             print(f"  {n:34s} {tr_[n]:+.3f}  seq-only {sq_[n]:+.3f}  "
@@ -300,8 +360,13 @@ def main() -> int:
         "n_assays_beating_order_only": float((np.abs(vals) > np.abs(ovals)).sum()),
         "epochs": float(args.epochs),
         "depth_aware": float(args.depth_aware),
-        "depth_beta": (float(F.softplus(head.depth_beta).detach())
+        "per_assay_depth": float(args.per_assay_depth),
+        "joint_stability": float(args.joint_stability),
+        "depth_beta": (float(F.softplus(head.depth_beta).detach().mean())
                        if args.depth_aware else 0.0),
+        "depth_beta_per_assay": (
+            [float(v) for v in F.softplus(head.depth_beta).detach()]
+            if args.depth_aware and args.per_assay_depth else []),
         "depth_beta_init": (0.6931 if args.depth_beta_init is None
                             else float(args.depth_beta_init)),
         "spearman_seq_only_mean": float(np.mean([seq_only[n] for n in names])),
@@ -333,6 +398,10 @@ def main() -> int:
     tag = args.instance
     if args.depth_aware:
         tag += f"_depth{args.depth_transform}"
+        if args.per_assay_depth:
+            tag += "_perassay"
+        if args.joint_stability:
+            tag += "_joint"
         if args.depth_beta_init is not None:
             tag += f"_b{args.depth_beta_init:g}"
     if args.equal_order_frac > 0:

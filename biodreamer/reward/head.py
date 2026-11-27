@@ -60,6 +60,14 @@ class RewardConfig:
     # score that is already log-scale in most assays. `log` is the gentler extrapolation
     # and is a sensitivity check, not an alternative to be selected on test numbers.
     depth_transform: str = "linear"
+    # One depth weight per assay instead of one shared across the corpus. Worth a test
+    # because the assays differ in how fast fitness falls with depth (order-only
+    # Spearman spans -0.125 to -0.505), but each weight is then identified from one
+    # assay's own order-1-versus-order-2 contrast, which is far less data than the
+    # shared weight gets. NOTE: a per-assay AFFINE output would be pointless here --
+    # H1 scores per-assay Spearman, which is invariant under any increasing per-assay
+    # rescaling. Reweighting two components is not the same as rescaling one.
+    n_assays: int = 0  # 0 means a single shared weight
 
 
 class Adapter(nn.Module):
@@ -128,7 +136,7 @@ class RewardHead(nn.Module):
         # (-0.125 to -0.505). Training sees only orders 1 and 2, so this is identified
         # from a 1-versus-2 contrast and then extrapolated to order 28 -- the weakest
         # part of the design and the thing to report with any number it produces.
-        self.depth_beta = nn.Parameter(torch.zeros(1))
+        self.depth_beta = nn.Parameter(torch.zeros(max(self.cfg.n_assays, 1)))
         if self.cfg.depth_transform not in ("linear", "log"):
             raise ValueError(
                 f"depth_transform must be 'linear' or 'log', got "
@@ -139,25 +147,34 @@ class RewardHead(nn.Module):
         """The per-residue latent the world model consumes. No pooling."""
         return self.adapter(z)
 
-    def depth_penalty(self, order: torch.Tensor) -> torch.Tensor:
+    def depth_penalty(
+        self, order: torch.Tensor, assay: torch.Tensor | None = None
+    ) -> torch.Tensor:
         """Non-negative penalty per variant, from its mutation count."""
         d = order.to(self.depth_beta.dtype)
         if (d <= 0).any():
             raise ValueError("mutation order must be >= 1")
         if self.cfg.depth_transform == "log":
             d = torch.log(d)
-        return F.softplus(self.depth_beta).squeeze(-1) * d
+        beta = F.softplus(self.depth_beta)
+        if self.cfg.n_assays:
+            if assay is None:
+                raise ValueError("n_assays > 0 requires `assay` per variant")
+            return beta[assay] * d
+        return beta.squeeze(-1) * d
 
     def forward(
         self,
         z: torch.Tensor,
         mask: torch.Tensor | None = None,
         order: torch.Tensor | None = None,
+        assay: torch.Tensor | None = None,
     ) -> dict[str, torch.Tensor]:
         """(B, L, backbone_dim) -> scalar predictions plus the latent, for reuse.
 
         `order` is the mutation count per variant, required when `depth_aware` is set.
         It is known for any candidate at inference time, so using it is not leakage.
+        `assay` is needed only for a per-assay depth weight (`n_assays > 0`).
         """
         if self.cfg.pool_first:
             # z may already be (B, d) if it came from a pooled cache
@@ -173,7 +190,7 @@ class RewardHead(nn.Module):
         if self.cfg.depth_aware:
             if order is None:
                 raise ValueError("depth_aware=True requires `order` per variant")
-            fitness = fitness - self.depth_penalty(order)
+            fitness = fitness - self.depth_penalty(order, assay)
         return {
             "stability": self.stability(h).squeeze(-1),
             "fitness": fitness,

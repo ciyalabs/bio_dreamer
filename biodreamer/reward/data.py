@@ -85,6 +85,10 @@ class Assay:
     score: np.ndarray
     order: np.ndarray
     censored: np.ndarray
+    # colon-separated substitution strings ("A23V:K56E"), kept because the additive
+    # null in Step 2.2 needs one coefficient per observed substitution and cannot
+    # recover them from the mutated sequence without the wild type
+    mutant: np.ndarray
 
     def __len__(self) -> int:
         return len(self.score)
@@ -115,6 +119,7 @@ def load_assay(name: str, limits: dict[str, float] | None = None) -> Assay:
         score=score,
         order=order,
         censored=cens,
+        mutant=df["mutant"].astype(str).to_numpy(),
     )
 
 

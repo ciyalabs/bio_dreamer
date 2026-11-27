@@ -10,7 +10,9 @@ measurement would corrupt every epistasis estimate downstream.
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
+from scipy.stats import spearmanr
 
 torch = pytest.importorskip("torch")
 
@@ -535,3 +537,46 @@ def test_depth_beta_receives_gradient_from_the_ranking_loss():
     loss.backward()
     assert head.depth_beta.grad is not None
     assert head.depth_beta.grad.abs().item() > 0
+
+
+# --- per-assay depth weight ---------------------------------------------------------
+# A per-assay AFFINE output would be a no-op: H1 scores per-assay Spearman, invariant
+# under any increasing per-assay rescaling. A per-assay depth WEIGHT is not, because it
+# reweights two components rather than rescaling one. test_per_assay_affine_is_a_noop
+# below pins the first claim so nobody spends time implementing it.
+
+
+def test_per_assay_affine_output_cannot_change_per_assay_spearman():
+    rng = np.random.default_rng(0)
+    pred = rng.normal(size=200)
+    truth = pred + rng.normal(scale=0.5, size=200)
+    base = spearmanr(pred, truth).statistic
+    for a, b in [(1.0, 0.0), (3.7, -2.0), (0.01, 100.0)]:
+        assert spearmanr(a * pred + b, truth).statistic == pytest.approx(base)
+
+
+def test_per_assay_depth_weight_needs_the_assay_index():
+    head = RewardHead(_depth_cfg(n_assays=3))
+    with pytest.raises(ValueError, match="assay"):
+        head.depth_penalty(torch.tensor([1, 2]))
+
+
+def test_per_assay_depth_weights_act_independently():
+    head = RewardHead(_depth_cfg(n_assays=2))
+    with torch.no_grad():
+        head.depth_beta.copy_(torch.tensor([-6.0, 2.0]))  # near-zero, then strong
+    order = torch.tensor([4, 4])
+    pen = head.depth_penalty(order, assay=torch.tensor([0, 1]))
+    assert pen[1] > pen[0] * 10
+
+
+def test_per_assay_weight_count_matches_config():
+    assert RewardHead(_depth_cfg()).depth_beta.numel() == 1
+    assert RewardHead(_depth_cfg(n_assays=7)).depth_beta.numel() == 7
+
+
+def test_shared_weight_still_works_without_an_assay_index():
+    head = RewardHead(_depth_cfg())
+    head.eval()
+    out = head(torch.zeros(2, 8), order=torch.tensor([1, 5]))
+    assert out["fitness"][0] > out["fitness"][1]

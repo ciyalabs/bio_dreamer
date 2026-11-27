@@ -255,18 +255,131 @@ unusable for a Phase 6 claim.
 
 ---
 
+## The three remaining levers, all pulled, none of them moves the mean
+
+| configuration | mean ρ | median | seq-only | within-order |
+|---|---:|---:|---:|---:|
+| depth-aware, shared weight | **+0.384** | +0.413 | +0.247 | +0.161 |
+| + per-assay depth weight | +0.389 | +0.416 | +0.252 | +0.167 |
+| + joint stability | +0.377 | +0.332 | +0.196 | +0.147 |
+| + both | +0.379 | +0.336 | +0.196 | +0.147 |
+
+Against an init-to-init spread of ±0.012, **+0.389 and +0.384 are the same number**, and
+joint training is slightly behind. The mean is stuck at ~0.38 against H1's 0.55.
+
+### `GCN4_YEAST` is unlearnable, and the exclusion rule for it does not work
+
+`scripts/trainability_screen.py` asks, **using the training split only**, whether the
+frozen encoder carries any signal about each assay: 5-fold out-of-fold ridge inside the
+≤300 order≤2 rows, nothing from order ≥3. The criterion has to be blind to test
+performance, because dropping the assay you score worst on raises the mean by
+construction.
+
+| assay | n_train | train sd | within-train OOF ρ | |
+|---|---:|---:|---:|---|
+| F7YBW8_MESOW_Aakre_2015 | 300 | 0.365 | **+0.865** | |
+| SPG1_STRSG_Wu_2016 | 300 | 0.559 | +0.680 | |
+| F7YBW8_MESOW_Ding_2023 | 166 | 0.282 | +0.639 | |
+| CAPSD_AAV2S_Sinai_2021 | 300 | 3.224 | +0.548 | |
+| PHOT_CHLRE_Chen_2023 | 300 | 0.331 | +0.536 | |
+| GFP_AEQVI_Sarkisyan_2016 | 300 | 0.669 | +0.287 | |
+| HIS7_YEAST_Pokusaeva_2019 | 300 | 0.249 | +0.269 | |
+| D7PM05_CLYGR_Somermeyer_2022 | 300 | 11975 | +0.143 | |
+| Q6WV12_9MAXI_Somermeyer_2022 | 300 | 5682 | +0.131 | |
+| **Q8WTC7_9CNID_Somermeyer_2022** | 300 | 3218 | **−0.012** | flagged — but scores **+0.330** on test |
+| **GCN4_YEAST_Staller_2018** | **88** | 0.315 | **−0.120** | flagged, and fails on test too |
+
+**GCN4 has no learnable signal from its 88 training variants** — a tuned RidgeCV finds
+nothing in-sample, so its negative test score is the data and the encoder, not the head's
+architecture. Its score distribution is also exceptionally narrow: sd 0.315 on a mean of
+1.40, one library at a single length of 281.
+
+**But the criterion also flags `Q8WTC7`, which transfers fine at +0.330.** Absence of
+in-sample OOF signal therefore does not predict failure to transfer — the order≤2 slice
+is narrow enough that a model can learn nothing in-sample and still rank order≥3
+variants. So the screen is **not usable as a drop rule**, and its threshold is
+deliberately not retuned to catch only GCN4: that would be reverse-engineering a
+criterion from test scores.
+
+**Recommendation.** Report H1 on all assays as the primary number. A GCN4-excluded
+subset may be reported as a clearly-labelled secondary, justified on sample size alone
+(88 against the protocol's 300, and below the screen's `MIN_TRAIN` of 150) — with the
+disclosure that 150 was chosen already knowing GCN4 had 88, so it is not a blind
+pre-registration. Excluding GCN4 and Q8WTC7 would raise `planning` from +0.384 to +0.451;
+that number is recorded here only so nobody can reach it by accident and call it progress.
+
+### A per-assay affine output is a no-op, proven rather than tried
+
+H1 scores **per-assay** Spearman, which is invariant under any increasing per-assay
+transform `a_k · pred + b_k`. No affine output layer can change it. This was on the
+candidate list and is now struck off with a test
+(`test_per_assay_affine_output_cannot_change_per_assay_spearman`) so it is not retried.
+
+A per-assay **depth weight** is a different thing — it reweights two components rather
+than rescaling one — and that is what was built and measured. It gains +0.005, i.e.
+nothing, and the reason is visible in the fitted weights:
+
+| assay | per-assay `beta` |
+|---|---:|
+| D7PM05_CLYGR | 0.806 |
+| PHOT_CHLRE | 0.803 |
+| CAPSD_AAV2S | 0.642 |
+| Q6WV12_9MAXI | 0.633 |
+| GFP_AEQVI | 0.603 |
+| GCN4_YEAST | 0.594 |
+| Q8WTC7_9CNID | 0.590 |
+
+All seven sit within ±0.11 of the shared 0.627. The per-assay weights are no better
+identified than the shared one was, for the same reason: one assay's order-1-versus-2
+contrast is even less data than the corpus's.
+
+### Joint stability training redistributes rather than improves
+
+The format obstacle is gone — stability latents are cached per-residue and fitness
+pooled, and mean-pooling the stability side bridges them, which is principled rather
+than a compromise because the head pools before the trunk anyway. The mean is unchanged
+(+0.377 against +0.384) but the **distribution moves a lot**:
+
+| assay | within-order ρ, fitness only | within-order ρ, joint |
+|---|---:|---:|
+| PHOT_CHLRE | −0.033 | **+0.210** |
+| CAPSD_AAV2S | +0.358 | **+0.222** |
+
+Joint training **rescues the assay that had no within-depth signal and costs the strongest
+one about as much** — the signature of regularisation, not of added information. The
+sequence component weakens overall, seq-only +0.247 → +0.196: the stability task is taking
+trunk capacity from fitness rather than sharing structure with it.
+
+One caveat recorded rather than papered over: the fold manifest carries no CI column, so
+this is unweighted SmoothL1, not the inverse-variance weighting Step 2.1 chose for
+stability-only training. Retrofitting CIs is a separate change.
+
+---
+
 ## What to try next, in the order worth trying
 
 1. ~~**Make the reward depth-aware inside the model.**~~ **Done** — +0.384 / +0.393, see
    above. The weight turned out not to be identifiable from orders 1–2, so it is a
    hyperparameter rather than a fitted blend; the result is robust across 120× of it.
-2. **Fix or drop `GCN4_YEAST`.** Negative on every configuration, within-order ρ −0.250,
-   88 training variants. Either it is unlearnable from 88 low-order examples — a finding
-   worth stating — or it needs separate treatment.
-3. **Per-assay affine output.** Still untried, still cheap.
-4. **Joint training with the stability target.** The trunk is shared and stability
-   reached +0.337 / +0.753; the two caches are in different formats, which is the only
-   obstacle.
+2. ~~**Fix or drop `GCN4_YEAST`.**~~ **Diagnosed**: unlearnable in-sample. No exclusion
+   applied, because the only criterion that catches it also catches an assay that works.
+3. ~~**Per-assay affine output.**~~ **Struck off** — provably a no-op for per-assay
+   Spearman. The per-assay depth weight that replaced it gains +0.005.
+4. ~~**Joint training with the stability target.**~~ **Done**: mean unchanged, and it
+   costs the sequence component (+0.247 → +0.196).
+
+**The cheap levers are exhausted.** Everything reachable without new data or a new
+encoder has been tried, and `planning` sits at +0.384 against a registered 0.55. What
+remains is not tuning:
+
+- **A stronger encoder or a trained one.** The head is 266k parameters on a frozen
+  backbone; every configuration above reads the same 1280-d pooled vector, and the
+  within-order ceiling across configurations is ~+0.21.
+- **More low-order training data per assay**, which H1's registered cap forbids for
+  `planning` — so this is a Step 2.2 question about what the protocol is comparable to,
+  not a free knob.
+- **Accept Phase 2 as a no-go and fix the oracle before Phase 3**, which is what the
+  plan's 2.2 gate already says to do.
 
 **Depth-invariant input is the wrong idea** and is recorded here so it is not retried:
 the measurement says depth is information the head is *failing to use*, not a confound

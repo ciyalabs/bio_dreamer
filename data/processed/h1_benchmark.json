@@ -1,0 +1,148 @@
+{
+  "metrics": {
+    "spearman_mean": 0.40857171860705344,
+    "spearman_median": 0.40402386075836016,
+    "additive_null_mean": 0.3238811944593846,
+    "margin_over_additive_null": 0.08469052414766881,
+    "frac_assays_beating_null": 0.6363636363636364,
+    "frozen_regression_mean": 0.300901164544074,
+    "frozen_regression_depth_mean": 0.3897907723490361,
+    "spearman_mean_vs_frozen_regression": 0.10767055406297943,
+    "n_assays": 11.0,
+    "h1_pass": 0.0
+  },
+  "verdict": {
+    "spearman_mean": {
+      "value": 0.40857171860705344,
+      "op": ">=",
+      "threshold": 0.55,
+      "pass": false
+    },
+    "margin_over_additive_null": {
+      "value": 0.08469052414766881,
+      "op": ">",
+      "threshold": 0.05,
+      "pass": true
+    },
+    "frac_assays_beating_null": {
+      "value": 0.6363636363636364,
+      "op": ">=",
+      "threshold": 0.7,
+      "pass": false
+    },
+    "spearman_mean_vs_frozen_regression": {
+      "value": 0.10767055406297943,
+      "op": ">",
+      "threshold": 0.0,
+      "pass": true
+    }
+  },
+  "per_assay": {
+    "CAPSD_AAV2S_Sinai_2021": {
+      "head": 0.659479176716375,
+      "additive_null": 0.19645691280454722,
+      "frozen_ridge": 0.17793991157182845,
+      "frozen_ridge_depth": 0.5719660278212879,
+      "n_test": 30963,
+      "banned": false,
+      "beats_null": true
+    },
+    "D7PM05_CLYGR_Somermeyer_2022": {
+      "head": 0.4475387689245089,
+      "additive_null": 0.37316184893079724,
+      "frozen_ridge": 0.30822395874986636,
+      "frozen_ridge_depth": 0.4253185775527213,
+      "n_test": 13198,
+      "banned": false,
+      "beats_null": true
+    },
+    "F7YBW8_MESOW_Aakre_2015": {
+      "head": 0.39013044743138087,
+      "additive_null": 0.42017204221302185,
+      "frozen_ridge": 0.3552872448685521,
+      "frozen_ridge_depth": 0.3654491027733961,
+      "n_test": 8656,
+      "banned": true,
+      "beats_null": false
+    },
+    "F7YBW8_MESOW_Ding_2023": {
+      "head": 0.4901233291624441,
+      "additive_null": 0.3340475714831106,
+      "frozen_ridge": 0.5187220452056028,
+      "frozen_ridge_depth": 0.6524267682593959,
+      "n_test": 7756,
+      "banned": true,
+      "beats_null": true
+    },
+    "GCN4_YEAST_Staller_2018": {
+      "head": 0.12007334055287618,
+      "additive_null": 0.029883783031865726,
+      "frozen_ridge": -0.12884152373599983,
+      "frozen_ridge_depth": -0.1797960922266752,
+      "n_test": 2550,
+      "banned": false,
+      "beats_null": true
+    },
+    "GFP_AEQVI_Sarkisyan_2016": {
+      "head": 0.5352150444297187,
+      "additive_null": 0.2755103968374913,
+      "frozen_ridge": 0.3380594116930946,
+      "frozen_ridge_depth": 0.4816693299831152,
+      "n_test": 37853,
+      "banned": false,
+      "beats_null": true
+    },
+    "HIS7_YEAST_Pokusaeva_2019": {
+      "head": 0.40402386075836016,
+      "additive_null": 0.39372652844138756,
+      "frozen_ridge": 0.4279907828108522,
+      "frozen_ridge_depth": 0.48444731178099787,
+      "n_test": 494494,
+      "banned": true,
+      "beats_null": true
+    },
+    "PHOT_CHLRE_Chen_2023": {
+      "head": 0.22571105083035306,
+      "additive_null": 0.31278039145362563,
+      "frozen_ridge": 0.4136554703083414,
+      "frozen_ridge_depth": 0.48444390142266136,
+      "n_test": 165231,
+      "banned": false,
+      "beats_null": false
+    },
+    "Q6WV12_9MAXI_Somermeyer_2022": {
+      "head": 0.38799882424585724,
+      "additive_null": 0.5179782903511299,
+      "frozen_ridge": 0.3551561635120681,
+      "frozen_ridge_depth": 0.4002733924318143,
+      "n_test": 14268,
+      "banned": false,
+      "beats_null": false
+    },
+    "Q8WTC7_9CNID_Somermeyer_2022": {
+      "head": 0.3349334538477451,
+      "additive_null": 0.34693508831588327,
+      "frozen_ridge": 0.17769598310038048,
+      "frozen_ridge_depth": 0.2364801515950576,
+      "n_test": 21049,
+      "banned": false,
+      "beats_null": false
+    },
+    "SPG1_STRSG_Wu_2016": {
+      "head": 0.49906160777796865,
+      "additive_null": 0.36204028519037124,
+      "frozen_ridge": 0.36602336190022716,
+      "frozen_ridge_depth": 0.3650200244456243,
+      "n_test": 147193,
+      "banned": true,
+      "beats_null": true
+    }
+  },
+  "literature_cited": {
+    "ProteinNPT": 0.56,
+    "MULTI-evolve": 0.61,
+    "Kermut": 0.62,
+    "Cerebra": 0.65
+  },
+  "instance": "benchmark"
+}

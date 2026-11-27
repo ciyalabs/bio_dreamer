@@ -823,10 +823,46 @@ precise +0.384 is not an optimum. The best init (+0.407) is deliberately not quo
 selecting it would spend the pre-registration on H1's own test set.
 
 Still short of 0.55, and the chance band rose to ~0.30 because the control heads carry the
-depth penalty too, so the learned component's margin is about +0.08. `PHOT_CHLRE` and
-`GCN4_YEAST` remain below their own chance bands, carried by the prior rather than by
-anything learned. Depth-invariant input is recorded as the **wrong** idea: depth was
-information the head was failing to use, not a confound to divide out.
+depth penalty too, so the learned component's margin is about +0.08. Depth-invariant input
+is recorded as the **wrong** idea: depth was information the head was failing to use, not a
+confound to divide out.
+
+**The three remaining levers were all pulled and none moves the mean:**
+
+| configuration | mean ρ | seq-only | within-order |
+|---|---:|---:|---:|
+| depth-aware, shared weight | **+0.384** | +0.247 | +0.161 |
+| + per-assay depth weight | +0.389 | +0.252 | +0.167 |
+| + joint stability | +0.377 | +0.196 | +0.147 |
+
+Against an init spread of ±0.012, +0.389 and +0.384 are the same number. The per-assay
+weights all land within ±0.11 of the shared 0.627 — one assay's order-1-versus-2 contrast
+identifies them even less well than the corpus's does. Joint stability **redistributes
+rather than improves**: `PHOT_CHLRE`'s within-order ρ goes −0.033 → +0.210 while `CAPSD`
+goes +0.358 → +0.222, and the sequence component weakens overall (+0.247 → +0.196), so the
+stability task is taking trunk capacity rather than sharing structure.
+
+**A per-assay affine output is provably a no-op** and is struck off the list with a test:
+H1 scores per-assay Spearman, invariant under any increasing per-assay rescaling.
+
+**`GCN4_YEAST` is unlearnable, and no exclusion is applied.**
+`scripts/trainability_screen.py` judges each assay on the **training split only** —
+5-fold OOF ridge inside the ≤300 order≤2 rows. GCN4 scores **−0.120**: a tuned RidgeCV
+finds no in-sample signal in its 88 variants, so its negative test score is the data and
+the encoder, not the architecture. But the same criterion flags `Q8WTC7` at −0.012, which
+**transfers fine at +0.330** — so in-sample signal does not predict transfer and the
+screen is not usable as a drop rule. Its threshold is deliberately not retuned to catch
+only GCN4; that would reverse-engineer a criterion from test scores. Report H1 on all
+assays as primary; a GCN4-excluded subset is a labelled secondary justified on sample size
+alone (88 against the protocol's 300), disclosing that 150 was chosen knowing GCN4 had 88.
+
+**The cheap levers are exhausted and Phase 2 should be read as heading for a 2.2 no-go.**
+`planning` sits at +0.384 against 0.55. What remains is not tuning: a stronger or
+non-frozen encoder (every configuration above reads the same 1280-d pooled vector, and the
+within-order ceiling across all of them is ~+0.21), or more low-order data per assay, which
+the registered cap forbids for `planning` and so is a 2.2 question about comparability
+rather than a free knob. The 2.2 gate already prescribes the response: *fix the reward
+model before Phase 3.*
 
 **This is not H1.** Step 2.2 still owes the additive null and the literature baselines.
 The order-only control is deliberately weaker than the additive null — it fits nothing —
@@ -856,6 +892,54 @@ additive null, which is the claim that actually matters.
 not, **do not proceed to Phase 3** — fix the reward model. A planner cannot rescue a bad oracle.
 
 **Outputs.** `results/reward_benchmark.md`; H1 verdict against `PREREGISTRATION.md`.
+
+**❌ H1 FAILED (2026-11-27). PHASE 3 IS BLOCKED.** See `results/reward_benchmark.md`.
+`benchmark` instance, 11 assays, 943,411 unseen order ≥ 3 variants, CPU only. No threshold
+was edited; the script wrote the verdict whichever way it fell.
+
+| condition | threshold | measured | |
+|---|---|---:|---|
+| `spearman_mean` | ≥ 0.55 | **+0.409** | **FAIL** |
+| `margin_over_additive_null` | > 0.05 | +0.085 | PASS |
+| `frac_assays_beating_null` | ≥ 0.70 | **0.636** (7/11) | **FAIL** |
+| `spearman_mean_vs_frozen_regression` | > 0 | +0.108 | PASS |
+
+**The finding that matters more than the verdict:**
+
+| method | mean ρ | median |
+|---|---:|---:|
+| reward head (266k params, depth-aware, ranking loss) | **+0.409** | +0.404 |
+| **frozen ridge + mutation count** | **+0.390** | **+0.425** |
+| additive null (one coefficient per substitution) | +0.324 | +0.347 |
+| frozen ridge, no mutation count | +0.301 | +0.355 |
+
+**The whole reward head buys +0.019 over `RidgeCV(pooled_embedding ++ mutation_count)`,
+and loses to it on median.** `spearman_mean_vs_frozen_regression` passes at +0.108 only
+because the registered baseline omits mutation count; add that one column and the margin
+falls fivefold. So Step 2.1's conclusion that the head needed depth was right, but so does
+a ridge, and once both have it they are the same model.
+
+**The additive null wins outright on four assays** — `Q6WV12` +0.518 against +0.388. Those
+assays are substantially additive, which is uncomfortable for the project's premise that
+structured epistasis is there and exploitable. The head's wins are real but concentrated:
+`CAPSD` +0.659 against a null of +0.196 on 30,963 unseen variants.
+
+**Diagnosis in the pre-registered order — the encoder is the binding constraint and the
+rest are acquitted.** Adapter capacity: Step 1.3 swept d = 64…512 and 128 already matches
+the unprojected 1280. Loss: the ridge *is* the regression comparator and it ties.
+Per-assay normalisation: provably irrelevant, per-assay Spearman is invariant under
+increasing per-assay rescaling. What remains is the representation — every configuration
+reads the same 1280-d **mean-pooled** vector, a linear model on it matches a trained head,
+and within-order ρ ceilings at ~+0.21 everywhere.
+
+**Carried forward: the pooled cache is the leading suspect and was never tested on
+fitness.** `pool_first` was adopted because it cost nothing on *stability* (+0.337 vs
++0.329) — measured on 1,000 Tsuboyama single mutants of 36–72 residue domains, then
+generalised to multi-mutant fitness on proteins up to 735 residues. Re-encoding
+per-residue costs a GPU rental and 170 GiB instead of 2.25 GB. **Not done:**
+`vs_zeroshot` (ProSST / VenusREM need those checkpoints run) and a strict
+`vs_literature` comparison on matched assays — both reported as not done rather than
+estimated.
 
 ---
 

@@ -1,0 +1,76 @@
+{
+  "criterion": "within-train 5-fold OOF ridge Spearman > 0 and n_train >= 150",
+  "min_train": 150,
+  "assays": {
+    "CAPSD_AAV2S_Sinai_2021": {
+      "n_train": 300,
+      "train_score_sd": 3.223878640513094,
+      "within_train_oof_spearman": 0.5482665362948477,
+      "trainable": true
+    },
+    "D7PM05_CLYGR_Somermeyer_2022": {
+      "n_train": 300,
+      "train_score_sd": 11975.441222371677,
+      "within_train_oof_spearman": 0.14326225766673073,
+      "trainable": true
+    },
+    "F7YBW8_MESOW_Aakre_2015": {
+      "n_train": 300,
+      "train_score_sd": 0.3649155096237952,
+      "within_train_oof_spearman": 0.8645064945166057,
+      "trainable": true
+    },
+    "F7YBW8_MESOW_Ding_2023": {
+      "n_train": 166,
+      "train_score_sd": 0.2823410511879136,
+      "within_train_oof_spearman": 0.6394278256192982,
+      "trainable": true
+    },
+    "GCN4_YEAST_Staller_2018": {
+      "n_train": 88,
+      "train_score_sd": 0.31544753369610246,
+      "within_train_oof_spearman": -0.12012821192049844,
+      "trainable": false
+    },
+    "GFP_AEQVI_Sarkisyan_2016": {
+      "n_train": 300,
+      "train_score_sd": 0.6687309698953274,
+      "within_train_oof_spearman": 0.28667029633662594,
+      "trainable": true
+    },
+    "HIS7_YEAST_Pokusaeva_2019": {
+      "n_train": 300,
+      "train_score_sd": 0.2490035773862419,
+      "within_train_oof_spearman": 0.2685872973241489,
+      "trainable": true
+    },
+    "PHOT_CHLRE_Chen_2023": {
+      "n_train": 300,
+      "train_score_sd": 0.33131710306742623,
+      "within_train_oof_spearman": 0.5359152879476439,
+      "trainable": true
+    },
+    "Q6WV12_9MAXI_Somermeyer_2022": {
+      "n_train": 300,
+      "train_score_sd": 5682.175461644155,
+      "within_train_oof_spearman": 0.1309472909464861,
+      "trainable": true
+    },
+    "Q8WTC7_9CNID_Somermeyer_2022": {
+      "n_train": 300,
+      "train_score_sd": 3217.615107088913,
+      "within_train_oof_spearman": -0.011814803193282512,
+      "trainable": false
+    },
+    "SPG1_STRSG_Wu_2016": {
+      "n_train": 300,
+      "train_score_sd": 0.5586841350799179,
+      "within_train_oof_spearman": 0.6803630135725435,
+      "trainable": true
+    }
+  },
+  "not_trainable": [
+    "GCN4_YEAST_Staller_2018",
+    "Q8WTC7_9CNID_Somermeyer_2022"
+  ]
+}
