@@ -56,11 +56,13 @@ from biodreamer.protein_dreamer.cache import sequence_hash
 from biodreamer.reward.data import assays_for, detection_limits, h1_split, load_assay
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from h1_benchmark import substitution_design  # noqa: E402
 from zeroshot_baseline import cache_path, within_order_rho  # noqa: E402
 
 CACHE = Path("data/processed/pooled_cache")
 BACKBONE = "westlake-repl_SaProt_650M_AF2"
 ZS_BACKBONE = "saprot"  # the default fixed in PREREGISTRATION.md, not the better scorer
+BACKBONES_ZS = ("saprot", "esm2")
 OUT = Path("data/processed/gp_reward.json")
 PRED = Path("data/processed/gp_predictions.npz")
 
@@ -76,13 +78,24 @@ class ExactGP(torch.nn.Module):
     rather than configured.
     """
 
-    def __init__(self, zero_shot_mean: bool) -> None:
+    def __init__(self, zero_shot_mean: bool, n_seq: int | None = None) -> None:
         super().__init__()
         self.log_lengthscale = torch.nn.Parameter(torch.zeros(1))
         self.log_outputscale = torch.nn.Parameter(torch.zeros(1))
         self.log_noise = torch.nn.Parameter(torch.tensor([-2.0]))
         self.beta = torch.nn.Parameter(torch.zeros(1))          # the constant
         self.zero_shot_mean = zero_shot_mean
+        # COMPOSITE KERNEL. `n_seq` splits the input into [embedding | substitution
+        # one-hot] and the kernel becomes pi*k_subs + (1-pi)*k_seq, which is Kermut's
+        # composition (eq. 4) with the substitution design standing in for the structure
+        # kernel this project has no ProteinMPNN for yet. Worth testing because the
+        # additive null -- one coefficient per observed substitution -- reaches +0.324 on
+        # its own, so substitution identity carries signal the RBF on a pooled vector may
+        # not express. pi is learned through the marginal likelihood like everything else.
+        self.n_seq = n_seq
+        if n_seq is not None:
+            self.log_lengthscale_subs = torch.nn.Parameter(torch.zeros(1))
+            self.logit_pi = torch.nn.Parameter(torch.zeros(1))
         # alpha exists only in the zero-shot variant; a constant-mean GP must not be able
         # to read f0 through a back door, or the ablation measures nothing
         self.alpha = torch.nn.Parameter(torch.zeros(1)) if zero_shot_mean else None
@@ -93,10 +106,22 @@ class ExactGP(torch.nn.Module):
         return self.alpha * f0 + self.beta
 
     def kernel(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-        d2 = torch.cdist(a, b).pow(2)
-        return self.log_outputscale.exp() * torch.exp(
-            -0.5 * d2 / self.log_lengthscale.exp().pow(2)
+        if self.n_seq is None:
+            d2 = torch.cdist(a, b).pow(2)
+            return self.log_outputscale.exp() * torch.exp(
+                -0.5 * d2 / self.log_lengthscale.exp().pow(2)
+            )
+        ns = self.n_seq
+        k_seq = torch.exp(
+            -0.5 * torch.cdist(a[:, :ns], b[:, :ns]).pow(2)
+            / self.log_lengthscale.exp().pow(2)
         )
+        k_sub = torch.exp(
+            -0.5 * torch.cdist(a[:, ns:], b[:, ns:]).pow(2)
+            / self.log_lengthscale_subs.exp().pow(2)
+        )
+        pi = torch.sigmoid(self.logit_pi)
+        return self.log_outputscale.exp() * (pi * k_sub + (1.0 - pi) * k_seq)
 
     def nll(self, x: torch.Tensor, y: torch.Tensor, f0: torch.Tensor) -> torch.Tensor:
         n = x.shape[0]
@@ -144,15 +169,23 @@ class ExactGP(torch.nn.Module):
         return (pred, np.concatenate(var)) if with_var else pred
 
 
-def fit(xtr, ytr, f0tr, zero_shot_mean: bool, steps: int, lr: float, seed: int) -> ExactGP:
+def fit(xtr, ytr, f0tr, zero_shot_mean: bool, steps: int, lr: float, seed: int,
+        n_seq: int | None = None) -> ExactGP:
     torch.manual_seed(seed)
-    gp = ExactGP(zero_shot_mean).double()
+    gp = ExactGP(zero_shot_mean, n_seq).double()
     # a sensible lengthscale start: the median pairwise distance. Starting at 1.0 on
     # 1280-d standardised vectors puts every off-diagonal kernel entry at ~0, the
     # gradient at ~0, and the GP never leaves its prior.
     with torch.no_grad():
-        d = torch.cdist(xtr, xtr)
+        ns = xtr.shape[1] if n_seq is None else n_seq
+        d = torch.cdist(xtr[:, :ns], xtr[:, :ns])
         gp.log_lengthscale.fill_(float(torch.log(d[d > 0].median())))
+        if n_seq is not None:
+            ds = torch.cdist(xtr[:, ns:], xtr[:, ns:])
+            pos = ds[ds > 0]
+            gp.log_lengthscale_subs.fill_(
+                float(torch.log(pos.median())) if pos.numel() else 0.0
+            )
     opt = torch.optim.Adam(gp.parameters(), lr=lr)
     for _ in range(steps):
         opt.zero_grad()
@@ -173,6 +206,12 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=0, help="split seed; LOCKED to H1's 0")
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--lr", type=float, default=0.05)
+    ap.add_argument(
+        "--zs-backbone", default=ZS_BACKBONE, choices=sorted(BACKBONES_ZS),
+        help="which backbone supplies f0. SaProt is this project's registered default and "
+             "is the primary; esm2 is a SENSITIVITY, and it is method-specified rather "
+             "than test-selected because Kermut names ESM-2 for its mean function.",
+    )
     ap.add_argument("--chunk", type=int, default=20000,
                     help="test rows per block; 20k x 1281 float64 is ~205 MB")
     ap.add_argument("--dry-run", action="store_true")
@@ -181,11 +220,14 @@ def main() -> int:
     # the two instances are different results and must not overwrite each other's files;
     # `benchmark` keeps the original names so earlier references stay valid
     global OUT, PRED
-    if args.instance != "benchmark":
-        OUT = OUT.with_name(f"gp_reward_{args.instance}.json")
-        PRED = PRED.with_name(f"gp_predictions_{args.instance}.npz")
+    tag = "" if args.instance == "benchmark" else f"_{args.instance}"
+    if args.zs_backbone != ZS_BACKBONE:
+        tag += f"_zs-{args.zs_backbone}"
+    if tag:
+        OUT = OUT.with_name(f"gp_reward{tag}.json")
+        PRED = PRED.with_name(f"gp_predictions{tag}.npz")
 
-    zs_file = cache_path(ZS_BACKBONE, "masked-marginals")
+    zs_file = cache_path(args.zs_backbone, "masked-marginals")
     if not zs_file.exists():
         raise FileNotFoundError(f"{zs_file} missing -- run scripts/zeroshot_baseline.py")
     zs = np.load(zs_file)
@@ -193,13 +235,16 @@ def main() -> int:
     names = assays_for(args.instance)
     limits = detection_limits()
     # (label, zero_shot_mean, use_order)
+    # (label, zero_shot_mean, use_order, composite)
     configs = [
-        ("gp_constant_mean", False, False),
-        ("gp_zeroshot_mean", True, False),
-        ("gp_zeroshot_mean_order", True, True),
+        ("gp_constant_mean", False, False, False),
+        ("gp_zeroshot_mean", True, False, False),
+        ("gp_zeroshot_mean_order", True, True, False),
+        ("gp_composite_kernel", True, False, True),
     ]
     res: dict[str, dict[str, float]] = {c[0]: {} for c in configs}
     wo: dict[str, dict[str, float]] = {c[0]: {} for c in configs}
+    pis: dict[str, float] = {}
     saved: dict[str, np.ndarray] = {}  # predictions + variances for Step 2.3
 
     for n in names:
@@ -232,17 +277,23 @@ def main() -> int:
 
         otr = a.order[tr].astype(np.float64)
         om, os_ = otr.mean(), otr.std() + 1e-12
+        dtr, vocab = substitution_design(a.mutant[tr])
+        subs_tr = dtr.toarray()
+        n_seq = xtr_s.shape[1]
 
-        def test_chunks(use_order: bool, size: int = args.chunk):
+        def test_chunks(use_order: bool, composite: bool, size: int = args.chunk):
             for s0 in range(0, len(te), size):
                 blk = te[s0 : s0 + size]
                 x = (feats(blk) - mu) / sd
                 if use_order:
                     o = ((a.order[blk].astype(np.float64) - om) / os_).reshape(-1, 1)
                     x = np.hstack([x, o])
+                if composite:
+                    # built per block: HIS7's full one-hot would be 494,494 x |vocab|
+                    x = np.hstack([x, substitution_design(a.mutant[blk], vocab)[0].toarray()])
                 yield torch.tensor(x), f0te[s0 : s0 + size]
 
-        for label, zsm, use_order in configs:
+        for label, zsm, use_order, composite in configs:
             # one extra standardised column for depth; the kernel then measures similarity
             # in sequence AND depth, which is how a GP is given the term the ridge baseline
             # gets as a feature. Kermut has no such term, which is why it is a separate row.
@@ -251,13 +302,18 @@ def main() -> int:
                 if use_order
                 else xtr_s
             )
+            if composite:
+                xtr = np.hstack([xtr, subs_tr])
             xt = torch.tensor(xtr)
             t0 = time.time()
-            gp = fit(xt, yt, f0tr, zsm, args.steps, args.lr, args.seed)
+            gp = fit(xt, yt, f0tr, zsm, args.steps, args.lr, args.seed,
+                     n_seq=n_seq if composite else None)
+            if composite:
+                pis[n] = float(torch.sigmoid(gp.logit_pi).detach())
             want_var = label == "gp_zeroshot_mean"
             if want_var:
                 pred, pvar = gp.predict(
-                    xt, yt, f0tr, test_chunks(use_order), with_var=True
+                    xt, yt, f0tr, test_chunks(use_order, composite), with_var=True
                 )
                 saved[f"{n}/pred"] = pred.astype(np.float32)
                 saved[f"{n}/var"] = pvar.astype(np.float32)
@@ -269,7 +325,7 @@ def main() -> int:
                 saved[f"{n}/ymu"] = np.float32(ytr.mean())
                 saved[f"{n}/ysd"] = np.float32(ytr.std())
             else:
-                pred = gp.predict(xt, yt, f0tr, test_chunks(use_order))
+                pred = gp.predict(xt, yt, f0tr, test_chunks(use_order, composite))
             res[label][n] = rho(pred, a.score[te])
             wo[label][n] = within_order_rho(pred, a.score[te], a.order[te])
             print(
@@ -281,7 +337,7 @@ def main() -> int:
 
     print()
     metrics: dict[str, float] = {}
-    for label, _, _ in configs:
+    for label, *_ in configs:
         v = np.array(list(res[label].values()))
         w = np.array(list(wo[label].values()))
         metrics[f"{label}/mean"] = float(v.mean())
@@ -313,6 +369,7 @@ def main() -> int:
     OUT.write_text(json.dumps(
         {"instance": args.instance, "seed": args.seed, "per_assay": res,
          "within_order": wo, "metrics": metrics,
+         "composite_pi_per_assay": pis,
          "ridge_baseline_cited": RIDGE_BASELINE,
          "kermut_sequence_published_n128_multimutant": 0.614}, indent=2) + "\n")
     print(f"wrote {OUT}")
@@ -321,10 +378,11 @@ def main() -> int:
 
     with tracking.run(
         "2.4", "gp_composite_kernel",
-        variant={"instance": args.instance, "kernel": "rbf_sequence",
-                 "mean": "affine_zeroshot", "structure_kernel": False},
+        variant={"instance": args.instance, "kernel": "rbf_sequence+composite",
+                 "mean": "affine_zeroshot", "structure_kernel": False,
+                 "zeroshot_backbone": args.zs_backbone},
         config={"steps": args.steps, "lr": args.lr, "backbone": BACKBONE,
-                "zeroshot": ZS_BACKBONE},
+                "zeroshot": args.zs_backbone},
         seed=args.seed, datasets=[str(CACHE), str(zs_file)],
         notes=("Kermut-sequence reproduced on this project's own cache: RBF on mean-pooled "
                "1280-d embeddings, m(x)=alpha*f0(x)+beta with f0 the summed log-likelihood "

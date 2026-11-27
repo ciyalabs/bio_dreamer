@@ -249,8 +249,27 @@ informative:
 | frozen ridge + mutation count | +0.390 | +0.300 | +0.090 |
 | frozen ridge + count + zero-shot | +0.444 | +0.352 | +0.093 |
 | GP, constant mean | +0.375 | +0.330 | +0.045 |
-| **GP, zero-shot mean (Kermut-sequence)** | +0.428 | **+0.371** | +0.057 |
+| GP, zero-shot mean (Kermut-sequence) — **the registered metric** | +0.428 | +0.371 | +0.057 |
 | GP, zero-shot mean + order term | +0.435 | +0.370 | +0.065 |
+| **GP, composite kernel** | **+0.479** | **+0.417** | +0.062 |
+
+All eleven assays positive in every GP row. The composite kernel is Kermut's own
+composition, `k = π·k_subs + (1−π)·k_seq`, with the **substitution one-hot** standing in
+for the structure kernel this project has no ProteinMPNN for yet. The mixing weight is
+learned through the marginal likelihood and genuinely mixes: π averages **0.410** across
+assays with a range of 0.025 … 0.898, so neither component is redundant.
+
+Its gains are concentrated where a purely additive model was already strong —
+`Q6WV12` **+0.408 → +0.580**, `Q8WTC7` +0.267 → +0.391, `D7PM05` +0.321 → +0.407,
+`GFP` +0.335 → +0.416 — which is the expected place for it, since `Q6WV12` is one of the
+four assays where the additive null beat the reward head outright at Step 2.2 (+0.518
+against +0.388). The composite now beats that null on its own best assay.
+
+**The registered threshold is read on `gp_zeroshot_mean`, not on the composite.**
+`spearman_mean_gp >= 0.55` was registered against Kermut-sequence *as published*, and
+reporting +0.479 in its place would be moving the goalpost after the fact. Both numbers
+fail 0.55 — +0.428 and +0.479 — so the verdict does not depend on the choice, which is the
+cleanest situation available and is why it can be stated plainly.
 
 **Correction.** The commit that first reported the GP compared its +0.371 against the
 *head's* +0.161 and called it 2.3× the skill. That comparison is true and it is the wrong

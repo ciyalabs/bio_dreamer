@@ -251,11 +251,23 @@ work; H1's four thresholds are untouched and its FAIL verdict stands. Step 2.4 a
 threshold (`zeroshot_feature_margin > 0.05`), registered **before** the measurement was run.
 
 **What a future H1 re-run may and may not claim.** The order ≥ 3 test set has now been read
-three times — H1, the positional readout, and Step 2.4. Step 2.4's model is specified from
-published results plus diagnostics taken on that same test set, so a later H1 pass is
-**weaker evidence than this document originally intended**. Recorded now rather than
-reconstructed later; the mitigation is to report per-assay results and the matched-assay
-comparison rather than leaning on the mean.
+repeatedly: H1 itself, the positional readout, the zero-shot ranker, the zero-shot feature,
+the GP ladder (constant mean / zero-shot mean / + order), the composite kernel, and the
+`planning` replication. Each reading costs independence, and the count only goes up.
+
+Three of those are specified by something other than our own results, which is the only
+thing that limits the damage: `gp_zeroshot_mean` is **Kermut-sequence as published**, the
+composite kernel is **Kermut's own kernel composition (eq. 4)**, and `masked-marginals` is
+**ProteinGym's standard rule**. Where a choice could have been made on our numbers, it was
+not: the prior-mean backbone is SaProt because this document fixes it as the default, even
+though ESM-2's zero-shot scores higher on the order ≥ 3 set, and an ESM-2 run is reported
+as a labelled sensitivity rather than promoted.
+
+Nonetheless a later H1 pass would be **weaker evidence than this document originally
+intended**, and that is recorded now rather than reconstructed afterwards. The mitigations
+are to report per-assay results rather than leaning on the mean, and to treat the
+matched-assay literature comparison — which uses *different datasets* and a *different
+protocol* — as the load-bearing external check.
 
 **No threshold was edited in Phase 1.** All six Step 1.1 entries correct a measurement error or a definition.
 None follows from a model result, because no model exists — these come from the step whose
