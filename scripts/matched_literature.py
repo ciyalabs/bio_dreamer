@@ -142,7 +142,6 @@ def main() -> int:
             _, te = literature_split(len(a.sequence), seed)
             xte = emb[[row[sequence_hash(s)] for s in a.sequence[te]]].astype(np.float64)
             truth = a.score[te]
-            dte = None
             for n in LITERATURE_TRAIN_SIZES:
                 tr, _ = literature_split(len(a.sequence), seed, n)
                 xtr = emb[[row[sequence_hash(s)] for s in a.sequence[tr]]].astype(np.float64)

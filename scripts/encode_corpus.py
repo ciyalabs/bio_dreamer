@@ -314,10 +314,21 @@ def main() -> int:
                          "per-residue matrix: 512x smaller, and measured to cost the "
                          "reward head nothing (see diagnostics/reward_head.md)")
     ap.add_argument("--backbone", default="saprot")
+    ap.add_argument(
+        "--assays", default="",
+        help="comma-separated group names to keep from the workload. For re-encoding one "
+             "assay without paying for the other ten.",
+    )
     args = ap.parse_args()
 
     fn = WORKLOADS[args.workload]
     groups = fn(args.limit_assays) if args.workload == "h1" else fn()
+    if args.assays:
+        want = set(args.assays.split(","))
+        missing = want - set(groups)
+        if missing:
+            raise KeyError(f"workload {args.workload!r} has no group(s) {sorted(missing)}")
+        groups = {k: v for k, v in groups.items() if k in want}
     if not groups:
         print("nothing to encode")
         return 1

@@ -20,6 +20,8 @@ of the two runs and that is worth stopping for.
 from __future__ import annotations
 
 import argparse
+import os
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -27,11 +29,40 @@ import numpy as np
 DEST = Path("data/processed/pooled_cache")
 
 
+def save_atomic(dest: Path, keys: np.ndarray, emb: np.ndarray) -> None:
+    """Write to a sibling temp file, then rename over `dest`.
+
+    `np.savez_compressed` truncates its target before writing, so an interrupt partway
+    through leaves a corrupt file and the original contents are gone. That is not
+    hypothetical: killing this script mid-merge destroyed a 494,794-vector HIS7 cache that
+    had cost an hour of rented A40 to build, and the loss was silent until the next read
+    raised BadZipFile. `rename` within a directory is atomic, so the destination is either
+    the old file or the complete new one and never a prefix of either.
+    """
+    # The suffix MUST end in `.npz`. `np.savez_compressed` appends `.npz` to any path that
+    # does not already end in it, so a `.npz.tmp` suffix makes numpy write to
+    # `<tmp>.npz.tmp.npz` while the empty file mkstemp created keeps the name being
+    # renamed -- which replaces every destination with a zero-byte file. That is not a
+    # hypothetical either: the first version of this function did exactly that to ten
+    # caches at once, and the only reason nothing was lost is that numpy's real output was
+    # still sitting beside them under its mangled name.
+    fd, tmp = tempfile.mkstemp(dir=str(dest.parent), suffix=".tmp.npz")
+    os.close(fd)
+    tmp_path = Path(tmp)
+    try:
+        np.savez_compressed(tmp_path, keys=keys, emb=emb)
+        if tmp_path.stat().st_size == 0:
+            raise RuntimeError(f"numpy wrote nothing to {tmp_path}")
+        os.replace(tmp_path, dest)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
 def merge_one(src: Path, dest: Path, atol: float) -> tuple[int, int, int]:
     with np.load(src) as s:
         skeys, semb = s["keys"], s["emb"]
     if not dest.exists():
-        np.savez_compressed(dest, keys=skeys, emb=semb)
+        save_atomic(dest, skeys, semb)
         return 0, len(skeys), 0
     with np.load(dest) as d:
         dkeys, demb = d["keys"], d["emb"]
@@ -50,9 +81,7 @@ def merge_one(src: Path, dest: Path, atol: float) -> tuple[int, int, int]:
             merged[k] = semb[i]
             added += 1
     order = sorted(merged)
-    np.savez_compressed(
-        dest, keys=np.array(order), emb=np.stack([merged[k] for k in order])
-    )
+    save_atomic(dest, np.array(order), np.stack([merged[k] for k in order]))
     return len(dkeys), added, mismatched
 
 
