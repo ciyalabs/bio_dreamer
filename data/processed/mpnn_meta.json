@@ -1,0 +1,18 @@
+{
+  "assays": [
+    "CAPSD_AAV2S_Sinai_2021",
+    "D7PM05_CLYGR_Somermeyer_2022",
+    "F7YBW8_MESOW_Aakre_2015",
+    "F7YBW8_MESOW_Ding_2023",
+    "GCN4_YEAST_Staller_2018",
+    "GFP_AEQVI_Sarkisyan_2016",
+    "GRB2_HUMAN_Faure_2021",
+    "HIS7_YEAST_Pokusaeva_2019",
+    "PABP_YEAST_Melamed_2013",
+    "PHOT_CHLRE_Chen_2023",
+    "Q6WV12_9MAXI_Somermeyer_2022",
+    "Q8WTC7_9CNID_Somermeyer_2022",
+    "SPG1_STRSG_Wu_2016"
+  ],
+  "source": "https://github.com/dauparas/ProteinMPNN.git"
+}

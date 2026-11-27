@@ -313,6 +313,57 @@ so Kermut's mechanism is not the source of its advantage either.
 
 ---
 
+## 6.5 Lever 4 measured: the structure score adds nothing as a mean term
+
+`scripts/structure_score.py` folded all 13 wild types with ESMFold on the rented box and
+ran **ProteinMPNN `--unconditional_probs_only`**, giving p(aa | structure) per site — the
+quantity Kermut's structure kernel reads, and its **largest** ablation (−0.065).
+
+Standalone on H1's test set it is a real but unremarkable predictor: mean ρ **+0.226**,
+within-order **+0.140** — a shade above SaProt's sequence zero-shot (+0.204 / +0.137) and
+below ESM-2's (+0.249 / +0.164). Added as a second mean-function term,
+`m(x) = a₁·f0_seq(x) + a₂·f0_struct(x) + β`:
+
+| | seq only | + structure | Δ |
+|---|---:|---:|---:|
+| GP, zero-shot mean | +0.428 | +0.433 | +0.005 |
+| GP, zero-shot mean — within-order | +0.371 | +0.365 | **−0.006** |
+| GP, composite kernel | +0.479 | +0.486 | +0.007 |
+| GP, composite kernel — within-order | +0.417 | +0.415 | **−0.002** |
+
+**Nothing, and slightly negative on the skill component.** The structural information is
+apparently already carried by the sequence terms.
+
+Three reasons this is **not** a refutation of Kermut's structure kernel, stated so the
+result is not over-read:
+
+1. **It was used as a mean term, not a kernel.** Kermut compares *sites* through their
+   ProteinMPNN distributions and inter-residue distances. A scalar summed over mutated
+   positions throws that structure away, and the kernel form is untested here.
+2. **The structures are ESMFold predictions of varying quality.** Native-argmax recovery
+   runs **14.2% … 49.3%** across the 13 — `GCN4_YEAST_Staller_2018` at 14.2% is a
+   transcription-factor activation domain, which is intrinsically disordered, so there may
+   be no fold for ProteinMPNN to read.
+3. **Kermut's −0.065 is on single-mutant random/modulo/contiguous splits**, not on order
+   ≥ 3 extrapolation. Nothing says the component transfers.
+
+### The levers, now that four of five are measured
+
+| lever | gain in **within-order skill** | verdict |
+|---|---:|---|
+| zero-shot prior (as feature or prior mean) | **+0.04 … +0.05** | worth it |
+| composite kernel (substitution identity) | **+0.046** | worth it, largest single gain |
+| predictor class (GP over ridge, matched prior) | +0.02 … +0.03 | small but real |
+| ESM-2 instead of SaProt for `f0` | +0.012 | sensitivity, not in force |
+| ProteinMPNN structure, as a mean term | **−0.002 … −0.006** | **no** |
+| encoder fine-tune | +0.003 (published, n=128) | **no**, and never run |
+
+End to end, the reward model went from the head's **+0.409 total / +0.161 skill** to the
+composite GP's **+0.479 / +0.417** — skill up **2.6×** — and is still **0.071 short** of
+the registered 0.55.
+
+---
+
 ## 7. The comparability problem, which is now blocking
 
 Every published number above is a mean over **its own assay list**. This project's +0.409 is
