@@ -62,6 +62,7 @@ CACHE = Path("data/processed/pooled_cache")
 BACKBONE = "westlake-repl_SaProt_650M_AF2"
 ZS_BACKBONE = "saprot"  # the default fixed in PREREGISTRATION.md, not the better scorer
 OUT = Path("data/processed/gp_reward.json")
+PRED = Path("data/processed/gp_predictions.npz")
 
 # cited from scripts/h1_benchmark.py on these same 11 assays and this same split seed
 RIDGE_BASELINE = 0.390
@@ -177,6 +178,13 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
+    # the two instances are different results and must not overwrite each other's files;
+    # `benchmark` keeps the original names so earlier references stay valid
+    global OUT, PRED
+    if args.instance != "benchmark":
+        OUT = OUT.with_name(f"gp_reward_{args.instance}.json")
+        PRED = PRED.with_name(f"gp_predictions_{args.instance}.npz")
+
     zs_file = cache_path(ZS_BACKBONE, "masked-marginals")
     if not zs_file.exists():
         raise FileNotFoundError(f"{zs_file} missing -- run scripts/zeroshot_baseline.py")
@@ -289,11 +297,18 @@ def main() -> int:
     # no order term, because Kermut has none -- so it is the one the thresholds are read on.
     best = metrics["gp_zeroshot_mean/mean"]
     metrics["spearman_mean_gp"] = best
-    metrics["gp_margin_over_ridge"] = best - RIDGE_BASELINE
-    print(f"\nridge + count (cited)        {RIDGE_BASELINE:+.3f}")
-    print(f"spearman_mean_gp             {best:+.3f}   (threshold >= 0.55)")
-    print(f"gp_margin_over_ridge         {metrics['gp_margin_over_ridge']:+.3f}   "
-          f"(threshold > 0.05)")
+    print(f"\nspearman_mean_gp             {best:+.3f}   (threshold >= 0.55)")
+    # RIDGE_BASELINE is scripts/h1_benchmark.py's number on the 11 BENCHMARK assays, so
+    # subtracting it from a 7-assay planning mean would compare two different assay lists
+    # -- the exact error this step promoted vs_literature to a precondition over.
+    if args.instance == "benchmark":
+        metrics["gp_margin_over_ridge"] = best - RIDGE_BASELINE
+        print(f"ridge + count (cited)        {RIDGE_BASELINE:+.3f}")
+        print(f"gp_margin_over_ridge         {metrics['gp_margin_over_ridge']:+.3f}   "
+              f"(threshold > 0.05)")
+    else:
+        print(f"gp_margin_over_ridge         not computed: the cited ridge baseline is "
+              f"the 11-assay benchmark mean, not {args.instance}'s")
 
     OUT.write_text(json.dumps(
         {"instance": args.instance, "seed": args.seed, "per_assay": res,
@@ -301,9 +316,8 @@ def main() -> int:
          "ridge_baseline_cited": RIDGE_BASELINE,
          "kermut_sequence_published_n128_multimutant": 0.614}, indent=2) + "\n")
     print(f"wrote {OUT}")
-    pred_file = Path("data/processed/gp_predictions.npz")
-    np.savez(pred_file, **saved)
-    print(f"wrote {pred_file} ({pred_file.stat().st_size / 2**20:.0f} MB) for step 2.3")
+    np.savez(PRED, **saved)
+    print(f"wrote {PRED} ({PRED.stat().st_size / 2**20:.0f} MB) for step 2.3")
 
     with tracking.run(
         "2.4", "gp_composite_kernel",
