@@ -95,7 +95,7 @@ def main() -> int:
     print(f"\nwrote {OUT}")
 
     with tracking.run(
-        "2.2", "vs_additive_null",
+        "2.4", "h1_verdict_rescored",
         variant={"instance": "benchmark", "model": PRIMARY, "rescored": True},
         config={"source": str(GP)}, seed=0, datasets=[str(H1), str(GP)],
         notes=("H1's four registered conditions re-read against the Step 2.4 reward model. "
