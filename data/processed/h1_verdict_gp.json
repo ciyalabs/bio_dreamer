@@ -1,0 +1,39 @@
+{
+  "primary": "gp_zeroshot_mean",
+  "models": {
+    "gp_zeroshot_mean": {
+      "metrics": {
+        "spearman_mean": 0.42826090096709063,
+        "margin_over_additive_null": 0.104379706507706,
+        "frac_assays_beating_null": 0.5454545454545454,
+        "spearman_mean_vs_frozen_regression": 0.12735973642301662
+      },
+      "verdict": {
+        "spearman_mean": false,
+        "margin_over_additive_null": true,
+        "frac_assays_beating_null": false,
+        "spearman_mean_vs_frozen_regression": true
+      },
+      "n_assays": 11,
+      "assays_beating_null": 6
+    },
+    "gp_composite_kernel": {
+      "metrics": {
+        "spearman_mean": 0.4787577824997339,
+        "margin_over_additive_null": 0.15487658804034926,
+        "frac_assays_beating_null": 0.8181818181818182,
+        "spearman_mean_vs_frozen_regression": 0.17785661795565988
+      },
+      "verdict": {
+        "spearman_mean": false,
+        "margin_over_additive_null": true,
+        "frac_assays_beating_null": true,
+        "spearman_mean_vs_frozen_regression": true
+      },
+      "n_assays": 11,
+      "assays_beating_null": 9
+    }
+  },
+  "baselines_from": "data/processed/h1_benchmark.json",
+  "note": "thresholds read from plan.yaml step 2.2; baselines reused from the 2.2 run, not recomputed; only the model column changes"
+}
