@@ -265,6 +265,26 @@ Its gains are concentrated where a purely additive model was already strong —
 four assays where the additive null beat the reward head outright at Step 2.2 (+0.518
 against +0.388). The composite now beats that null on its own best assay.
 
+**Sensitivity: which backbone supplies `f0`, and a threshold that turns on it.**
+`PREREGISTRATION.md` fixes SaProt as the default — on a *stability* measurement — and
+ESM-2 as the comparator. Kermut names ESM-2 for its mean function, so running it is
+method-specified rather than test-selected, and it is reported as a sensitivity:
+
+| config | `f0` from SaProt (registered) | `f0` from ESM-2 (sensitivity) |
+|---|---:|---:|
+| GP, zero-shot mean | +0.428 | **+0.444** |
+| GP, composite kernel | +0.479 | **+0.489** |
+| within-order, composite | +0.417 | **+0.426** |
+| `gp_margin_over_ridge` (threshold **> 0.05**) | **+0.038 FAIL** | **+0.054 PASS** |
+
+**The registered margin condition fails on the registered backbone and passes on the
+sensitivity.** That is reported as a failure, because swapping the backbone after seeing
+which way each falls is precisely the move the pre-registration exists to prevent. It is
+worth stating plainly all the same: one of H1's four conditions turns on a default that
+was chosen for a *different target*, and the backbone that wins on fitness is not the one
+in force. That is a finding about the default, not a licence to change it mid-gate —
+changing it belongs in an amendment, before a re-run, with the reason stated first.
+
 **The registered threshold is read on `gp_zeroshot_mean`, not on the composite.**
 `spearman_mean_gp >= 0.55` was registered against Kermut-sequence *as published*, and
 reporting +0.479 in its place would be moving the goalpost after the fact. Both numbers
