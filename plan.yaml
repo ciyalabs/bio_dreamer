@@ -231,6 +231,8 @@ phases:
             name: Train on <300 singles+doubles, test on unseen 3+ mutants
           - id: vs_additive_null_run
             name: H1 gate run -- head, additive null, frozen ridge, verdict
+          - id: positional_readout
+            name: Does reading the mutated positions beat mean-pooling (H1 diagnosis)
         thresholds:
           # published band on the same protocol: ProteinNPT 0.56, MULTI-evolve
           # 0.61, Kermut 0.62, Cerebra 0.65

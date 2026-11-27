@@ -274,6 +274,7 @@ data/processed/d1_folds/
 # Pooled embedding cache: regenerable by re-encoding, and the benchmark instance is
 # 2.4 GB. The npz files are the rental's product and belong on disk, not in git.
 data/processed/pooled_cache/
+data/processed/positional_cache/
 
 # dry-run and partial outputs: never real results
 data/processed/*.dryrun.json
