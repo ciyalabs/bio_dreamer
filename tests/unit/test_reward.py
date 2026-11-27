@@ -432,3 +432,106 @@ def test_order_length_mismatch_is_rejected():
     with pytest.raises(ValueError, match="order"):
         ranking_pairs(target, assay, order=torch.tensor([1, 1, 2]),
                       equal_order_frac=1.0)
+
+
+# --- depth-aware fitness ------------------------------------------------------------
+# Step 2.1 measured that the head and mutation count are COMPLEMENTARY: at fixed depth
+# the head ranks at +0.18 to +0.36 on 5/7 assays, while depth alone scores 0.31 and has
+# no within-depth skill. These tests pin the combination's invariants.
+
+
+def _depth_cfg(**kw):
+    return RewardConfig(backbone_dim=8, latent_dim=4, trunk_dim=4,
+                        pool_first=True, depth_aware=True, **kw)
+
+
+def test_depth_aware_requires_order():
+    head = RewardHead(_depth_cfg())
+    with pytest.raises(ValueError, match="order"):
+        head(torch.zeros(3, 8))
+
+
+def test_depth_penalty_is_monotone_and_non_negative():
+    head = RewardHead(_depth_cfg())
+    with torch.no_grad():
+        head.depth_beta.fill_(-5.0)   # softplus keeps it positive even here
+    order = torch.tensor([1, 2, 5, 28])
+    pen = head.depth_penalty(order)
+    assert (pen >= 0).all()
+    assert torch.all(pen[1:] >= pen[:-1])
+
+
+def test_depth_penalty_cannot_invert_however_beta_is_driven():
+    # the prior is that deeper is never better; softplus enforces it structurally
+    head = RewardHead(_depth_cfg())
+    for b in (-50.0, -1.0, 0.0, 3.0):
+        with torch.no_grad():
+            head.depth_beta.fill_(b)
+        pen = head.depth_penalty(torch.tensor([1, 9]))
+        assert pen[1] >= pen[0]
+
+
+def test_depth_aware_lowers_the_score_of_deeper_variants():
+    torch.manual_seed(0)
+    head = RewardHead(_depth_cfg())
+    head.eval()  # dropout would make identical rows differ
+    with torch.no_grad():
+        head.depth_beta.fill_(2.0)
+    z = torch.zeros(2, 8)                      # identical input, different depth
+    out = head(z, order=torch.tensor([1, 6]))
+    assert out["fitness"][0] > out["fitness"][1]
+    # the sequence-only score ignores depth, so it stays tied
+    assert torch.allclose(out["fitness_sequence_only"][0],
+                          out["fitness_sequence_only"][1])
+
+
+def test_sequence_only_score_is_unchanged_by_the_penalty():
+    torch.manual_seed(0)
+    plain = RewardHead(RewardConfig(backbone_dim=8, latent_dim=4, trunk_dim=4,
+                                    pool_first=True))
+    torch.manual_seed(0)
+    deep = RewardHead(_depth_cfg())
+    plain.eval()
+    deep.eval()
+    z = torch.randn(4, 8)
+    a = plain(z)["fitness"]
+    b = deep(z, order=torch.tensor([1, 2, 3, 4]))["fitness_sequence_only"]
+    assert torch.allclose(a, b, atol=1e-6)
+
+
+def test_log_transform_extrapolates_more_gently_than_linear():
+    lin = RewardHead(_depth_cfg(depth_transform="linear"))
+    log = RewardHead(_depth_cfg(depth_transform="log"))
+    with torch.no_grad():
+        lin.depth_beta.fill_(1.0)
+        log.depth_beta.fill_(1.0)
+    order = torch.tensor([2, 28])
+    # identified on the 1-2 contrast, the two agree in kind; at order 28 they must not
+    ratio_lin = (lin.depth_penalty(order)[1] / lin.depth_penalty(order)[0]).item()
+    ratio_log = (log.depth_penalty(order)[1] / log.depth_penalty(order)[0]).item()
+    assert ratio_lin > ratio_log
+
+
+def test_bad_depth_transform_is_rejected():
+    with pytest.raises(ValueError, match="depth_transform"):
+        RewardHead(_depth_cfg(depth_transform="sqrt"))
+
+
+def test_order_below_one_is_rejected():
+    head = RewardHead(_depth_cfg())
+    with pytest.raises(ValueError, match="order"):
+        head.depth_penalty(torch.tensor([0, 1]))
+
+
+def test_depth_beta_receives_gradient_from_the_ranking_loss():
+    torch.manual_seed(0)
+    head = RewardHead(_depth_cfg())
+    z = torch.randn(6, 8)
+    order = torch.tensor([1, 1, 1, 2, 2, 2])
+    target = torch.tensor([1.0, 0.9, 0.8, 0.3, 0.2, 0.1])  # shallower is fitter
+    assay = torch.zeros(6, dtype=torch.long)
+    loss = pairwise_ranking_loss(head(z, order=order)["fitness"], target, assay,
+                                 max_pairs=None)
+    loss.backward()
+    assert head.depth_beta.grad is not None
+    assert head.depth_beta.grad.abs().item() > 0

@@ -801,12 +801,32 @@ A fixed 50/50 rank average of the two reaches mean ρ **+0.375** (CAPSD +0.637, 
 depth alone. `PHOT_CHLRE` is the exception: ρ(pred, order) = −0.472 and within-order ρ
 −0.028, so its apparent +0.094 was entirely depth, which is why stratifying hurt it most.
 
-So the aggregate tie understates what the head learned while correctly reporting it is
-not yet H1-competitive. **Making the reward depth-aware, with the blend weight fitted on
-the training split only, is the next step** — the 50/50 weight above is unfitted and
-therefore legitimate, but a weight chosen after seeing test numbers would not be.
-Depth-invariant input is the wrong idea and is recorded as such: depth is information the
-head is failing to use, not a confound to divide out.
+**The depth-aware head is built and it is the best configuration so far.** Score becomes
+`fitness(h) − softplus(beta)·order`, softplus so the penalty cannot invert:
+
+| | mean ρ | median | min | all positive |
+|---|---:|---:|---:|---|
+| head alone, `planning` | +0.260 | +0.370 | −0.175 | no |
+| **depth-aware, `planning`** | **+0.384** | +0.413 | +0.099 | **yes** |
+| **depth-aware, `benchmark`** | **+0.393** | +0.393 | +0.003 | **yes** |
+
+Every assay positive for the first time, GCN4 included, and the sequence component is
+undamaged (seq-only +0.247 against +0.252 standalone). `linear` was the pre-specified
+prior and is the one that works; `log` gives +0.295 and is reported as a sensitivity
+rather than selected against.
+
+**`beta` is not a fitted parameter.** It moves 9% from its init over 300 epochs, and
+across a 120× sweep of that init it always stays where it started: mean ρ runs +0.331 to
++0.407, every assay positive throughout. The order-1-versus-order-2 contrast cannot
+identify it. So it is a hyperparameter, the robustness across it is the result, and the
+precise +0.384 is not an optimum. The best init (+0.407) is deliberately not quoted —
+selecting it would spend the pre-registration on H1's own test set.
+
+Still short of 0.55, and the chance band rose to ~0.30 because the control heads carry the
+depth penalty too, so the learned component's margin is about +0.08. `PHOT_CHLRE` and
+`GCN4_YEAST` remain below their own chance bands, carried by the prior rather than by
+anything learned. Depth-invariant input is recorded as the **wrong** idea: depth was
+information the head was failing to use, not a confound to divide out.
 
 **This is not H1.** Step 2.2 still owes the additive null and the literature baselines.
 The order-only control is deliberately weaker than the additive null — it fits nothing —

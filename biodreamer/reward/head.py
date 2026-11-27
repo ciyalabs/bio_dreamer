@@ -30,6 +30,7 @@ from dataclasses import dataclass
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 @dataclass
@@ -46,6 +47,19 @@ class RewardConfig:
     # cache 512x smaller -- 2.4 GB instead of 615 GB for the benchmark instance -- and
     # is only legitimate if it costs nothing, which scripts/train_reward.py measures.
     pool_first: bool = False
+    # Subtract a learned, non-negative multiple of mutation count from the fitness
+    # score. Step 2.1 measured why: the head ranks variants at FIXED depth at +0.18 to
+    # +0.36 on five of seven assays but barely uses depth itself (rho(pred, order)
+    # -0.10 to -0.32), while a predictor reading depth alone scores 0.31. The two are
+    # complementary, and a fixed 50/50 rank average of them reaches 0.375 against 0.252
+    # for the head. This makes that combination part of the model instead of a
+    # post-hoc blend, so the weight is fitted on the training split like everything else.
+    depth_aware: bool = False
+    # Fitness is roughly multiplicative in independent deleterious mutations, so log
+    # fitness is roughly linear in their count -- `linear` is the principled prior for a
+    # score that is already log-scale in most assays. `log` is the gentler extrapolation
+    # and is a sensitivity check, not an alternative to be selected on test numbers.
+    depth_transform: str = "linear"
 
 
 class Adapter(nn.Module):
@@ -108,15 +122,43 @@ class RewardHead(nn.Module):
         )
         self.stability = nn.Linear(self.cfg.trunk_dim, 1)
         self.fitness = nn.Linear(self.cfg.trunk_dim, 1)
+        # One scalar, passed through softplus so the penalty cannot invert. Monotone
+        # decreasing fitness in mutation count is a prior, not something to be learned
+        # from scratch: order-only Spearman is negative on all 11 assays in the corpus
+        # (-0.125 to -0.505). Training sees only orders 1 and 2, so this is identified
+        # from a 1-versus-2 contrast and then extrapolated to order 28 -- the weakest
+        # part of the design and the thing to report with any number it produces.
+        self.depth_beta = nn.Parameter(torch.zeros(1))
+        if self.cfg.depth_transform not in ("linear", "log"):
+            raise ValueError(
+                f"depth_transform must be 'linear' or 'log', got "
+                f"{self.cfg.depth_transform!r}"
+            )
 
     def latents(self, z: torch.Tensor) -> torch.Tensor:
         """The per-residue latent the world model consumes. No pooling."""
         return self.adapter(z)
 
+    def depth_penalty(self, order: torch.Tensor) -> torch.Tensor:
+        """Non-negative penalty per variant, from its mutation count."""
+        d = order.to(self.depth_beta.dtype)
+        if (d <= 0).any():
+            raise ValueError("mutation order must be >= 1")
+        if self.cfg.depth_transform == "log":
+            d = torch.log(d)
+        return F.softplus(self.depth_beta).squeeze(-1) * d
+
     def forward(
-        self, z: torch.Tensor, mask: torch.Tensor | None = None
+        self,
+        z: torch.Tensor,
+        mask: torch.Tensor | None = None,
+        order: torch.Tensor | None = None,
     ) -> dict[str, torch.Tensor]:
-        """(B, L, backbone_dim) -> scalar predictions plus the latent, for reuse."""
+        """(B, L, backbone_dim) -> scalar predictions plus the latent, for reuse.
+
+        `order` is the mutation count per variant, required when `depth_aware` is set.
+        It is known for any candidate at inference time, so using it is not leakage.
+        """
         if self.cfg.pool_first:
             # z may already be (B, d) if it came from a pooled cache
             pooled_backbone = z if z.ndim == 2 else masked_pool(z, mask, self.cfg.pool)
@@ -126,9 +168,18 @@ class RewardHead(nn.Module):
             per_residue = self.adapter(z)
             pooled = masked_pool(per_residue, mask, self.cfg.pool)
         h = self.trunk(pooled)
+        fitness = self.fitness(h).squeeze(-1)
+        sequence_only = fitness
+        if self.cfg.depth_aware:
+            if order is None:
+                raise ValueError("depth_aware=True requires `order` per variant")
+            fitness = fitness - self.depth_penalty(order)
         return {
             "stability": self.stability(h).squeeze(-1),
-            "fitness": self.fitness(h).squeeze(-1),
+            "fitness": fitness,
+            # the score before the depth penalty, so the two components stay separable
+            # for diagnostics -- the within-order measurement reads this one
+            "fitness_sequence_only": sequence_only,
             "latent": per_residue,
             "pooled": pooled,
         }

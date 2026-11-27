@@ -36,6 +36,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from scipy.stats import spearmanr
 
 from biodreamer import tracking
@@ -97,6 +98,15 @@ def main() -> int:
     ap.add_argument("--epochs", type=int, default=300)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--max-pairs", type=int, default=4096)
+    ap.add_argument("--depth-aware", action="store_true",
+                    help="subtract a learned non-negative multiple of mutation count; "
+                         "the weight is fitted on the TRAINING split like everything else")
+    ap.add_argument("--depth-transform", default="linear", choices=["linear", "log"])
+    ap.add_argument("--depth-beta-init", type=float, default=None,
+                    help="initial VALUE of softplus(depth_beta); the default init is "
+                         "beta=0, i.e. 0.693. Exposed because the fitted beta moves "
+                         "only ~9%% from its init, so the init is doing most of the work "
+                         "and its influence has to be measured rather than assumed.")
     ap.add_argument("--equal-order-frac", type=float, default=0.0,
                     help="share of each step's pairs reserved for EQUAL mutation order; "
                          "0.0 is the uniform sampler that tied with counting mutations")
@@ -167,8 +177,16 @@ def main() -> int:
         raise RuntimeError("stratified sampling requested but no equal-order pair exists")
     print(f"  equal_order_frac = {args.equal_order_frac}")
 
-    cfg = RewardConfig(backbone_dim=X.shape[1], pool_first=True)
+    cfg = RewardConfig(backbone_dim=X.shape[1], pool_first=True,
+                       depth_aware=args.depth_aware,
+                       depth_transform=args.depth_transform)
     head = RewardHead(cfg)
+    if args.depth_beta_init is not None:
+        if not args.depth_aware:
+            raise RuntimeError("--depth-beta-init requires --depth-aware")
+        with torch.no_grad():  # inverse softplus
+            v = torch.tensor(float(args.depth_beta_init))
+            head.depth_beta.fill_(float(torch.log(torch.expm1(v))))
     # The untrained control needs MANY seeds. One random head is not a control: on
     # PHOT_CHLRE, 20 random inits gave mean -0.031 with sd 0.248 and a range of -0.438
     # to +0.472, so a single draw can look like a strong result or a strong anti-result
@@ -186,7 +204,7 @@ def main() -> int:
     head.train()
     for e in range(args.epochs):
         loss = pairwise_ranking_loss(
-            head(X)["fitness"], y, assay, censored=cens,
+            head(X, order=order_t)["fitness"], y, assay, censored=cens,
             max_pairs=args.max_pairs, generator=gen,
             order=order_t, equal_order_frac=args.equal_order_frac,
         )
@@ -194,8 +212,10 @@ def main() -> int:
         loss.backward()
         opt.step()
         if e % 25 == 0 or e == args.epochs - 1:
-            curve.append({"epoch": e, "loss": float(loss)})
-            print(f"  epoch {e:>4}  ranking loss {float(loss):.4f}", flush=True)
+            beta = float(F.softplus(head.depth_beta).detach()) if args.depth_aware else 0.0
+            curve.append({"epoch": e, "loss": float(loss.detach()), "depth_beta": beta})
+            print(f"  epoch {e:>4}  ranking loss {float(loss.detach()):.4f}"
+                  + (f"  depth_beta {beta:.4f}" if args.depth_aware else ""), flush=True)
     print(f"  trained in {time.time()-t0:.0f}s")
 
     # ---- pass 2: per-assay Spearman on the unseen order>=3 variants ----
@@ -205,22 +225,36 @@ def main() -> int:
     # latent whose magnitude tracks "how many mutations" will do. It is NOT H1's
     # additive null (that fits per-site effects and belongs to Step 2.2); it is the
     # cheapest guard against reading mutation count as learned biology.
-    def score_all() -> tuple[dict, dict, dict, dict]:
+    def score_all() -> tuple[dict, dict, dict, dict, dict, dict]:
         head.eval()
-        tr_, ct_, cs_, nm_ = {}, {}, {}, {}
+        tr_, ct_, cs_, nm_, sq_, wo_ = {}, {}, {}, {}, {}, {}
         for n, k, rte, te in plan:
             a = load_assay(n, limits)
             z = np.load(cache_path(n))
             emb = z["emb"]
             pt = np.empty(len(rte), np.float32)
+            od_t = torch.from_numpy(a.order[te].astype(np.int64))
+            ps = np.empty(len(rte), np.float32)  # before the depth penalty
             with torch.no_grad():
                 for s in range(0, len(rte), args.eval_batch):
                     b = rte[s : s + args.eval_batch]
                     xb = torch.from_numpy(emb[b].astype(np.float32))
-                    pt[s : s + len(b)] = head(xb)["fitness"].numpy()
+                    ob = od_t[s : s + len(b)]
+                    o = head(xb, order=ob)
+                    pt[s : s + len(b)] = o["fitness"].numpy()
+                    ps[s : s + len(b)] = o["fitness_sequence_only"].numpy()
             truth = a.score[te]
             tr_[n] = float(spearmanr(pt, truth).statistic)
             nm_[n] = float(spearmanr(a.order[te], truth).statistic)
+            sq_[n] = float(spearmanr(ps, truth).statistic)
+            # rho at FIXED depth: the measurement that showed the head and mutation
+            # count are complementary rather than competing. Depths with <200 variants
+            # are skipped because their Spearman is mostly sampling noise.
+            od = a.order[te]
+            w = [float(spearmanr(ps[od == o], truth[od == o]).statistic)
+                 for o in np.unique(od)
+                 if (od == o).sum() >= 200 and np.ptp(truth[od == o]) > 0]
+            wo_[n] = float(np.mean(w)) if w else float("nan")
 
             # control on a fixed subsample: 10 heads x the full set would triple the
             # run for a number that is a chance band, not a result.
@@ -230,18 +264,20 @@ def main() -> int:
             z.close()
             rs = []
             with torch.no_grad():
+                oc = od_t[sub]
                 for m in controls:
-                    rs.append(float(spearmanr(m(xc)["fitness"].numpy(),
+                    rs.append(float(spearmanr(m(xc, order=oc)["fitness"].numpy(),
                                               truth[sub]).statistic))
             rs = np.array(rs)
             ct_[n], cs_[n] = float(np.abs(rs).mean()), float(rs.std())
-            print(f"  {n:34s} {tr_[n]:+.3f}   chance {ct_[n]:.3f}+-{cs_[n]:.3f}   "
+            print(f"  {n:34s} {tr_[n]:+.3f}  seq-only {sq_[n]:+.3f}  "
+                  f"within-order {wo_[n]:+.3f}  chance {ct_[n]:.3f}+-{cs_[n]:.3f}  "
                   f"order-only {nm_[n]:+.3f}"
-                  f"{'   [BANNED]' if n in banned else ''}", flush=True)
-        return tr_, ct_, cs_, nm_
+                  f"{'  [BANNED]' if n in banned else ''}", flush=True)
+        return tr_, ct_, cs_, nm_, sq_, wo_
 
     print("\nper-assay Spearman on unseen order>=3 variants:")
-    trained, control, control_sd, order_only = score_all()
+    trained, control, control_sd, order_only, seq_only, within_order = score_all()
     vals = np.array([trained[n] for n in names])
 
     cvals = np.array([control[n] for n in names])
@@ -263,6 +299,13 @@ def main() -> int:
         "order_only_spearman_max_abs": float(np.abs(ovals).max()),
         "n_assays_beating_order_only": float((np.abs(vals) > np.abs(ovals)).sum()),
         "epochs": float(args.epochs),
+        "depth_aware": float(args.depth_aware),
+        "depth_beta": (float(F.softplus(head.depth_beta).detach())
+                       if args.depth_aware else 0.0),
+        "depth_beta_init": (0.6931 if args.depth_beta_init is None
+                            else float(args.depth_beta_init)),
+        "spearman_seq_only_mean": float(np.mean([seq_only[n] for n in names])),
+        "within_order_mean": float(np.nanmean([within_order[n] for n in names])),
         "init_seed": float(init_seed),
         "equal_order_frac": float(args.equal_order_frac),
         "n_pairs_total": float(n_any),
@@ -279,10 +322,19 @@ def main() -> int:
           f"  max |rho| {metrics['order_only_spearman_max_abs']:.3f}")
     print(f"  beats order-only on {int(metrics['n_assays_beating_order_only'])}"
           f"/{len(names)} assays")
+    print(f"  sequence-only mean {metrics['spearman_seq_only_mean']:+.3f}   "
+          f"within-order mean {metrics['within_order_mean']:+.3f}")
+    if args.depth_aware:
+        print(f"  learned depth_beta {metrics['depth_beta']:.4f} "
+              f"({args.depth_transform}, fitted on orders 1-2 only)")
 
     out.parent.mkdir(parents=True, exist_ok=True)
     payload = json.loads(out.read_text()) if out.exists() else {}
     tag = args.instance
+    if args.depth_aware:
+        tag += f"_depth{args.depth_transform}"
+        if args.depth_beta_init is not None:
+            tag += f"_b{args.depth_beta_init:g}"
     if args.equal_order_frac > 0:
         tag += f"_eq{args.equal_order_frac:g}"
     if args.init_seed is not None:
@@ -291,6 +343,7 @@ def main() -> int:
         "metrics": metrics, "per_assay": trained,
         "per_assay_chance_mean_abs": control, "per_assay_chance_sd": control_sd,
         "per_assay_order_only": order_only,
+        "per_assay_seq_only": seq_only, "per_assay_within_order": within_order,
         "curve": curve,
         "backbone": BACKBONE, "assays": names,
     }
@@ -302,7 +355,9 @@ def main() -> int:
             "2.1", "fitness_training",
             variant={"instance": args.instance, "target": "fitness",
                      "backbone": BACKBONE,
-                     "equal_order_frac": args.equal_order_frac},
+                     "equal_order_frac": args.equal_order_frac,
+                     "depth_aware": args.depth_aware,
+                     "depth_transform": args.depth_transform},
             config=vars(args), seed=args.seed, datasets=[str(CACHE)],
             notes=("Per-assay standardisation + RankNet, censored pairs dropped where "
                    "BOTH members sit at the detection limit. Trained on <=300 order<=2 "

@@ -755,5 +755,1319 @@
       "Q6WV12_9MAXI_Somermeyer_2022",
       "Q8WTC7_9CNID_Somermeyer_2022"
     ]
+  },
+  "planning_depthlinear": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.3836450405547417,
+      "spearman_median": 0.4130712148065773,
+      "spearman_p10": 0.1481496722320442,
+      "spearman_p90": 0.5889180418186631,
+      "spearman_min": 0.09877797484438658,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.3014751957320433,
+      "chance_spearman_max_abs": 0.4543872551879943,
+      "n_assays_above_chance": 5.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 5.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 0.6270874738693237,
+      "spearman_seq_only_mean": 0.24746086865166322,
+      "within_order_mean": 0.16097586255385427,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.4434497058391571
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.6692968087861058,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.4583283870645903,
+      "GCN4_YEAST_Staller_2018": 0.09877797484438658,
+      "GFP_AEQVI_Sarkisyan_2016": 0.5353321971737014,
+      "PHOT_CHLRE_Chen_2023": 0.18106413715714925,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.4130712148065773,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.3296445640506807
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4035924535182739,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.4040754034389208,
+      "GCN4_YEAST_Staller_2018": -0.2059870196905702,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4037558233907513,
+      "PHOT_CHLRE_Chen_2023": 0.06398916765346896,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3862168433785463,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.27658340887225175
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.35767813020597206,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.1841404513469349,
+      "GCN4_YEAST_Staller_2018": -0.13803489409650668,
+      "GFP_AEQVI_Sarkisyan_2016": 0.19600288565169513,
+      "PHOT_CHLRE_Chen_2023": -0.032696970197942404,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3374513367676003,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2222900981992267
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.6906550526618958,
+        "depth_beta": 0.6926472783088684
+      },
+      {
+        "epoch": 25,
+        "loss": 0.6604866981506348,
+        "depth_beta": 0.6811109781265259
+      },
+      {
+        "epoch": 50,
+        "loss": 0.6257075071334839,
+        "depth_beta": 0.6700947284698486
+      },
+      {
+        "epoch": 75,
+        "loss": 0.5912106037139893,
+        "depth_beta": 0.6611891984939575
+      },
+      {
+        "epoch": 100,
+        "loss": 0.5637326836585999,
+        "depth_beta": 0.6543331146240234
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5643813014030457,
+        "depth_beta": 0.6493844389915466
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5253461599349976,
+        "depth_beta": 0.64516282081604
+      },
+      {
+        "epoch": 175,
+        "loss": 0.5021699070930481,
+        "depth_beta": 0.6416641473770142
+      },
+      {
+        "epoch": 200,
+        "loss": 0.48860329389572144,
+        "depth_beta": 0.6380158066749573
+      },
+      {
+        "epoch": 225,
+        "loss": 0.4712776839733124,
+        "depth_beta": 0.6357481479644775
+      },
+      {
+        "epoch": 250,
+        "loss": 0.4623374342918396,
+        "depth_beta": 0.6336907148361206
+      },
+      {
+        "epoch": 275,
+        "loss": 0.44890427589416504,
+        "depth_beta": 0.63020259141922
+      },
+      {
+        "epoch": 299,
+        "loss": 0.4434497058391571,
+        "depth_beta": 0.6270874738693237
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "planning_depthlog": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.2951486332522539,
+      "spearman_median": 0.38926228091588655,
+      "spearman_p10": -4.33411451556797e-05,
+      "spearman_p90": 0.4782777784170822,
+      "spearman_min": -0.010224659224318785,
+      "frac_assays_positive": 0.8571428571428571,
+      "chance_spearman_mean_abs": 0.3014713160866259,
+      "chance_spearman_max_abs": 0.45438713142663223,
+      "n_assays_above_chance": 5.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 4.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 0.7140893936157227,
+      "spearman_seq_only_mean": 0.2412290297123698,
+      "within_order_mean": 0.15970200591233757,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.43766283988952637
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.5134131577499381,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.4183495331532542,
+      "GCN4_YEAST_Staller_2018": -0.010224659224318785,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4548541921951782,
+      "PHOT_CHLRE_Chen_2023": 0.006744204240953053,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.38926228091588655,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2936417237348856
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431729316304625,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.33230225179295536,
+      "GCN4_YEAST_Staller_2018": 0.1702657928721942,
+      "GFP_AEQVI_Sarkisyan_2016": 0.45438713142663223,
+      "PHOT_CHLRE_Chen_2023": 0.3437148590560716,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993612231452555,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652012351354
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.01933910393788142,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183863692808612,
+      "GCN4_YEAST_Staller_2018": 0.02603324173586852,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128886027598973,
+      "PHOT_CHLRE_Chen_2023": 0.03070648254542266,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392813619051621,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015431124691944157
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4181599459589183,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.39824086186749247,
+      "GCN4_YEAST_Staller_2018": -0.16011437843181311,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4086428746609491,
+      "PHOT_CHLRE_Chen_2023": -0.026718853132704463,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3780762155839502,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2723165414797964
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.3518032665520166,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.18045753898903147,
+      "GCN4_YEAST_Staller_2018": -0.06302847211210118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.19930279451852592,
+      "PHOT_CHLRE_Chen_2023": -0.10048563652462375,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.32869365462539457,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.22117089533811943
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.6894475221633911,
+        "depth_beta": 0.6926472783088684
+      },
+      {
+        "epoch": 25,
+        "loss": 0.6583131551742554,
+        "depth_beta": 0.6868851184844971
+      },
+      {
+        "epoch": 50,
+        "loss": 0.6241869926452637,
+        "depth_beta": 0.6797873973846436
+      },
+      {
+        "epoch": 75,
+        "loss": 0.5916940569877625,
+        "depth_beta": 0.6765044331550598
+      },
+      {
+        "epoch": 100,
+        "loss": 0.562630832195282,
+        "depth_beta": 0.6774441003799438
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5606880784034729,
+        "depth_beta": 0.6823744177818298
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5269768238067627,
+        "depth_beta": 0.6877690553665161
+      },
+      {
+        "epoch": 175,
+        "loss": 0.5016381740570068,
+        "depth_beta": 0.6931888461112976
+      },
+      {
+        "epoch": 200,
+        "loss": 0.4897940158843994,
+        "depth_beta": 0.6975074410438538
+      },
+      {
+        "epoch": 225,
+        "loss": 0.4776194095611572,
+        "depth_beta": 0.7042772769927979
+      },
+      {
+        "epoch": 250,
+        "loss": 0.46448904275894165,
+        "depth_beta": 0.7098701596260071
+      },
+      {
+        "epoch": 275,
+        "loss": 0.4515242874622345,
+        "depth_beta": 0.7119986414909363
+      },
+      {
+        "epoch": 299,
+        "loss": 0.43766283988952637,
+        "depth_beta": 0.7140893936157227
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "planning_depthlinear_b0.05": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.33149088220419737,
+      "spearman_median": 0.3841511877716827,
+      "spearman_p10": 0.1838444885722113,
+      "spearman_p90": 0.45177950413225954,
+      "spearman_min": 0.0671385735507264,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.3014751957320433,
+      "chance_spearman_max_abs": 0.4543872551879943,
+      "n_assays_above_chance": 4.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 4.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 0.06554372608661652,
+      "depth_beta_init": 0.05,
+      "spearman_seq_only_mean": 0.28902063055487937,
+      "within_order_mean": 0.1988067638035911,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.4427573084831238
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.47544720682567665,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.4072502895478134,
+      "GCN4_YEAST_Staller_2018": 0.0671385735507264,
+      "GFP_AEQVI_Sarkisyan_2016": 0.43600103566998144,
+      "PHOT_CHLRE_Chen_2023": 0.2616484319198679,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3841511877716827,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2887994501436331
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4140251771347779,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.39916889883721435,
+      "GCN4_YEAST_Staller_2018": -0.11895610993674682,
+      "GFP_AEQVI_Sarkisyan_2016": 0.41472394681809477,
+      "PHOT_CHLRE_Chen_2023": 0.25541482073286653,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3795004055529733,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.27926727474497576
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.35661858616213493,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.17887416602609893,
+      "GCN4_YEAST_Staller_2018": -0.01627611434733801,
+      "GFP_AEQVI_Sarkisyan_2016": 0.19098235983469203,
+      "PHOT_CHLRE_Chen_2023": 0.12520687199665995,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3303036730701082,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.22593780388278173
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.6922602653503418,
+        "depth_beta": 0.050048794597387314
+      },
+      {
+        "epoch": 25,
+        "loss": 0.6589598655700684,
+        "depth_beta": 0.051227081567049026
+      },
+      {
+        "epoch": 50,
+        "loss": 0.6269338130950928,
+        "depth_beta": 0.05237273499369621
+      },
+      {
+        "epoch": 75,
+        "loss": 0.5982810854911804,
+        "depth_beta": 0.05357978492975235
+      },
+      {
+        "epoch": 100,
+        "loss": 0.5615189671516418,
+        "depth_beta": 0.0548761822283268
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5652045011520386,
+        "depth_beta": 0.05628907307982445
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5257877111434937,
+        "depth_beta": 0.05768097937107086
+      },
+      {
+        "epoch": 175,
+        "loss": 0.5082734823226929,
+        "depth_beta": 0.059048209339380264
+      },
+      {
+        "epoch": 200,
+        "loss": 0.501039445400238,
+        "depth_beta": 0.060341086238622665
+      },
+      {
+        "epoch": 225,
+        "loss": 0.4811577796936035,
+        "depth_beta": 0.061715010553598404
+      },
+      {
+        "epoch": 250,
+        "loss": 0.4594684839248657,
+        "depth_beta": 0.0630621686577797
+      },
+      {
+        "epoch": 275,
+        "loss": 0.4642048478126526,
+        "depth_beta": 0.06430090963840485
+      },
+      {
+        "epoch": 299,
+        "loss": 0.4427573084831238,
+        "depth_beta": 0.06554372608661652
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "planning_depthlinear_b0.2": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.3451593727657447,
+      "spearman_median": 0.38712978298840833,
+      "spearman_p10": 0.12172884015692924,
+      "spearman_p90": 0.525026757434165,
+      "spearman_min": 0.06478547592035663,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.3014751957320433,
+      "chance_spearman_max_abs": 0.4543872551879943,
+      "n_assays_above_chance": 5.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 5.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 0.25349122285842896,
+      "depth_beta_init": 0.2,
+      "spearman_seq_only_mean": 0.2591412819706528,
+      "within_order_mean": 0.16926766388540268,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.43628451228141785
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.5843846139127257,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.43064318470630936,
+      "GCN4_YEAST_Staller_2018": 0.06478547592035663,
+      "GFP_AEQVI_Sarkisyan_2016": 0.48545485311512454,
+      "PHOT_CHLRE_Chen_2023": 0.15969108298131096,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.38712978298840833,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.3040266157359778
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4086881880991043,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.40310318343262813,
+      "GCN4_YEAST_Staller_2018": -0.1723800206841178,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4158631026665131,
+      "PHOT_CHLRE_Chen_2023": 0.1140987682768053,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.37176510398317386,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.27285064802046244
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.36289545819109886,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.17774347844186555,
+      "GCN4_YEAST_Staller_2018": -0.08954467610770249,
+      "GFP_AEQVI_Sarkisyan_2016": 0.19349432769690597,
+      "PHOT_CHLRE_Chen_2023": 0.00030690384553048127,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3204790648685197,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2194990902616008
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.6904581785202026,
+        "depth_beta": 0.20018136501312256
+      },
+      {
+        "epoch": 25,
+        "loss": 0.6577291488647461,
+        "depth_beta": 0.20428088307380676
+      },
+      {
+        "epoch": 50,
+        "loss": 0.6249798536300659,
+        "depth_beta": 0.20811687409877777
+      },
+      {
+        "epoch": 75,
+        "loss": 0.5959420204162598,
+        "depth_beta": 0.21233491599559784
+      },
+      {
+        "epoch": 100,
+        "loss": 0.5631871819496155,
+        "depth_beta": 0.21703486144542694
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5562199950218201,
+        "depth_beta": 0.2222389578819275
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5207297801971436,
+        "depth_beta": 0.22721253335475922
+      },
+      {
+        "epoch": 175,
+        "loss": 0.5015583038330078,
+        "depth_beta": 0.23206119239330292
+      },
+      {
+        "epoch": 200,
+        "loss": 0.4883250296115875,
+        "depth_beta": 0.23651373386383057
+      },
+      {
+        "epoch": 225,
+        "loss": 0.47425031661987305,
+        "depth_beta": 0.241261288523674
+      },
+      {
+        "epoch": 250,
+        "loss": 0.4611356854438782,
+        "depth_beta": 0.2458183914422989
+      },
+      {
+        "epoch": 275,
+        "loss": 0.46682029962539673,
+        "depth_beta": 0.24966375529766083
+      },
+      {
+        "epoch": 299,
+        "loss": 0.43628451228141785,
+        "depth_beta": 0.25349122285842896
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "planning_depthlinear_b0.693": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.3835484508778843,
+      "spearman_median": 0.4132830468604135,
+      "spearman_p10": 0.14765597902364738,
+      "spearman_p90": 0.5890042480786155,
+      "spearman_min": 0.09855196760613086,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.3014751957320433,
+      "chance_spearman_max_abs": 0.4543872551879943,
+      "n_assays_above_chance": 5.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 5.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 0.6269828677177429,
+      "depth_beta_init": 0.693,
+      "spearman_seq_only_mean": 0.24732873348420195,
+      "within_order_mean": 0.16090193510708586,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.44352149963378906
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.6693277134011865,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.45837658204681875,
+      "GCN4_YEAST_Staller_2018": 0.09855196760613086,
+      "GFP_AEQVI_Sarkisyan_2016": 0.5354552711969015,
+      "PHOT_CHLRE_Chen_2023": 0.18039198663532505,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.4132830468604135,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.32945258839841424
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.40375570921045806,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.40412292239812225,
+      "GCN4_YEAST_Staller_2018": -0.2061483057076648,
+      "GFP_AEQVI_Sarkisyan_2016": 0.40376782999407285,
+      "PHOT_CHLRE_Chen_2023": 0.06299938100335503,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.38643375068260627,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.27636984680846394
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.35788199898156087,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.1843814848473806,
+      "GCN4_YEAST_Staller_2018": -0.13824672472205565,
+      "GFP_AEQVI_Sarkisyan_2016": 0.1960230180293394,
+      "PHOT_CHLRE_Chen_2023": -0.03330759679869771,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.33768821437688173,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.22189315103519153
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.6906536817550659,
+        "depth_beta": 0.6925001740455627
+      },
+      {
+        "epoch": 25,
+        "loss": 0.6604844927787781,
+        "depth_beta": 0.680966317653656
+      },
+      {
+        "epoch": 50,
+        "loss": 0.6257054805755615,
+        "depth_beta": 0.669952392578125
+      },
+      {
+        "epoch": 75,
+        "loss": 0.5912107229232788,
+        "depth_beta": 0.6610493659973145
+      },
+      {
+        "epoch": 100,
+        "loss": 0.5637319087982178,
+        "depth_beta": 0.6541963815689087
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5643719434738159,
+        "depth_beta": 0.6492513418197632
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5253509879112244,
+        "depth_beta": 0.645033597946167
+      },
+      {
+        "epoch": 175,
+        "loss": 0.5021705031394958,
+        "depth_beta": 0.6415390372276306
+      },
+      {
+        "epoch": 200,
+        "loss": 0.48860085010528564,
+        "depth_beta": 0.6378942728042603
+      },
+      {
+        "epoch": 225,
+        "loss": 0.4712831377983093,
+        "depth_beta": 0.635631263256073
+      },
+      {
+        "epoch": 250,
+        "loss": 0.46227461099624634,
+        "depth_beta": 0.6335766315460205
+      },
+      {
+        "epoch": 275,
+        "loss": 0.4488658308982849,
+        "depth_beta": 0.6300902366638184
+      },
+      {
+        "epoch": 299,
+        "loss": 0.44352149963378906,
+        "depth_beta": 0.6269828677177429
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "planning_depthlinear_b2": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.40656008052198744,
+      "spearman_median": 0.4079023001555183,
+      "spearman_p10": 0.21115554439085985,
+      "spearman_p90": 0.6032416189306448,
+      "spearman_min": 0.12309370275404434,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.3014751957320433,
+      "chance_spearman_max_abs": 0.4543872551879943,
+      "n_assays_above_chance": 5.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 5.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 1.7990803718566895,
+      "depth_beta_init": 2.0,
+      "spearman_seq_only_mean": 0.24535000205834764,
+      "within_order_mean": 0.18221295208328198,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.4583576023578644
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.646426948427566,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.48126661365638607,
+      "GCN4_YEAST_Staller_2018": 0.12309370275404434,
+      "GFP_AEQVI_Sarkisyan_2016": 0.5744513992660306,
+      "PHOT_CHLRE_Chen_2023": 0.2698634388154035,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.4079023001555183,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.3429161605789632
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.36714813723260586,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.37953690031558185,
+      "GCN4_YEAST_Staller_2018": -0.16521724543714716,
+      "GFP_AEQVI_Sarkisyan_2016": 0.37835151385356064,
+      "PHOT_CHLRE_Chen_2023": 0.10443623687258675,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3762515558118238,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.27694291575942154
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.3434008403921696,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.1831894814448296,
+      "GCN4_YEAST_Staller_2018": -0.0540603499013283,
+      "GFP_AEQVI_Sarkisyan_2016": 0.19709116370173307,
+      "PHOT_CHLRE_Chen_2023": 0.034105510503582265,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3368205999703594,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2349434184716282
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.7280586957931519,
+        "depth_beta": 1.9991353750228882
+      },
+      {
+        "epoch": 25,
+        "loss": 0.7017223238945007,
+        "depth_beta": 1.977753758430481
+      },
+      {
+        "epoch": 50,
+        "loss": 0.6522418856620789,
+        "depth_beta": 1.9569777250289917
+      },
+      {
+        "epoch": 75,
+        "loss": 0.6135337352752686,
+        "depth_beta": 1.937557578086853
+      },
+      {
+        "epoch": 100,
+        "loss": 0.5816679000854492,
+        "depth_beta": 1.9192354679107666
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5776561498641968,
+        "depth_beta": 1.9017517566680908
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5360435247421265,
+        "depth_beta": 1.885056734085083
+      },
+      {
+        "epoch": 175,
+        "loss": 0.5228484869003296,
+        "depth_beta": 1.8689535856246948
+      },
+      {
+        "epoch": 200,
+        "loss": 0.5178877711296082,
+        "depth_beta": 1.8533551692962646
+      },
+      {
+        "epoch": 225,
+        "loss": 0.5032065510749817,
+        "depth_beta": 1.8391554355621338
+      },
+      {
+        "epoch": 250,
+        "loss": 0.4798749089241028,
+        "depth_beta": 1.8253732919692993
+      },
+      {
+        "epoch": 275,
+        "loss": 0.4750937223434448,
+        "depth_beta": 1.8116215467453003
+      },
+      {
+        "epoch": 299,
+        "loss": 0.4583576023578644,
+        "depth_beta": 1.7990803718566895
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "planning_depthlinear_b6": {
+    "metrics": {
+      "n_assays": 7.0,
+      "n_train_rows": 1888.0,
+      "n_test_variants": 285112.0,
+      "spearman_mean": 0.3877144118552963,
+      "spearman_median": 0.36850054986054925,
+      "spearman_p10": 0.24816528837879936,
+      "spearman_p90": 0.5557089588537725,
+      "spearman_min": 0.16274904310702476,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.3014751957320433,
+      "chance_spearman_max_abs": 0.4543872551879943,
+      "n_assays_above_chance": 5.0,
+      "order_only_spearman_mean_abs": 0.31186664139574266,
+      "order_only_spearman_max_abs": 0.4639144702655874,
+      "n_assays_beating_order_only": 5.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 5.7201738357543945,
+      "depth_beta_init": 6.0,
+      "spearman_seq_only_mean": 0.19708487982819117,
+      "within_order_mean": 0.18960981982833472,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 271606.0,
+      "n_pairs_equal_order": 229769.0,
+      "final_loss": 0.5868247747421265
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.572409329272805,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.44075821151558575,
+      "GCN4_YEAST_Staller_2018": 0.16274904310702476,
+      "GFP_AEQVI_Sarkisyan_2016": 0.5445753785744174,
+      "PHOT_CHLRE_Chen_2023": 0.3198989187633761,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.36850054986054925,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.30510945189331573
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.1997972078394407,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3397600483606676,
+      "GCN4_YEAST_Staller_2018": -0.06344759094040098,
+      "GFP_AEQVI_Sarkisyan_2016": 0.33474279747318525,
+      "PHOT_CHLRE_Chen_2023": -0.021096944400424644,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3549087884650281,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2349298519998422
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.3407351008252728,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.16116011441584513,
+      "GCN4_YEAST_Staller_2018": 0.02835132486063542,
+      "GFP_AEQVI_Sarkisyan_2016": 0.1956370562577919,
+      "PHOT_CHLRE_Chen_2023": 0.05520792152592891,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3341200134763598,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2120572074365091
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.958275318145752,
+        "depth_beta": 5.999002456665039
+      },
+      {
+        "epoch": 25,
+        "loss": 0.9488650560379028,
+        "depth_beta": 5.9741597175598145
+      },
+      {
+        "epoch": 50,
+        "loss": 0.861158013343811,
+        "depth_beta": 5.949251651763916
+      },
+      {
+        "epoch": 75,
+        "loss": 0.8138508200645447,
+        "depth_beta": 5.924917221069336
+      },
+      {
+        "epoch": 100,
+        "loss": 0.7890505194664001,
+        "depth_beta": 5.900955677032471
+      },
+      {
+        "epoch": 125,
+        "loss": 0.7561776638031006,
+        "depth_beta": 5.877049922943115
+      },
+      {
+        "epoch": 150,
+        "loss": 0.7039239406585693,
+        "depth_beta": 5.853396415710449
+      },
+      {
+        "epoch": 175,
+        "loss": 0.7063291072845459,
+        "depth_beta": 5.829855918884277
+      },
+      {
+        "epoch": 200,
+        "loss": 0.6961318850517273,
+        "depth_beta": 5.80650520324707
+      },
+      {
+        "epoch": 225,
+        "loss": 0.6504749059677124,
+        "depth_beta": 5.783998489379883
+      },
+      {
+        "epoch": 250,
+        "loss": 0.6054026484489441,
+        "depth_beta": 5.762041091918945
+      },
+      {
+        "epoch": 275,
+        "loss": 0.6204279661178589,
+        "depth_beta": 5.7404398918151855
+      },
+      {
+        "epoch": 299,
+        "loss": 0.5868247747421265,
+        "depth_beta": 5.7201738357543945
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022"
+    ]
+  },
+  "benchmark_depthlinear": {
+    "metrics": {
+      "n_assays": 11.0,
+      "n_train_rows": 2954.0,
+      "n_test_variants": 943211.0,
+      "spearman_mean": 0.39283110552928596,
+      "spearman_median": 0.3927426078805926,
+      "spearman_p10": 0.19511416388946773,
+      "spearman_p90": 0.5309330547111347,
+      "spearman_min": 0.0033904490764276505,
+      "frac_assays_positive": 1.0,
+      "chance_spearman_mean_abs": 0.2912940852477588,
+      "chance_spearman_max_abs": 0.49483308786594693,
+      "n_assays_above_chance": 8.0,
+      "order_only_spearman_mean_abs": 0.3033650233586816,
+      "order_only_spearman_max_abs": 0.5046096803123954,
+      "n_assays_beating_order_only": 8.0,
+      "epochs": 300.0,
+      "depth_aware": 1.0,
+      "depth_beta": 0.6004221439361572,
+      "depth_beta_init": 0.6931,
+      "spearman_seq_only_mean": 0.27645254643220735,
+      "within_order_mean": 0.2129498706361224,
+      "init_seed": 0.0,
+      "equal_order_frac": 0.0,
+      "n_pairs_total": 419039.0,
+      "n_pairs_equal_order": 353132.0,
+      "final_loss": 0.4436902105808258
+    },
+    "per_assay": {
+      "CAPSD_AAV2S_Sinai_2021": 0.6632055551599721,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.43972436247815017,
+      "F7YBW8_MESOW_Aakre_2015": 0.3887439521829646,
+      "F7YBW8_MESOW_Ding_2023": 0.47928210966997475,
+      "GCN4_YEAST_Staller_2018": 0.0033904490764276505,
+      "GFP_AEQVI_Sarkisyan_2016": 0.5309330547111347,
+      "HIS7_YEAST_Pokusaeva_2019": 0.3927426078805926,
+      "PHOT_CHLRE_Chen_2023": 0.19511416388946773,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.38649278624099087,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.3375362737399457,
+      "SPG1_STRSG_Wu_2016": 0.503976845792524
+    },
+    "per_assay_chance_mean_abs": {
+      "CAPSD_AAV2S_Sinai_2021": 0.4431728841770245,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.3323024008623423,
+      "F7YBW8_MESOW_Aakre_2015": 0.24441647205485192,
+      "F7YBW8_MESOW_Ding_2023": 0.49483308786594693,
+      "GCN4_YEAST_Staller_2018": 0.17029239871917118,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4543872551879943,
+      "HIS7_YEAST_Pokusaeva_2019": 0.21333342518141754,
+      "PHOT_CHLRE_Chen_2023": 0.3437148269307529,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.17993647307747723,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.18652013116954075,
+      "SPG1_STRSG_Wu_2016": 0.141325582498827
+    },
+    "per_assay_chance_sd": {
+      "CAPSD_AAV2S_Sinai_2021": 0.019339145038202877,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.012183656984629447,
+      "F7YBW8_MESOW_Aakre_2015": 0.03798451617636,
+      "F7YBW8_MESOW_Ding_2023": 0.047733636656269895,
+      "GCN4_YEAST_Staller_2018": 0.025982418597924363,
+      "GFP_AEQVI_Sarkisyan_2016": 0.011128795418774108,
+      "HIS7_YEAST_Pokusaeva_2019": 0.02294711772324734,
+      "PHOT_CHLRE_Chen_2023": 0.03070651094098118,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.03392804186735353,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.015430943691361663,
+      "SPG1_STRSG_Wu_2016": 0.14928636720901575
+    },
+    "per_assay_order_only": {
+      "CAPSD_AAV2S_Sinai_2021": -0.45078581262576967,
+      "D7PM05_CLYGR_Somermeyer_2022": -0.35130108463245363,
+      "F7YBW8_MESOW_Aakre_2015": -0.3223056887343804,
+      "F7YBW8_MESOW_Ding_2023": -0.5046096803123954,
+      "GCN4_YEAST_Staller_2018": -0.16959871035188395,
+      "GFP_AEQVI_Sarkisyan_2016": -0.4639144702655874,
+      "HIS7_YEAST_Pokusaeva_2019": -0.20155214136679533,
+      "PHOT_CHLRE_Chen_2023": -0.3282750882352703,
+      "Q6WV12_9MAXI_Somermeyer_2022": -0.20664393003474604,
+      "Q8WTC7_9CNID_Somermeyer_2022": -0.21254739362448785,
+      "SPG1_STRSG_Wu_2016": -0.12548125676172733
+    },
+    "per_assay_seq_only": {
+      "CAPSD_AAV2S_Sinai_2021": 0.31288663043865433,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.33950115600407504,
+      "F7YBW8_MESOW_Aakre_2015": 0.38417758250647316,
+      "F7YBW8_MESOW_Ding_2023": 0.35117104481892686,
+      "GCN4_YEAST_Staller_2018": -0.2948009822274542,
+      "GFP_AEQVI_Sarkisyan_2016": 0.3982402323124522,
+      "HIS7_YEAST_Pokusaeva_2019": 0.2960649111883986,
+      "PHOT_CHLRE_Chen_2023": 0.1297214072349471,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.34484205794203315,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.2713249592966568,
+      "SPG1_STRSG_Wu_2016": 0.5078490112391179
+    },
+    "per_assay_within_order": {
+      "CAPSD_AAV2S_Sinai_2021": 0.34608072799358786,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.17104862444371502,
+      "F7YBW8_MESOW_Aakre_2015": 0.396439975143172,
+      "F7YBW8_MESOW_Ding_2023": 0.20175423165801445,
+      "GCN4_YEAST_Staller_2018": -0.38323439536585835,
+      "GFP_AEQVI_Sarkisyan_2016": 0.18718119497735203,
+      "HIS7_YEAST_Pokusaeva_2019": 0.24934377476445962,
+      "PHOT_CHLRE_Chen_2023": 0.04538532866835066,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.3202709478368767,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.23304081269729915,
+      "SPG1_STRSG_Wu_2016": 0.5751373541803773
+    },
+    "curve": [
+      {
+        "epoch": 0,
+        "loss": 0.6886958479881287,
+        "depth_beta": 0.6926472783088684
+      },
+      {
+        "epoch": 25,
+        "loss": 0.6154595613479614,
+        "depth_beta": 0.6811069846153259
+      },
+      {
+        "epoch": 50,
+        "loss": 0.5810598731040955,
+        "depth_beta": 0.6714000105857849
+      },
+      {
+        "epoch": 75,
+        "loss": 0.5618112683296204,
+        "depth_beta": 0.6626876592636108
+      },
+      {
+        "epoch": 100,
+        "loss": 0.5350382328033447,
+        "depth_beta": 0.6548962593078613
+      },
+      {
+        "epoch": 125,
+        "loss": 0.5219752788543701,
+        "depth_beta": 0.6468156576156616
+      },
+      {
+        "epoch": 150,
+        "loss": 0.5089749693870544,
+        "depth_beta": 0.637772798538208
+      },
+      {
+        "epoch": 175,
+        "loss": 0.4967609643936157,
+        "depth_beta": 0.6294741034507751
+      },
+      {
+        "epoch": 200,
+        "loss": 0.4764247238636017,
+        "depth_beta": 0.6230669021606445
+      },
+      {
+        "epoch": 225,
+        "loss": 0.463620662689209,
+        "depth_beta": 0.6166813969612122
+      },
+      {
+        "epoch": 250,
+        "loss": 0.4621376097202301,
+        "depth_beta": 0.6099267601966858
+      },
+      {
+        "epoch": 275,
+        "loss": 0.4436890482902527,
+        "depth_beta": 0.6048222184181213
+      },
+      {
+        "epoch": 299,
+        "loss": 0.4436902105808258,
+        "depth_beta": 0.6004221439361572
+      }
+    ],
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "assays": [
+      "CAPSD_AAV2S_Sinai_2021",
+      "D7PM05_CLYGR_Somermeyer_2022",
+      "F7YBW8_MESOW_Aakre_2015",
+      "F7YBW8_MESOW_Ding_2023",
+      "GCN4_YEAST_Staller_2018",
+      "GFP_AEQVI_Sarkisyan_2016",
+      "HIS7_YEAST_Pokusaeva_2019",
+      "PHOT_CHLRE_Chen_2023",
+      "Q6WV12_9MAXI_Somermeyer_2022",
+      "Q8WTC7_9CNID_Somermeyer_2022",
+      "SPG1_STRSG_Wu_2016"
+    ]
   }
 }
