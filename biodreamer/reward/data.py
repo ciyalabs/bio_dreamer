@@ -182,25 +182,6 @@ def literature_split(
     return perm[:train_n], perm[hi : hi + LITERATURE_TEST_N]
 
 
-H1_TEST_CAP_SEED = 0
-
-
-def cap_test(te: np.ndarray, cap: int, seed: int = H1_TEST_CAP_SEED) -> np.ndarray:
-    """A reproducible subsample of an H1 test split.
-
-    Shared so that an encoder and an evaluator cannot disagree about which variants were
-    embedded -- the same discipline `literature_split` enforces. Capping is sound here
-    because it was checked rather than assumed: `diagnostics/positional_readout.md` scored
-    `pooled` at +0.410 on a 30,000-cap against H1's uncapped +0.409, reproducing it to
-    0.001. The point of a cap is cost: ESM-2 over the uncapped corpus is 240M residues and about
-    2.5 A40-hours at the 26k res/s this job actually logged, against 29M and twenty
-    minutes at cap 10,000 -- plus 2 GB less to pull back over a slow link.
-    """
-    if cap <= 0 or len(te) <= cap:
-        return te
-    return np.sort(np.random.default_rng(seed).choice(te, size=cap, replace=False))
-
-
 def load_instance(
     instance: str, assays: list[str] | None = None, seed: int = 0
 ) -> dict[str, tuple[Assay, np.ndarray, np.ndarray]]:

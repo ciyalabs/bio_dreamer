@@ -113,26 +113,6 @@ def literature_sequences() -> dict[str, list[str]]:
     return out
 
 
-def capped_instance_sequences(instance: str, cap: int = 10000) -> dict[str, list[str]]:
-    """An instance's H1 split with the test side subsampled to `cap` per assay.
-
-    Exists to make a second backbone affordable. ESM-2 over the uncapped `benchmark`
-    workload is 240.3M residues, about nine hours on an A40 at the throughput this job
-    actually measured (~7,600 res/s on 735-residue sequences, not the 27,000 res/s a
-    short-sequence benchmark suggested). At cap 10,000 it is 29M residues and one hour,
-    and `cap_test` is shared with the evaluator so both see the same variants.
-    """
-    from biodreamer.reward.data import cap_test, load_instance  # noqa: PLC0415
-
-    out = {}
-    for name, (a, tr, te) in load_instance(instance).items():
-        te = cap_test(te, cap)
-        idx = np.concatenate([tr, te])
-        out[name] = a.sequence[idx].tolist()
-        print(f"  {name:34s} {len(tr):>5,} train + {len(te):>6,} test (cap {cap:,})")
-    return out
-
-
 def h1_sequences(limit_assays: int | None = None) -> dict[str, list[str]]:
     """Per assay: up to 300 order<=2 for training, plus every order>=3 for testing."""
     if not BUDGET.exists():
@@ -237,7 +217,6 @@ WORKLOADS = {
     "planning": lambda: instance_sequences("planning"),
     "benchmark": lambda: instance_sequences("benchmark"),
     "literature": literature_sequences,
-    "benchmark_capped": lambda: capped_instance_sequences("benchmark"),
 }
 
 

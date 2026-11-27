@@ -88,13 +88,13 @@ tar czf /workspace/phase2_literature.tgz \
     data/processed/logprob_matrix_*.npz
 ls -la /workspace/phase2_literature.tgz
 
-# Cap 10,000 test variants per assay, not the full split. The card logs 26k res/s, so
-# uncapped is 240M residues and ~2.5 hours; capped it is 27.6M and about twenty minutes,
-# and 2 GB less to pull back over a link that uploads at ~100 kB/s. The cap is not a
-# guess: diagnostics/positional_readout.md scored a 30,000-cap at +0.410 against H1's
-# uncapped +0.409.
-say "stage 6: ESM-2 pooled, this project's own 11 assays, test capped (kill-safe)"
-python -I scripts/encode_corpus.py --workload benchmark_capped --pooled --backbone esm2 \
+# The full split, 240.3M residues, ~2.5 hours at the 26k res/s this card logs. A capped
+# variant was written and then deleted unused: the run that was already in flight had the
+# uncapped line, because rsync replaces a file by rename and a running bash keeps reading
+# the original inode. The uncapped cache is the better artefact anyway -- no cap caveat on
+# the backbone comparison -- so the capped path was removed rather than left behind.
+say "stage 6: ESM-2 pooled, this project's own 11 assays (kill-safe)"
+python -I scripts/encode_corpus.py --workload benchmark --pooled --backbone esm2 \
     --batch-size 8
 tar czf /workspace/phase2_esm2_benchmark.tgz data/processed/pooled_cache/facebook_esm2*
 ls -la /workspace/phase2_esm2_benchmark.tgz
