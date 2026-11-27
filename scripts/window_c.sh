@@ -88,11 +88,11 @@ tar czf /workspace/phase2_literature.tgz \
     data/processed/logprob_matrix_*.npz
 ls -la /workspace/phase2_literature.tgz
 
-# Cap 10,000 test variants per assay, not the full split. Measured throughput on this
-# card is ~7,600 res/s on long sequences, not the 27,000 res/s a short-sequence benchmark
-# suggested, so the uncapped workload is 240M residues and ~9 hours ($5+). Capped it is
-# 29M and about an hour, and the cap is not a guess: diagnostics/positional_readout.md
-# scored a 30,000-cap at +0.410 against H1's uncapped +0.409.
+# Cap 10,000 test variants per assay, not the full split. The card logs 26k res/s, so
+# uncapped is 240M residues and ~2.5 hours; capped it is 27.6M and about twenty minutes,
+# and 2 GB less to pull back over a link that uploads at ~100 kB/s. The cap is not a
+# guess: diagnostics/positional_readout.md scored a 30,000-cap at +0.410 against H1's
+# uncapped +0.409.
 say "stage 6: ESM-2 pooled, this project's own 11 assays, test capped (kill-safe)"
 python -I scripts/encode_corpus.py --workload benchmark_capped --pooled --backbone esm2 \
     --batch-size 8
