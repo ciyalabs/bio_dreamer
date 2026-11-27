@@ -28,6 +28,15 @@
       "PHOT_CHLRE_Chen_2023": 0.8003373192055125,
       "Q6WV12_9MAXI_Somermeyer_2022": 0.409801140748982,
       "Q8WTC7_9CNID_Somermeyer_2022": 0.269454434002021
+    },
+    "gp_composite_kernel": {
+      "CAPSD_AAV2S_Sinai_2021": 0.6346329531754255,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.407116790714346,
+      "GCN4_YEAST_Staller_2018": 0.16407236282628046,
+      "GFP_AEQVI_Sarkisyan_2016": 0.4155864800996808,
+      "PHOT_CHLRE_Chen_2023": 0.7896921669659048,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.5802845500883727,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.39128484451407836
     }
   },
   "within_order": {
@@ -57,6 +66,15 @@
       "PHOT_CHLRE_Chen_2023": 0.7828647984815958,
       "Q6WV12_9MAXI_Somermeyer_2022": 0.3764469752372021,
       "Q8WTC7_9CNID_Somermeyer_2022": 0.22709126106674876
+    },
+    "gp_composite_kernel": {
+      "CAPSD_AAV2S_Sinai_2021": 0.5468265444554541,
+      "D7PM05_CLYGR_Somermeyer_2022": 0.28646707543490957,
+      "GCN4_YEAST_Staller_2018": 0.08402143227794633,
+      "GFP_AEQVI_Sarkisyan_2016": 0.31459216004257007,
+      "PHOT_CHLRE_Chen_2023": 0.7721011859373701,
+      "Q6WV12_9MAXI_Somermeyer_2022": 0.5558997116049808,
+      "Q8WTC7_9CNID_Somermeyer_2022": 0.3966515038488427
     }
   },
   "metrics": {
@@ -72,7 +90,20 @@
     "gp_zeroshot_mean_order/median": 0.3433336547418963,
     "gp_zeroshot_mean_order/within_order_mean": 0.3577281891844985,
     "gp_zeroshot_mean_order/n_positive": 7.0,
+    "gp_composite_kernel/mean": 0.48323859262629837,
+    "gp_composite_kernel/median": 0.4155864800996808,
+    "gp_composite_kernel/within_order_mean": 0.4223656590860105,
+    "gp_composite_kernel/n_positive": 7.0,
     "spearman_mean_gp": 0.41015691705144974
+  },
+  "composite_pi_per_assay": {
+    "CAPSD_AAV2S_Sinai_2021": 0.08949503655109932,
+    "D7PM05_CLYGR_Somermeyer_2022": 0.7578388813177089,
+    "GCN4_YEAST_Staller_2018": 0.769642082911859,
+    "GFP_AEQVI_Sarkisyan_2016": 0.35687931214744856,
+    "PHOT_CHLRE_Chen_2023": 0.0655223104644127,
+    "Q6WV12_9MAXI_Somermeyer_2022": 0.8064582151833426,
+    "Q8WTC7_9CNID_Somermeyer_2022": 0.897639195826196
   },
   "ridge_baseline_cited": 0.39,
   "kermut_sequence_published_n128_multimutant": 0.614

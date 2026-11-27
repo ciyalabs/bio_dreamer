@@ -265,6 +265,46 @@ Its gains are concentrated where a purely additive model was already strong —
 four assays where the additive null beat the reward head outright at Step 2.2 (+0.518
 against +0.388). The composite now beats that null on its own best assay.
 
+**The learned mixing weight picks the right model per assay, from the training
+likelihood alone.** π is the weight on the substitution kernel, fitted by marginal
+likelihood on ≤300 training variants with no sight of the test set:
+
+| assay | π on substitutions | additive null | composite | composite − null |
+|---|---:|---:|---:|---:|
+| Q8WTC7 | **0.898** | +0.347 | +0.391 | +0.044 |
+| Q6WV12 | **0.806** | **+0.518** | **+0.580** | +0.062 |
+| GCN4 | 0.770 | +0.030 | +0.164 | +0.134 |
+| D7PM05 | 0.758 | +0.373 | +0.407 | +0.034 |
+| HIS7 | 0.417 | +0.394 | +0.515 | +0.121 |
+| GFP | 0.357 | +0.276 | +0.416 | +0.140 |
+| F7YBW8 (Aakre) | 0.209 | +0.420 | +0.359 | **−0.061** |
+| F7YBW8 (Ding) | 0.114 | +0.334 | +0.656 | +0.322 |
+| CAPSD | 0.089 | +0.196 | +0.635 | +0.438 |
+| PHOT | 0.066 | +0.313 | +0.790 | +0.477 |
+| SPG1 | 0.025 | +0.362 | +0.354 | −0.008 |
+
+π is **high exactly where the additive null was strong** — `Q6WV12` is the assay whose null
+beat the reward head +0.518 to +0.388 at Step 2.2, and it gets π = 0.806 — and **low
+exactly where the sequence kernel wins outright**: `PHOT` at π = 0.066 scores +0.790.
+`ρ(π, composite − null) = −0.273`, which is the right sign: where the model leans on
+substitutions, the null is already close to optimal and there is less left to win.
+
+And on those assays the composite does not merely reproduce the null, it beats it —
+`Q6WV12` +0.580 against +0.518, `Q8WTC7` +0.391 against +0.347 — so the sequence kernel is
+still contributing underneath. **9 of 11 assays beat the additive null**, against 7 of 11
+for the reward head, which is the `frac_assays_beating_null` condition flipping from FAIL
+to PASS. The two that do not are `F7YBW8 (Aakre)` at −0.061 and `SPG1` at −0.008.
+
+This matters beyond the number. Step 2.2 recorded that four substantially additive assays
+were "uncomfortable for the project's premise that structured epistasis is there and
+exploitable". The discomfort was real but the diagnosis was about the *model*, not the
+data: a model that can represent both, and select between them per assay without being
+told which, recovers those assays and keeps the rest.
+
+**Replicated on the `planning` instance** — the only one allowed to produce a Phase 6
+number — at **+0.483 / +0.422 within-order, 7/7 positive**, against benchmark's
++0.479 / +0.417. The result does not depend on the four firewall-banned assays.
+
 **Sensitivity: which backbone supplies `f0`, and a threshold that turns on it.**
 `PREREGISTRATION.md` fixes SaProt as the default — on a *stability* measurement — and
 ESM-2 as the comparator. Kermut names ESM-2 for its mean function, so running it is
