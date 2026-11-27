@@ -226,6 +226,41 @@ the question is still closed on H1 at Step 2.2.*
 
 ---
 
+## Phase 2 gate (2026-11-27): H1 FAILED, Phase 3 BLOCKED
+
+`RESEARCH_PLAN.md`'s Phase 2 gate carries the full statement. Recorded here because the
+pre-registration is what the verdict is read against.
+
+**No threshold was edited in Phase 2.** H1's four conditions are unchanged and were re-read
+against the replacement reward model with the thresholds taken from `plan.yaml` rather than
+restated. `spearman_mean` **+0.479 against 0.55** is the failing condition; the other three
+pass.
+
+**Two conditions were reported as failing where a defensible alternative would have passed,
+and both are recorded rather than taken.**
+
+1. `gp_margin_over_ridge` is **+0.038 (FAIL)** with the registered SaProt zero-shot and
+   **+0.054 (PASS)** with ESM-2's. SaProt is the registered default, so the answer is FAIL.
+2. `spearman_mean_gp` is read on `gp_zeroshot_mean` (+0.428), the configuration it was
+   registered against, not on the better composite kernel (+0.479). Both fail 0.55.
+
+**An amendment this phase earned but did not take.** Three independent measurements now put
+ESM-2 ahead of SaProt on *fitness*: zero-shot masked marginals (+0.249 against +0.204,
+within-order +0.164 against +0.137), the GP on H1's protocol (+0.444 against +0.428), and
+the matched literature protocol (+0.663 against +0.631 at n = 128). The default was fixed
+above on a **stability** measurement. Changing it is defensible and belongs in the table
+below *before* a re-run, with this reason stated. It was not changed tonight, because the
+only reason to change it tonight would have been that it moves a threshold.
+
+**What the phase can and cannot claim.** The implementation is validated: on the
+literature's own datasets and protocol the Kermut-sequence reproduction scores +0.631 at
+n = 128 against a published +0.614 with SaProt, and +0.663 with ESM-2. The assay list is
+harder than the literature's by about 0.06 (the 3 shared assays score +0.522, the 8 others
++0.463). After the registered `GCN4_YEAST` exclusion the remaining ten reach +0.510. None
+of those rescues 0.55.
+
+---
+
 ## Amendments
 
 Any change after Phase 1 begins is logged here with its date and reason. The original

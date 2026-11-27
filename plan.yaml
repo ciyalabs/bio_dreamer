@@ -295,6 +295,8 @@ phases:
             name: GP with a composite kernel on the pooled cache, zero-shot as prior mean
           - id: predictor_class_control
             name: Is a ridge/MLP tie evidence about features or only about ridge-like classes
+          - id: h1_verdict_rescored
+            name: H1's four conditions re-read against the replacement reward model
         thresholds:
           # the same margin size H1 required of the additive null. If the zero-shot term
           # buys less than this on OUR assays, the published +0.21 does not transfer and
