@@ -303,6 +303,19 @@ phases:
             op: ">"
             value: 0.05
             hypothesis: H1
+          # Registered 2026-11-27 BEFORE the GP was run. The zero-shot term as a FEATURE
+          # bought +0.055; the question is whether the same information as a GP prior mean,
+          # under a different predictor class, buys more than that. Same margin convention.
+          - metric: gp_margin_over_ridge
+            op: ">"
+            value: 0.05
+            hypothesis: H1
+          # H1's own bar, unchanged. Kermut-sequence (no structure kernel) is the published
+          # configuration being reproduced; it reports 0.614 at n=128 on multi-mutants.
+          - metric: spearman_mean_gp
+            op: ">="
+            value: 0.55
+            hypothesis: H1
         outputs: [diagnostics/finetune_scoping.md, results/reward_benchmark.md]
 
   - id: "3"

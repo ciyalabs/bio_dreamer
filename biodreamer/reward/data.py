@@ -138,6 +138,50 @@ def h1_split(
     return np.sort(low), high
 
 
+# The 5 multi-mutant ProteinGym datasets the fine-tuning literature benchmarks on
+# (bioRxiv 2024.05.28.596156v4, Table 3), with its protocol: n training sequences sampled
+# at random from the whole dataset, 5,000 more for test, averaged over 3 seeds. GRB2 and
+# PABP top out at order 2 and so are absent from `assays_for`, which filters on
+# max_order >= 3; they are required here because the published protocol uses them.
+LITERATURE_MULTIMUTANT = [
+    "CAPSD_AAV2S_Sinai_2021",
+    "GFP_AEQVI_Sarkisyan_2016",
+    "GRB2_HUMAN_Faure_2021",
+    "HIS7_YEAST_Pokusaeva_2019",
+    "PABP_YEAST_Melamed_2013",
+]
+LITERATURE_TRAIN_SIZES = (24, 32, 48, 128, 512)
+LITERATURE_TEST_N = 5000
+LITERATURE_SEEDS = (0, 1, 2)
+
+
+def literature_split(
+    n_variants: int, seed: int, train_n: int = max(LITERATURE_TRAIN_SIZES)
+) -> tuple[np.ndarray, np.ndarray]:
+    """One permutation per (dataset, seed): first `train_n` to train, next 5,000 to test.
+
+    **Nested on purpose.** Drawing an independent sample per training size would make the
+    n = 24 and n = 512 rows differ by both sample size and sample identity, so a rise
+    across the row could be either. Nesting makes n the only thing that changes.
+
+    The test block is taken AFTER the largest training size rather than after `train_n`,
+    so every training size is scored on the *same* 5,000 variants. Otherwise the test set
+    would shift with n and the comparison down the row would be against a moving target.
+
+    This is also what makes the rental cheap: only `max(train_n) + 5000` sequences per
+    dataset and seed are ever needed, so the encoder can be told to embed 82k sequences
+    instead of the corpus's 691k.
+    """
+    if train_n > n_variants - LITERATURE_TEST_N:
+        raise ValueError(
+            f"{n_variants} variants cannot supply {train_n} train + "
+            f"{LITERATURE_TEST_N} test"
+        )
+    perm = np.random.default_rng(1000 + seed).permutation(n_variants)
+    hi = max(LITERATURE_TRAIN_SIZES)
+    return perm[:train_n], perm[hi : hi + LITERATURE_TEST_N]
+
+
 def load_instance(
     instance: str, assays: list[str] | None = None, seed: int = 0
 ) -> dict[str, tuple[Assay, np.ndarray, np.ndarray]]:

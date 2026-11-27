@@ -279,6 +279,9 @@ data/processed/positional_cache/
 # backbone and the wild type, so scripts/zeroshot_baseline.py regenerates them and resumes
 # from them. data/processed/zeroshot_baseline.json IS committed -- that is the result.
 data/processed/zeroshot_*_marginals.npz
+# GP test-set predictions and predictive variances, regenerable by scripts/gp_reward.py
+# and consumed by scripts/calibration.py. data/processed/gp_reward.json IS the result.
+data/processed/gp_predictions.npz
 
 # dry-run and partial outputs: never real results
 data/processed/*.dryrun.json

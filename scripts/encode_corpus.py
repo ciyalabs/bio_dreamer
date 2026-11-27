@@ -80,6 +80,39 @@ def instance_sequences(instance: str) -> dict[str, list[str]]:
     return out
 
 
+def literature_sequences() -> dict[str, list[str]]:
+    """Only the variants the literature protocol actually draws, across its 3 seeds.
+
+    The protocol samples n training sequences at random from the whole dataset plus 5,000
+    for test, so the H1 split is the wrong subset -- CAPSD's H1 file holds 31,263 of its
+    42,328 variants and the missing 11k are the low-order ones a random draw hits most
+    often. But the whole dataset is the wrong subset too, and expensively so: 691,253
+    sequences and 188M residues, against the 512 + 5,000 per seed the protocol can
+    possibly touch. `literature_split` is shared with scripts/matched_literature.py so
+    the encoder and the evaluator cannot disagree about which those are.
+    """
+    from biodreamer.reward.data import (  # noqa: PLC0415
+        LITERATURE_MULTIMUTANT,
+        LITERATURE_SEEDS,
+        literature_split,
+        load_assay,
+    )
+
+    out = {}
+    for name in LITERATURE_MULTIMUTANT:
+        a = load_assay(name)
+        need: set[int] = set()
+        for seed in LITERATURE_SEEDS:
+            tr, te = literature_split(len(a.sequence), seed)
+            need.update(tr.tolist())
+            need.update(te.tolist())
+        idx = np.array(sorted(need))
+        out[name] = a.sequence[idx].tolist()
+        print(f"  {name:34s} {len(idx):>6,} of {len(a.sequence):>7,} variants "
+              f"({len(idx) / len(a.sequence):.1%}) across {len(LITERATURE_SEEDS)} seeds")
+    return out
+
+
 def h1_sequences(limit_assays: int | None = None) -> dict[str, list[str]]:
     """Per assay: up to 300 order<=2 for training, plus every order>=3 for testing."""
     if not BUDGET.exists():
@@ -183,6 +216,7 @@ WORKLOADS = {
     "probe": probe_sequences,
     "planning": lambda: instance_sequences("planning"),
     "benchmark": lambda: instance_sequences("benchmark"),
+    "literature": literature_sequences,
 }
 
 
@@ -207,19 +241,43 @@ def pool_group(enc: ProteinEncoder, group: str, seqs: list[str], batch_size: int
     # One file per assay, so the instances overlap: `benchmark` contains all 7 of
     # `planning`'s assays plus 4 more. Re-encoding the shared ones would repeat 64M of
     # 240M residues -- about an hour of rented GPU for a byte-identical result.
+    # Resume per SEQUENCE, not per file. Skipping a whole existing file was right while
+    # every workload asked for the same H1 split, but the `literature` workload asks for
+    # EVERY variant of assays whose file already holds only the split -- CAPSD's file has
+    # 31,263 of its 42,328 -- and a whole-file skip would silently return the subset. A
+    # hash-keyed merge keeps the original saving (all hashes present -> nothing encoded)
+    # and additionally fills a partial file, which here is 47M residues instead of 188M.
+    have: dict[str, np.ndarray] = {}
     if dest.exists():
-        print(f"    {group}: already encoded, skipping ({dest.stat().st_size/1e6:.1f} MB)")
+        with np.load(dest) as old_npz:
+            have = {k: v for k, v in zip(old_npz["keys"], old_npz["emb"])}
+    wanted = {}
+    for seq in seqs:
+        wanted.setdefault(sequence_hash(seq), seq)
+    todo = [seq for h, seq in wanted.items() if h not in have]
+    if not todo:
+        print(f"    {group}: all {len(wanted):,} sequences already encoded, skipping")
         return dest
+    if have:
+        print(f"    {group}: {len(have):,} cached, encoding {len(todo):,} more "
+              f"({sum(len(s) for s in todo)/1e6:.1f}M res)", flush=True)
     vecs, keys = [], []
-    for s in range(0, len(seqs), batch_size):
-        chunk = seqs[s : s + batch_size]
+    for s in range(0, len(todo), batch_size):
+        chunk = todo[s : s + batch_size]
         for seq, z in zip(chunk, enc.encode(chunk, batch_size=batch_size, use_cache=False)):
             vecs.append(z.mean(axis=0).astype(np.float16))
             keys.append(sequence_hash(seq))
         if (s // batch_size) % 200 == 0 and s:
-            print(f"      {s:,}/{len(seqs):,}", flush=True)
-    np.savez_compressed(dest, keys=np.array(keys), emb=np.stack(vecs))
-    print(f"    -> {dest} ({dest.stat().st_size/1e6:.1f} MB)")
+            print(f"      {s:,}/{len(todo):,}", flush=True)
+    for k, v in zip(keys, vecs):
+        have[k] = v
+    ordered = sorted(have)
+    np.savez_compressed(
+        dest,
+        keys=np.array(ordered),
+        emb=np.stack([have[k] for k in ordered]),
+    )
+    print(f"    -> {dest} ({dest.stat().st_size/1e6:.1f} MB, {len(ordered):,} vectors)")
     return dest
 
 

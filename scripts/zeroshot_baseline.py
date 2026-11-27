@@ -177,6 +177,23 @@ def cache_path(key: str, rule: str) -> Path:
     return Path("data/processed") / f"zeroshot_{key}_{rule.replace('-', '_')}.npz"
 
 
+def matrix_path(key: str) -> Path:
+    """Per-position log-probabilities, which supersede the per-variant score cache.
+
+    The score cache holds one number per variant for ONE split, so it cannot serve a
+    different split. The (L, 20) masked-marginal matrix holds everything needed to score
+    **any** variant of that protein and is 15 KB, so caching it instead makes the matched
+    literature protocol -- which uses random splits over all variants -- free rather than a
+    second GPU pass.
+    """
+    return Path("data/processed") / f"logprob_matrix_{key}.npz"
+
+
+def score_from_matrix(mutants: np.ndarray, mat: np.ndarray, wt: str) -> np.ndarray:
+    """Score variants from a full (L, 20) log-probability matrix."""
+    return score_variants(mutants, {p + 1: mat[p] for p in range(mat.shape[0])}, wt)
+
+
 def rho(pred: np.ndarray, truth: np.ndarray) -> float:
     r = spearmanr(pred, truth).statistic
     return 0.0 if np.isnan(r) else float(r)
@@ -215,12 +232,50 @@ def main() -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", default="float16")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--save-logprob-matrix", action="store_true",
+        help="mask EVERY position and cache the (L, 20) matrix per assay, so any split "
+             "can be scored later without another GPU pass",
+    )
+    ap.add_argument(
+        "--assays", default="",
+        help="comma-separated assay names, overriding the instance list (for the matched "
+             "literature protocol, whose datasets are not all in this corpus)",
+    )
     args = ap.parse_args()
 
-    names = assays_for(args.instance)
+    names = args.assays.split(",") if args.assays else assays_for(args.instance)
     limits = detection_limits()
     rules = args.rules.split(",")
     keys = args.backbones.split(",")
+
+    if args.save_logprob_matrix:
+        for key in keys:
+            dest = matrix_path(key)
+            have = dict(np.load(dest)) if dest.exists() else {}
+            tok = model = None
+            device, sa = args.device, key == "saprot"
+            for n in names:
+                if n in have:
+                    print(f"  {key:7s} {n:30s} cached ({have[n].shape})")
+                    continue
+                a = load_assay(n, limits)
+                wt = resolve_wild_type(a, n)
+                if model is None:
+                    tok, model, device = load_backbone(key, args.device, args.dtype)
+                t0 = time.time()
+                lp = logprobs(tok, model, wt, list(range(1, len(wt) + 1)), sa, device,
+                              "masked-marginals", args.batch)
+                have[n] = np.stack([lp[p] for p in range(1, len(wt) + 1)]).astype(np.float32)
+                np.savez(dest, **have)  # written per assay, so an interrupt loses one
+                print(f"  {key:7s} {n:30s} L={len(wt):4d} "
+                      f"{time.time() - t0:.0f}s -> {dest.name}")
+            if model is not None:
+                model.to("cpu")
+                del model, tok
+                gc.collect()
+                torch.cuda.empty_cache()
+        return 0
 
     loaded = {}
     for n in names:
@@ -349,7 +404,21 @@ def main() -> int:
         def rows(idx):
             return z["emb"][[emb[sequence_hash(s)] for s in a.sequence[idx]]].astype(np.float64)
 
-        xtr, xte = rows(tr), rows(te)
+        def predict_chunked(model, extra_te, size: int = 20000) -> np.ndarray:
+            """Predict the test split in blocks instead of one matrix.
+
+            HIS7 has 494,494 test rows and 494,494 x 1280 in float64 is **5 GB**; the
+            hstack needed to append the order and zero-shot columns makes a second copy.
+            Building both at once is what exhausted this machine's memory.
+            """
+            out = []
+            for s0 in range(0, len(te), size):
+                blk = te[s0 : s0 + size]
+                cols = [rows(blk)] + [e[s0 : s0 + size] for e in extra_te]
+                out.append(model.predict(np.hstack(cols)))
+            return np.concatenate(out)
+
+        xtr = rows(tr)
         otr = a.order[tr].reshape(-1, 1).astype(float)
         ote = a.order[te].reshape(-1, 1).astype(float)
         ztr = zs[f"{n}/tr"].reshape(-1, 1)
@@ -357,9 +426,19 @@ def main() -> int:
         y = a.score[tr]
         base = RidgeCV(alphas=ALPHAS).fit(np.hstack([xtr, otr]), y)
         with_zs = RidgeCV(alphas=ALPHAS).fit(np.hstack([xtr, otr, ztr]), y)
+        p_base = predict_chunked(base, [ote])
+        p_zs = predict_chunked(with_zs, [ote, zte])
+        # within-order rho for the ridge too, so the comparison against the GP is on the
+        # depth-free diagnostic and not only on a total that a mutation counter inflates.
+        # Without this the GP looks like +0.038 over the ridge; the skill gap is the number
+        # that matters and it cannot be read off the totals.
         combo[n] = {
-            "ridge_count": rho(base.predict(np.hstack([xte, ote])), a.score[te]),
-            "ridge_count_zeroshot": rho(with_zs.predict(np.hstack([xte, ote, zte])), a.score[te]),
+            "ridge_count": rho(p_base, a.score[te]),
+            "ridge_count_zeroshot": rho(p_zs, a.score[te]),
+            "ridge_count_within_order": within_order_rho(p_base, a.score[te], a.order[te]),
+            "ridge_count_zeroshot_within_order": within_order_rho(
+                p_zs, a.score[te], a.order[te]
+            ),
         }
         # SENSITIVITY, not an alternative to be selected on: `masked-marginals` is
         # ProteinGym's standard for ESM-family models and is the pre-specified rule. The
@@ -374,7 +453,7 @@ def main() -> int:
                     np.hstack([xtr, otr, za[f"{n}/tr"].reshape(-1, 1)]), y
                 )
                 combo[n]["ridge_count_zeroshot_wt"] = rho(
-                    w.predict(np.hstack([xte, ote, za[f"{n}/te"].reshape(-1, 1)])),
+                    predict_chunked(w, [ote, za[f"{n}/te"].reshape(-1, 1)]),
                     a.score[te],
                 )
         print(f"  prior-mean {n:30s} {combo[n]['ridge_count']:+.3f} -> "
@@ -398,6 +477,8 @@ def main() -> int:
           f"hurt >0.02 {(dv < -0.02).sum()}/{len(dv)}")
     print(f"  top two assays             {carried}")
     print(f"  mean delta over the rest    {rest:+.3f}")
+    for k in ("ridge_count_within_order", "ridge_count_zeroshot_within_order"):
+        print(f"  {k:45s} {np.mean([v[k] for v in combo.values()]):+.3f}")
     alt_vals = [v["ridge_count_zeroshot_wt"] for v in combo.values()
                 if "ridge_count_zeroshot_wt" in v]
     alt_mean = float(np.mean(alt_vals)) if len(alt_vals) == len(combo) else float("nan")
@@ -422,6 +503,12 @@ def main() -> int:
             "zeroshot_feature_margin_median": float(np.median(dv)),
             "zeroshot_feature_margin_excluding_top_two": rest,
             "zeroshot_feature_margin_wt_marginals_sensitivity": alt_mean - base_mean,
+            "ridge_count_within_order_mean": float(
+                np.mean([v["ridge_count_within_order"] for v in combo.values()])
+            ),
+            "ridge_count_zeroshot_within_order_mean": float(
+                np.mean([v["ridge_count_zeroshot_within_order"] for v in combo.values()])
+            ),
         },
         "delta_per_assay": deltas,
         "carried_by": carried,
