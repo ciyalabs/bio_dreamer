@@ -423,6 +423,33 @@ of those datasets (GRB2, PABP) top out at order 2 and had never been in this cor
 ahead throughout.** That is the check this whole comparison exists for: the estimator is
 not broken, and the shortfall on our own assays is not an implementation bug.
 
+### 7.1b And with ESM-2 — the backbone Kermut actually specifies — it is well ahead
+
+The table above uses SaProt, this project's registered default. Kermut specifies **ESM-2
+for both the embeddings and `f0`**, so the ESM-2 row is the faithful reproduction:
+
+| n | 24 | 32 | 48 | 128 | 512 |
+|---|---:|---:|---:|---:|---:|
+| **ours, ESM-2, `gp_zeroshot`** | **+0.500** | **+0.539** | **+0.578** | **+0.663** | **+0.743** |
+| ours, SaProt, `gp_zeroshot` | +0.433 | +0.468 | +0.506 | +0.631 | +0.733 |
+| published Kermut-sequence | +0.397 | +0.426 | +0.504 | +0.614 | +0.724 |
+| ours (ESM-2) − published | **+0.103** | **+0.113** | **+0.074** | **+0.049** | **+0.019** |
+
+Ahead of the published figure at every training size, and by most at the smallest, which is
+the regime the registered H1 protocol sits closest to.
+
+**Three independent measurements now say the same thing about the default backbone.**
+Zero-shot masked marginals (+0.249 against +0.204, within-order +0.164 against +0.137), the
+GP on H1's own protocol (+0.444 against +0.428, and `gp_margin_over_ridge` passing rather
+than failing), and now the matched literature protocol (+0.663 against +0.631 at n = 128).
+`PREREGISTRATION.md` fixed SaProt as the default on a **stability** measurement (+0.337
+against +0.209 pooled Spearman); on **fitness** the comparator leads everywhere it has been
+measured.
+
+That is a concrete, actionable amendment for whoever closes this phase — and it is an
+*amendment*, to be written down with its reason before any re-run, not a swap made after
+seeing which side of a threshold each backbone lands on.
+
 ### 7.2 The harness control says we are, if anything, pessimistic
 
 | n | 24 | 32 | 48 | 128 | 512 |

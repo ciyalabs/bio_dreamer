@@ -160,3 +160,53 @@ A fine-tune is last on it, on payoff rather than price.
   against 0.55 is not an unlucky draw, and 7/11 against 8/11 (needed for 0.70) is one
   assay away, which init noise does not bridge for the four assays the null wins by
   0.01–0.13.
+
+---
+
+## Phase 2 outcome (2026-11-27) — this report's verdict superseded, not reversed
+
+H1 still **FAILS** and Phase 3 stays blocked. What changed is the reward model and the
+quality of the explanation. `RESEARCH_PLAN.md`'s **Phase 2 gate** is the authoritative
+statement; this section records only what it means for the numbers above.
+
+**The 266k head is no longer the reward model.** It was replaced by a Gaussian process:
+RBF on the same mean-pooled 1280-d vectors, composed with a substitution kernel, with a
+zero-shot likelihood as the prior mean. Re-reading H1's four conditions against it
+(`scripts/h1_verdict_gp.py`, thresholds read from `plan.yaml`, baselines reused from this
+report rather than recomputed):
+
+| condition | head, above | GP, composite |
+|---|---:|---:|
+| `spearman_mean` ≥ 0.55 | +0.409 ❌ | **+0.479 ❌** |
+| `margin_over_additive_null` > 0.05 | +0.085 ✅ | +0.155 ✅ |
+| `frac_assays_beating_null` ≥ 0.70 | 0.636 ❌ | **0.818 ✅** |
+| `spearman_mean_vs_frozen_regression` > 0 | +0.108 ✅ | +0.178 ✅ |
+
+**The "finding that matters more than the verdict" above has been superseded.** This report
+recorded that the whole reward head buys +0.019 over `RidgeCV(pooled ++ mutation_count)`
+and loses on median — true, and the right thing to have noticed. But the comparison was
+made on *total* Spearman, and total Spearman on this protocol is inflated by mutation
+count. On **within-order ρ**, where depth carries no information:
+
+| | total | within-order | of which depth |
+|---|---:|---:|---:|
+| reward head | +0.409 | **+0.161** | **61%** |
+| frozen ridge + count | +0.390 | +0.300 | 23% |
+| GP, composite | +0.479 | **+0.417** | 13% |
+
+The head did not merely tie the ridge; it was **worse than the ridge at reading the
+sequence** and made the difference up with a mutation counter. That is a sharper and less
+flattering statement than the one this report made, and it only became visible once the
+ridge was measured on the depth-free diagnostic — which this report did not do.
+
+**The four substantially additive assays are no longer uncomfortable.** This report flagged
+that the additive null wins outright on four assays, `Q6WV12` at +0.518 against +0.388, and
+read it as uncomfortable for the project's premise. A composite kernel that can weight
+substitution identity against sequence similarity, choosing per assay from the training
+likelihood alone, scores **+0.580** there and beats the null on **9 of 11** assays. The
+discomfort was about the model, not the data.
+
+**And the diagnosis section above is wrong in its conclusion** — see "What the diagnosis
+missed". The encoder was acquitted by `diagnostics/finetune_scoping.md`, and a matched-
+protocol run reproduces published Kermut-sequence (+0.631 at n = 128 against +0.614), so
+the implementation is sound and the shortfall is neither the encoder nor a bug.
