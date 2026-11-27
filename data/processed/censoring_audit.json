@@ -1,0 +1,107 @@
+{
+  "fitness_assays": {
+    "CAPSD_AAV2S_Sinai_2021": {
+      "n": 42328.0,
+      "min": -9.544672364814057,
+      "max": 9.53645667061,
+      "frac_at_floor": 7.087507087507087e-05,
+      "frac_at_ceiling": 2.3625023625023624e-05,
+      "modal_value": -4.296595,
+      "modal_share": 0.0004961254961254961,
+      "distinct_fraction": 0.8878756378756378,
+      "detection_limit": false
+    },
+    "D7PM05_CLYGR_Somermeyer_2022": {
+      "n": 24515.0,
+      "min": 589.9999999999998,
+      "max": 40086.91476680549,
+      "frac_at_floor": 0.4086069753212319,
+      "frac_at_ceiling": 8.158270446665307e-05,
+      "modal_value": 590.0,
+      "modal_share": 0.31874362635121356,
+      "distinct_fraction": 0.6812971650010198,
+      "detection_limit": true
+    },
+    "GCN4_YEAST_Staller_2018": {
+      "n": 2638.0,
+      "min": 0.0,
+      "max": 5.008590409,
+      "frac_at_floor": 0.005686125852918878,
+      "frac_at_ceiling": 0.0003790750568612585,
+      "modal_value": 0.0,
+      "modal_share": 0.005686125852918878,
+      "distinct_fraction": 0.9931766489764974,
+      "detection_limit": false
+    },
+    "GFP_AEQVI_Sarkisyan_2016": {
+      "n": 51714.0,
+      "min": 1.28341923933,
+      "max": 4.12310906338,
+      "frac_at_floor": 0.21448737285841357,
+      "frac_at_ceiling": 0.0001740341106856944,
+      "modal_value": 1.30103,
+      "modal_share": 0.08088718722202885,
+      "distinct_fraction": 0.7998607727114514,
+      "detection_limit": true
+    },
+    "PHOT_CHLRE_Chen_2023": {
+      "n": 167529.0,
+      "min": 0.01936251330808,
+      "max": 1.780454805435373,
+      "frac_at_floor": 0.000137289663282178,
+      "frac_at_ceiling": 5.969115794877305e-06,
+      "modal_value": 0.5277,
+      "modal_share": 2.9845578974386524e-05,
+      "distinct_fraction": 0.9272245402288559,
+      "detection_limit": false
+    },
+    "Q6WV12_9MAXI_Somermeyer_2022": {
+      "n": 31401.0,
+      "min": 589.9999999999999,
+      "max": 27865.00219022995,
+      "frac_at_floor": 0.15375306518900672,
+      "frac_at_ceiling": 3.1846119550332795e-05,
+      "modal_value": 590.0,
+      "modal_share": 0.00913983631094551,
+      "distinct_fraction": 0.9907327792108531,
+      "detection_limit": false
+    },
+    "Q8WTC7_9CNID_Somermeyer_2022": {
+      "n": 33510.0,
+      "min": 449.0,
+      "max": 18688.76426962074,
+      "frac_at_floor": 0.13473589973142344,
+      "frac_at_ceiling": 2.9841838257236645e-05,
+      "modal_value": 449.0,
+      "modal_share": 0.026589077887197853,
+      "distinct_fraction": 0.9734109221128021,
+      "detection_limit": true
+    }
+  },
+  "stability": {
+    "n": 426965.0,
+    "dG_min": -0.9999140928088576,
+    "dG_max": 4.999897929340607,
+    "frac_at_rails": 4.684224702258968e-06,
+    "n_with_ci": 487914.0,
+    "ci_median": 0.13188471688959347,
+    "frac_ci_over_1": 0.09673631008743344
+  },
+  "decision": {
+    "fitness": {
+      "rule": "pairwise ranking loss, dropping pairs where BOTH members are at the detection limit",
+      "why": "A floored pair carries no ordering information and would teach the model a false tie-break. A floored-versus-live pair carries the real signal that one variant is dead. Excluding censored variants entirely would discard that, and regressing on them would assert a precise value the assay never measured.",
+      "detection_limit_assays": [
+        "D7PM05_CLYGR_Somermeyer_2022",
+        "GFP_AEQVI_Sarkisyan_2016",
+        "Q8WTC7_9CNID_Somermeyer_2022"
+      ],
+      "modal_share_threshold": 0.02
+    },
+    "stability": {
+      "rule": "inverse-variance weighted SmoothL1; no censoring treatment",
+      "why": "dG_ML is rail-clipped but only ~0.01% of values reach a rail, so there is nothing meaningful to censor. What varies is precision: ~10% of measurements have a 95% CI wider than 1 kcal/mol, and weighting by it uses every point in proportion to how much it is worth.",
+      "ci_limit_kcal": 1.0
+    }
+  }
+}

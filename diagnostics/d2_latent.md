@@ -70,7 +70,16 @@ agree, but a basis from more data would likely shift the absolute values slightl
 
 ---
 
-## ⚠ Updated 2026-11-26 after the folds existed: SaProt loses
+## ⚠ Updated 2026-11-26 after the folds existed, corrected 2026-11-27
+
+> **Correction, 2026-11-27.** The backbone conclusion below compared ESM-2 against
+> SaProt **with** 3Di only. Like for like, SaProt **without** 3Di was already ahead
+> (+0.459 vs +0.445), and Step 2.1's trained stability head confirms it: pooled
+> Spearman **+0.337 for SaProt against +0.209 for ESM-2**, per-protein median +0.753
+> against +0.598. **SaProt stays the default, run without its structure channel.** The
+> finding that survives is about the channel, not the model: do not feed a
+> structure-aware encoder predicted 3Di for stability work.
+
 
 The section below was written when SaProt had **no** structure tokens, because the
 Tsuboyama domains had no structures. Step 1.2's folds removed that excuse, and the
@@ -92,10 +101,10 @@ ddG ≤ −2. ESMFold returns a confident, well-folded structure for a severely
 destabilising mutation, so the 3Di tokens assert *"still folded"* for proteins that
 are measurably destabilised — a misleading input, not merely a weak one.
 
-**ESM-2 650M is therefore the leading backbone** (+0.445 raw, +0.502 at d = 128).
-Both are MIT-licensed, so nothing but the measurement is at stake. Confirm on H1 at
-Step 2.2 before making it permanent — this is one task on 50 small domains with one
-structure predictor.
+**SaProt without 3Di remains the leading backbone** (+0.459 raw). Reading only the
+two right-hand columns suggested ESM-2 had won; the left-hand column is SaProt's
+actual operating configuration and it is ahead. Step 2.1's trained head agrees by a
+wider margin. Confirm on H1 at Step 2.2 before making it permanent.
 
 **The d = 128 choice is unaffected** and holds on both backbones.
 

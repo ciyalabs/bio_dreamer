@@ -179,6 +179,20 @@ phases:
             name: Recovery accuracy as a function of L
         outputs: [diagnostics/d4_inverse.md]
 
+      - id: "1.5"
+        name: "Phase 1 gate: consolidate and decide"
+        size: S
+        gate: true
+        why: >-
+          Four diagnostics, each capable of redirecting the project, are only useful if
+          they are read together and against what was registered. This is where the
+          proceed / adjust / rescope decision is made and logged, rather than drifting
+          into Phase 2 by default.
+        experiments:
+          - id: consolidated_report
+            name: Single report reconciling 1.1-1.4 against PREREGISTRATION.md
+        outputs: [diagnostics/phase1_gate.md, logged gate decision]
+
   - id: "2"
     name: Reward head
     goal: A planner on a weak reward model is a machine for generating confident nonsense.

@@ -606,11 +606,12 @@ position argument, not this one.**
 discarding directions that carry no stability signal — and 4× larger buys ≤ 0.04. This unlocks
 the 10× cache reduction the rental plan depends on (1.7 TiB → 170 GiB for ProteinGym).
 
-**Backbone: resolved 2026-11-26, and it is ESM-2.** The first pass ran SaProt with no 3Di,
-because the Tsuboyama domains had no structures. With Step 1.2's folds, SaProt + real 3Di
-scores **+0.304** against ESM-2's **+0.445** (d=128: 0.332 vs 0.502) — the structure channel
-makes it worse, because the predictor reports a folded structure for destabilised mutants.
-Confirm on H1 before making it permanent.
+**Backbone: resolved 2026-11-27, and the answer is about the channel, not the model.** Three
+numbers, not two: SaProt **no-3Di +0.459**, ESM-2 **+0.445**, SaProt **+3Di +0.304**. Feeding
+the predicted structure costs SaProt 0.155, because the predictor reports a folded structure
+for destabilised mutants. *A first reading of this compared ESM-2 against SaProt+3Di only and
+concluded ESM-2 had won; that was withdrawn once Step 2.1's trained head gave SaProt +0.337
+against ESM-2's +0.209.* **SaProt stays the default, run without 3Di.** Confirm on H1.
 
 ---
 
@@ -657,8 +658,50 @@ latent.
 
 ---
 
-**Phase 1 gate.** Write a single consolidated diagnostics report and re-read
-`PREREGISTRATION.md` against it. Decide explicitly: proceed, adjust, or rescope. Log the decision.
+## Step 1.5 — Phase 1 gate: consolidate and decide `S` ⚠️ **GATE**
+
+**Why.** Four diagnostics, each capable of redirecting the project, are only useful read
+together and against what was registered. Without this step the project drifts into Phase 2
+by default.
+
+**Work.** A single consolidated report reconciling 1.1–1.4 against `PREREGISTRATION.md`.
+Decide explicitly: proceed, adjust, or rescope. Log the decision.
+
+**Outputs.** `diagnostics/phase1_gate.md`; logged gate decision.
+
+**✅ DONE (2026-11-27) — verdict: PROCEED.** See `diagnostics/phase1_gate.md`. Total GPU
+spend for all of Phase 1: **$1.05**.
+
+Three H4 landscapes have verified wild types and real headroom — GB1 +0.421, TrpB4 +0.344,
+TEV +0.257 structured epistasis, with path accessibility 0.000–0.208 and greedy failing
+30–100% of the time. The two controls are clean: path accessibility **1.000**, zero
+reciprocal-sign traps, stack-top-k capturing 100% of the gain. **Difficulty rises
+monotonically with depth** — greedy 0.906 → 0.242 and path accessibility 0.609 → 0.095 over
+HIS3 dimensions 3–9 — which is the only evidence above horizon 4 and the most direct support
+for multi-step planning. The inverse-dynamics precondition holds at **53× chance**.
+
+**The usable set is smaller than Step 1.1 implies.** TrpB3D/E/G/I have sound
+structured-epistasis figures but **unresolved wild types**, so every wild-type-anchored
+number for them is unusable (TrpB3D reports 97.3% of variants above its "wild type"). Phase 1
+delivers **three H4 landscapes and two controls**, not nine.
+
+**Four conditions carried into Phase 2:**
+
+1. ~~ESM-2 becomes the default backbone~~ — **withdrawn 2026-11-27.** **SaProt stays the
+   default, run without its 3Di channel**; ESM-2 is the comparator. The gate compared ESM-2
+   against SaProt's *worst* configuration; SaProt-no-3Di was already ahead, and Step 2.1's
+   trained head confirms it (+0.337 vs +0.209). Still settled on H1.
+2. **Reconcile B = 100 with the registered greedy before Step 6.3** (already blocking there).
+3. **Resolve ParD2/ParD3 variable positions** — needed to encode the controls as whole
+   proteins for Phase 6. CPU work, needs Ding et al. 2023.
+4. **Do not reopen the TrpB3 landscapes** without resolving their wild types first.
+
+**A pattern worth naming.** Four Phase 1 findings have the same shape: *the decision was
+right and the recorded reason was wrong* — pooling attenuation, structure invariance,
+greedy's success rate, and the gate metric itself. Each was an instrument artifact read as
+biology: read noise, a dead reference variant, a too-short step limit, a predictor
+insensitive to destabilisation. Standing rules 7 and 8 were added for this, and Step 1.2's
+fold-the-wild-type-twice floor is the pattern to repeat wherever a displacement is claimed.
 
 ---
 
@@ -689,6 +732,37 @@ phase optimises.
 **Go / no-go.** Proceed to 2.2 once stable.
 
 **Outputs.** `reward/` module; trained `benchmark` and `planning` instances (Step 0.3).
+
+**✅ PARTLY DONE (2026-11-27).** See `diagnostics/reward_head.md`. Module
+`biodreamer/reward/` built (266k trainable params), censoring decided by measurement, and
+the stability target trained. No GPU needed — Steps 1.3/1.4 had already cached the latents.
+
+**Censoring, decided.** The two targets needed different answers and neither matched the
+options this step anticipated. *Fitness:* 3 of the 7 H1 assays carry a detection limit, one
+with **31.9% of variants at a single exact value** — and the modal share, not the floor
+fraction, is the diagnostic (Q6WV12 has 15.4% near its floor but only 0.9% at any one
+value, a soft tail). Excluding them discards "this variant is dead"; regressing on them
+asserts a value the assay never produced. So: **rank, and drop pairs where both members are
+censored.** *Stability:* only 0.01% of dG values reach a rail, so there is nothing to
+censor — but 9.7% have a 95% CI wider than 1 kcal/mol, so it is **inverse-variance
+weighted** instead.
+
+**First training run**, cross-validated over held-out **proteins** (splitting by mutant
+would measure memorised protein identity — 20 mutants of a domain share 95% of residues):
+
+| | pooled ρ | per-protein median | p10 | ρ>0 | ρ>0.3 |
+|---|---:|---:|---:|---:|---:|
+| **SaProt** (no 3Di) | **+0.337** | **+0.753** | +0.311 | 100% | 90% |
+| ESM-2 650M | +0.209 | +0.598 | +0.172 | 92% | 80% |
+
+**This is the frozen-encoder baseline H1 registers against** (`spearman_mean_vs_frozen_
+regression > 0`) — no world model exists yet, so this *is* that comparator. Phase 3 must
+beat +0.337 / +0.753 to have added anything.
+
+**Not done:** the fitness target is untrained and neither the `benchmark` nor the
+`planning` instance exists, because both need ProteinGym latents — 287,000 sequences,
+0.8 GPU-hours. Losses and head are built and tested; only the data is missing. First items
+of the next rental, with H1.
 
 ---
 

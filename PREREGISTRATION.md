@@ -181,6 +181,26 @@ fraction is inadmissible.
 
 ---
 
+## Phase 1 gate (2026-11-27): PROCEED
+
+All four diagnostics complete; `diagnostics/phase1_gate.md` reconciles them against this
+document. Both Step 1.1 thresholds passed and **no threshold was edited in Phase 1**.
+
+One decision that is *not* an amendment, recorded here so it is not mistaken for one later:
+**SaProt 650M remains the default, but is run without its 3Di structure channel.**
+Feeding it real predicted 3Di drops its correlation with |ddG| from **+0.459 to +0.304**,
+because ESMFold reports a confident folded structure even at ddG ≤ −2 and the tokens then
+assert "still folded" for destabilised proteins.
+
+*An intermediate version of this note said the default moved to ESM-2. That was withdrawn
+on 2026-11-27: it compared ESM-2's +0.445 against SaProt's +0.304 — ESM-2's only
+configuration against SaProt's worst — when SaProt-without-3Di was already ahead at +0.459.
+Step 2.1's trained stability head settles it: pooled Spearman **+0.337 for SaProt against
++0.209 for ESM-2**, per-protein median +0.753 against +0.598. ESM-2 stays the comparator;
+the question is still closed on H1 at Step 2.2.*
+
+---
+
 ## Amendments
 
 Any change after Phase 1 begins is logged here with its date and reason. The original

@@ -48,6 +48,15 @@ channel carries nothing. It carries a graded, measurable signal.
 
 ## And the structure channel actively hurts
 
+> **Correction, 2026-11-27.** The backbone conclusion below compared ESM-2 against
+> SaProt **with** 3Di only. Like for like, SaProt **without** 3Di was already ahead
+> (+0.459 vs +0.445), and Step 2.1's trained stability head confirms it: pooled
+> Spearman **+0.337 for SaProt against +0.209 for ESM-2**, per-protein median +0.753
+> against +0.598. **SaProt stays the default, run without its structure channel.** The
+> finding that survives is about the channel, not the model: do not feed a
+> structure-aware encoder predicted 3Di for stability work.
+
+
 Step 1.3 was re-run with these predicted structures, which is the first time SaProt
 has been measured with its 3Di channel fed rather than blanked:
 
@@ -70,11 +79,10 @@ structure for a severely destabilising mutant — TM-score 0.984 even at ddG ≤
 destabilised. That is not a weak signal, it is a **misleading** one, and it dilutes
 the sequence signal SaProt would otherwise have.
 
-**Consequence: ESM-2 650M is the better backbone for the reward head**, at +0.445
-raw and +0.502 at d = 128 against SaProt's +0.304 and +0.332. SaProt was made the
-default in the revision because it is structure-aware and MIT-licensed; ESM-2 is
-equally MIT-licensed, and structure-awareness turns out to be a liability on this
-task.
+**Consequence: switch the channel off, not the model.** SaProt without 3Di scores
++0.459 against ESM-2's +0.445, and its trained reward head reaches +0.337 against
+ESM-2's +0.209. Structure-*awareness* is not the liability; being handed a
+stability-blind predicted structure is.
 
 **Caveat before acting on it.** This is one task — correlation of latent displacement
 with \|ddG\| — on 50 small domains of 36–72 residues, with structures from one
@@ -91,8 +99,8 @@ confirmed at Step 2.2, not as a settled encoder change.
 - **Rewrite the proposal's §3 structure paragraph.** It claims recent evidence shows
   structure is invariant under point mutation. The measurement here shows a graded
   response against a zero floor; what is invariant is the *fold*, not the tokens.
-- **Carry ESM-2 into Phase 2 as the leading backbone**, with SaProt as the comparator,
-  and settle it on H1 rather than here.
+- **Carry SaProt into Phase 2 with its structure channel off**, ESM-2 as the
+  comparator, and settle it on H1 rather than here.
 - **Do not feed predicted 3Di to a structure-aware encoder for stability work** until
   a predictor that responds to destabilisation is available. This is the sharpest
   practical finding of Phase 1.

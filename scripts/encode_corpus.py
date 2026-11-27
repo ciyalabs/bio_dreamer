@@ -50,6 +50,7 @@ BUDGET = Path("data/processed/encoding_budget.json")
 REGISTRY = Path("splits/heldout.yaml")
 SSMULA = Path("data/raw/ssmula/extracted/data")
 OUT = Path("data/processed/encoding_log.json")
+POOLED_DIR = Path("data/processed/pooled_cache")
 
 H1_TRAIN_PER_ASSAY = 300
 
@@ -60,6 +61,23 @@ LANDSCAPES = {
     "ParD2": SSMULA / "ParD2/fitness_landscape/ParD2.csv",
     "ParD3": SSMULA / "ParD3/fitness_landscape/ParD3.csv",
 }
+
+
+def instance_sequences(instance: str) -> dict[str, list[str]]:
+    """Every sequence one instance's H1 split needs: <=300 order<=2 plus all order>=3.
+
+    `planning` excludes the 8 firewall-banned assays and is the only instance allowed
+    to produce a Phase 6 number; `benchmark` may use them, for literature
+    comparability. Deriving the lists from `biodreamer.reward.data` rather than here
+    keeps the two-instance rule in one place.
+    """
+    from biodreamer.reward.data import load_instance  # noqa: PLC0415
+
+    out = {}
+    for name, (a, tr, te) in load_instance(instance).items():
+        idx = np.concatenate([tr, te])
+        out[name] = a.sequence[idx].tolist()
+    return out
 
 
 def h1_sequences(limit_assays: int | None = None) -> dict[str, list[str]]:
@@ -159,7 +177,44 @@ def probe_sequences(n: int = 200) -> dict[str, list[str]]:
     return {"probe": out[:n]}
 
 
-WORKLOADS = {"h1": h1_sequences, "landscapes": landscape_sequences, "probe": probe_sequences}
+WORKLOADS = {
+    "h1": h1_sequences,
+    "landscapes": landscape_sequences,
+    "probe": probe_sequences,
+    "planning": lambda: instance_sequences("planning"),
+    "benchmark": lambda: instance_sequences("benchmark"),
+}
+
+
+def pool_group(enc: ProteinEncoder, group: str, seqs: list[str], batch_size: int) -> Path:
+    """Encode and store ONE mean-pooled vector per sequence.
+
+    The reward head pools anyway, and training the adapter after pooling rather than
+    before was measured to cost nothing: per-protein median Spearman 0.771 against
+    0.753 on held-out Tsuboyama domains. The cache then drops from 615 GB to 2.4 GB
+    for the benchmark instance -- small enough to bring home, which moves every later
+    Phase 2 iteration off the rented box entirely.
+
+    This serves the reward head only. The world model needs the per-residue tensor and
+    must not read these files.
+    """
+    import numpy as np  # noqa: PLC0415
+
+    from biodreamer.protein_dreamer.cache import sequence_hash  # noqa: PLC0415
+
+    POOLED_DIR.mkdir(parents=True, exist_ok=True)
+    dest = POOLED_DIR / f"{enc.name.replace('/', '_')}__{group}.npz"
+    vecs, keys = [], []
+    for s in range(0, len(seqs), batch_size):
+        chunk = seqs[s : s + batch_size]
+        for seq, z in zip(chunk, enc.encode(chunk, batch_size=batch_size, use_cache=False)):
+            vecs.append(z.mean(axis=0).astype(np.float16))
+            keys.append(sequence_hash(seq))
+        if (s // batch_size) % 200 == 0 and s:
+            print(f"      {s:,}/{len(seqs):,}", flush=True)
+    np.savez_compressed(dest, keys=np.array(keys), emb=np.stack(vecs))
+    print(f"    -> {dest} ({dest.stat().st_size/1e6:.1f} MB)")
+    return dest
 
 
 def main() -> int:
@@ -169,6 +224,11 @@ def main() -> int:
     ap.add_argument("--limit-assays", type=int, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="list the work and the storage cost, encode nothing")
+    ap.add_argument("--pooled", action="store_true",
+                    help="store ONE mean-pooled vector per sequence instead of the "
+                         "per-residue matrix: 512x smaller, and measured to cost the "
+                         "reward head nothing (see diagnostics/reward_head.md)")
+    ap.add_argument("--backbone", default="saprot")
     args = ap.parse_args()
 
     fn = WORKLOADS[args.workload]
@@ -189,12 +249,15 @@ def main() -> int:
         print("\ndry run: nothing encoded")
         return 0
 
-    enc = ProteinEncoder("saprot")
+    enc = ProteinEncoder(args.backbone)
     cache = enc.cache
     log, t0 = {}, time.time()
     for g, seqs in groups.items():
         t = time.time()
-        enc.encode(seqs, batch_size=args.batch_size, use_cache=True)
+        if args.pooled:
+            pool_group(enc, g, seqs, args.batch_size)
+        else:
+            enc.encode(seqs, batch_size=args.batch_size, use_cache=True)
         dt = time.time() - t
         res = sum(len(s) for s in seqs)
         log[g] = {
