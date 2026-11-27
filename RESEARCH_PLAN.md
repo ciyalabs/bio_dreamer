@@ -960,20 +960,57 @@ opposite way from the hypothesis.
 generalisation from stability to fitness was correct. The cap is validated too: `pooled`
 scores +0.410 here against H1's +0.409 uncapped, reproducing it to 0.001.
 
-**So the encoder's representation is the ceiling, and every pre-registered diagnosis item
-is now resolved** — capacity swept at 1.3, loss tied against a ridge, per-assay
+~~**So the encoder's representation is the ceiling, and every pre-registered diagnosis
+item is now resolved** — capacity swept at 1.3, loss tied against a ridge, per-assay
 normalisation provably irrelevant, readout shown not to matter. The remaining lever is
 fine-tuning SaProt or moving to a backbone trained for variant effects. That is
 materially larger than a $0.70 rental and **Phase 2 should be re-scoped against what a
-fine-tune could plausibly buy before it starts.**
+fine-tune could plausibly buy before it starts.**~~
+
+**↑ WITHDRAWN 2026-11-27, same day. The re-scope was done and it refuted the paragraph
+above.** See `diagnostics/finetune_scoping.md`. Kept visible because it was the stated
+justification for a rental.
+
+Three things in it are wrong:
+
+1. **"The encoder's representation is the ceiling" is false.** Kermut scores **0.62** on
+   this exact protocol with a **frozen** backbone and a **mean-pooled** sequence kernel —
+   the same input at the same pooling. Its 0.62 is not from pooled embeddings alone (it
+   adds a structure kernel and a zero-shot prior mean), so the correct statement is
+   narrower and still fatal: a frozen mean-pooled representation is demonstrably not what
+   caps this task at 0.409.
+2. **The diagnosis enumerated only components this model has.** Capacity, loss,
+   normalisation and readout were each acquitted, and the conclusion treated that list as
+   exhaustive. It could not detect a component the model **lacks entirely** — and that is
+   where the gap is. Every method above 0.55 on this protocol carries a **pretrained
+   likelihood** as a separate term: Kermut as the GP prior mean, ProteinNPT as input
+   features, PoET as the score itself. This project has never computed one, and
+   `vs_zeroshot` has stood unchecked in this step since it was written.
+3. **"Materially larger than a $0.70 rental" was wrong about cost as well as value.**
+   Fine-tuning ESM-2 with the relevant recipe is **4 minutes per assay on an H100** —
+   cheaper than the positional-readout rental it was being contrasted with. A fine-tune is
+   deprioritised on *measured payoff*, not price: at n = 128 multi-mutants it buys
+   **+0.003** over a frozen pooled head with the same ranking loss, and **−0.015** at
+   n = 512. The registered cap of 300 sits inside that crossover.
+
+The lever order that replaces it is **Step 2.4**, and a fine-tune is last on it.
 
 One exception worth remembering, not acting on: `PHOT_CHLRE` gains **+0.174** from
 displacement, and it was the assay with no within-depth signal under pooling. One assay
 of eleven, 118 residues, does not move the mean.
 
-**Not done:** `vs_zeroshot` (ProSST / VenusREM need those checkpoints run) and a strict
-`vs_literature` comparison on matched assays — both reported as not done rather than
-estimated.
+**`vs_zeroshot` is now DONE** (Step 2.4) — not with ProSST / VenusREM, but with masked
+marginals from the two backbones already cached, which cost nothing: the scoring rule is
+additive over positions, so **1,201 forward passes cover all 943,211 test variants**
+because a substitution's score is read from the wild type's logits at one site.
+
+**`vs_literature` is still not done, and it has been promoted from an unchecked box to a
+precondition.** Every published figure is a mean over *its own* assay list; +0.409 is a
+mean over *our* eleven. Those are not the same quantity, and the registered 0.55 came from
+published means — so an unknown part of the 0.141 shortfall is assay difficulty rather than
+method quality. Until that is closed, **neither a pass nor a fail of H1 is attributable**.
+Kermut is the practical instrument: public code, and ~10 minutes against ProteinNPT's 400
+hours for the same work.
 
 ---
 
@@ -994,6 +1031,130 @@ appendix afterthought.
 **Go / no-go.** Record the calibration quality; it conditions the interpretation of H3.
 
 **Outputs.** `results/calibration.md`.
+
+---
+
+## Step 2.4 — The missing component: a zero-shot prior, before any encoder work `M` ⚠️
+
+**Why.** Step 2.2 concluded the frozen representation was the ceiling and named a fine-tune
+as the next lever. The re-scope refuted both halves. `diagnostics/finetune_scoping.md` has
+the full argument; the two numbers that decide it, both from the one paper that isolates
+these levers against each other on multi-mutant ProteinGym data:
+
+| lever, measured at n = 128 multi-mutants | gain |
+|---|---:|
+| adding a **zero-shot score** to the features (one-hot 0.473 → 0.684) | **+0.211** |
+| **fine-tuning the whole encoder** vs a frozen pooled head, same ranking loss (0.648 → 0.651) | **+0.003** |
+
+A zero-shot prior is worth roughly **seventy times** an encoder fine-tune at this project's
+data scale, and it is free — no training, no rental, forward passes only. The fine-tune's
+advantage exists but lives at n = 24–48 and has inverted by n = 512; the registered cap of
+300 sits inside the crossover. Worse, the scoring rule a fine-tune optimises (wt-marginals)
+sums independent per-position log-odds and so **cannot represent epistasis at all**, while
+this project's test set is order ≥ 3 — the pure-epistasis regime.
+
+**Work, in measured value per unit cost. Everything above the line reads the cache this
+project already owns.**
+
+- [x] **Zero-shot masked marginals as a standalone ranker** on H1's own test set, both
+      cached backbones. One forward pass per *mutated position*, not per variant.
+- [x] **Zero-shot as a feature** on the frozen ridge that already ties the whole reward
+      head — the cheapest form of Kermut's prior mean.
+- [ ] **MSA-based zero-shot** instead of single-sequence. `hmmer`/`mmseqs2` are already
+      installed and verified (Step 0.4). The published multi-mutant zero-shot levels put
+      MSA Transformer at **0.534** against ESM-2 wt-marginals at **0.493**.
+- [ ] **ProteinMPNN site-conditioned distributions** as a structural feature. Kermut's
+      *largest* ablation is its structure kernel (−0.065 mean ΔSpearman, against −0.045 for
+      the sequence kernel and −0.026 for the zero-shot mean). All eleven wild types are
+      already folded, twice, with bitwise-identical 3Di.
+- [ ] **`vs_literature` on a matched assay list** — see Step 2.2; this is now a
+      precondition for interpreting H1 at all, not a nice-to-have.
+- [ ] ~~Fine-tune the encoder~~ — **deprioritised to last**, on payoff rather than price.
+
+**The 3Di result does not transfer, and is not reopened.** `PREREGISTRATION.md` records
+that SaProt's structure channel *hurt* here (|ddG| correlation +0.459 → +0.304) because
+ESMFold reports a confident fold even at ddG ≤ −2, so the tokens assert "still folded" for
+destabilised proteins. That stands. But it is a property of feeding a **structure token into
+a sequence model**, which is a different mechanism from using **inverse-folding
+log-probabilities as a feature**. The first failing does not rule out the second.
+
+**Pre-registered threshold.** `zeroshot_feature_margin > 0.05` — the gain from adding the
+zero-shot column to the frozen ridge. Deliberately the same margin size H1 demanded of the
+additive null. If the zero-shot term buys less than that on *our* assays, then the published
++0.211 does not transfer and **the diagnosis changes again rather than the threshold.**
+
+**A disclosure that limits what a future H1 re-run can claim.** The order ≥ 3 test set has
+now been read three times — H1 itself, the positional readout, and this step. Each reading
+costs independence. Step 2.4's model is specified from published results plus diagnostics
+taken on that test set, so a subsequent H1 pass would be **weaker evidence than the original
+pre-registration intended**, and saying otherwise later would be a reconstruction. The
+mitigation is to lean on per-assay results and the matched-assay literature comparison
+rather than on the mean, and it is recorded here rather than discovered afterwards.
+
+**Experiments.** Per-assay Spearman on H1's exact split (seed 0, locked); zero-shot alone
+and as a feature; both backbones; masked marginals and wt-marginals.
+
+**Go / no-go.** If the margin clears 0.05, rebuild the reward model around a zero-shot prior
+and re-run H1 under an amendment. If it does not, the binding constraint is neither the
+encoder nor the prior, and Phase 2 needs a different hypothesis before more money is spent.
+
+**Outputs.** `diagnostics/finetune_scoping.md`; `results/reward_benchmark.md`.
+
+**✅ RUN, 2026-11-27, $0.** SaProt 650M, `benchmark` instance, H1's exact split (seed 0),
+all 943,211 unseen order ≥ 3 variants, 1,201 forward passes on the laptop GPU.
+`scripts/zeroshot_baseline.py`, 5 tests.
+
+**The threshold passes, and the mean is not the honest summary.**
+
+| | mean ρ | median |
+|---|---:|---:|
+| frozen ridge + mutation count | +0.390 | +0.425 |
+| **+ zero-shot column** | **+0.444** | — |
+| `zeroshot_feature_margin` (threshold **> 0.05**) | **+0.055 PASS** | **+0.002** |
+
+It clears the bar by 0.005, and **two assays of eleven carry all of it**: `GCN4_YEAST`
+−0.180 → **+0.163** and `PHOT_CHLRE` +0.484 → **+0.748**. Over the other nine the mean
+delta is **−0.0006** — not small, zero. Six assays do not move in the third decimal and
+`GFP_AEQVI` loses 0.057.
+
+Both rescued assays are precisely the ones the supervised pipeline had already failed on:
+GCN4 is the assay Step 2.1 called **unlearnable** (no in-sample signal in 88 training
+variants, ranked backwards on every run), and PHOT had no within-depth signal and sat
+inside its chance band. **So a zero-shot prior is a floor, not a lift** — which is what a
+GP prior mean is *for*, and is a materially weaker claim than the +0.211 the literature
+reports for the same idea on random splits.
+
+**Zero-shot alone is mostly a mutation counter, and the standing rule caught it.**
+
+| rule | total ρ | within-order ρ | depth-attributable |
+|---|---:|---:|---:|
+| `wt-marginals` | +0.321 | **+0.131** | +0.190 |
+| `masked-marginals` | +0.204 | **+0.137** | +0.067 |
+
+The two rules differ by 0.117 in total and **0.006 in skill**. `wt-marginals` only looks
+better because more of its score is depth: the rule sums one mostly-negative log-odds term
+per substitution, so deeper variants score lower by construction, and Step 2.1 measured
+that counting mutations alone reaches 0.31 here. A zero-shot total of +0.321 is on its own
+consistent with **no sequence-specific skill at all**. `masked-marginals` is the
+pre-specified rule (ProteinGym's standard); the prior-mean test uses SaProt because
+`PREREGISTRATION.md` fixes it as the default, **not** because it scored better — selecting
+the backbone on the order ≥ 3 set would select the registered margin on its own test set.
+
+**The conclusion moves a second time, and this is what Phase 2 now turns on.** +0.444
+against 0.55 and a published 0.56–0.65. The missing component was real and is not enough.
+**0.55 is not reachable by adding terms to this model**, because Kermut is not "our ridge
+plus a zero-shot column" — it is a Gaussian process whose kernel composes mean-pooled
+sequence similarity with site-level structure, with the zero-shot score as its prior mean
+function. A different estimator, not ours with another feature.
+
+**Which exposes the real hole in Step 2.2's diagnosis.** It found a ridge and a 266k MLP
+scoring the same and concluded the *features* were saturated. That is not what a tie
+between those two shows: a ridge and a small MLP on one pooled vector are near-equivalent
+function classes, so their agreement is close to tautological and was never evidence about
+the features. The next experiment is therefore the **predictor class** — a GP with a
+composite kernel on the cache that already exists, scored on our eleven assays *and* on the
+assay list the published method reports, so the comparability prerequisite closes in the
+same run. No rental: Kermut does three CV schemes on four datasets in ~10 minutes.
 
 ---
 

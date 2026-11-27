@@ -243,7 +243,21 @@ threshold stays visible.
 | 2026-11-26 | **Path accessibility of the primary landscapes** | TEV 0.042 | **TEV 0.000, TrpB4 0.000, GB1 0.208** | Same cause. From the verified wild type, no monotone shortest path reaches the global optimum on TEV or TrpB4 at all |
 | 2026-11-26 | **Greedy's oracle cost** | unspecified | **counted, and must be reconciled with B** | The registered greedy (5 restarts × 20 steps) costs order 10³ evaluations on a four-site landscape, against a registered budget of B = 100. Blocking requirement on Step 6.3 |
 
-**No threshold was edited.** All six entries correct a measurement error or a definition.
+| 2026-11-27 | **Step 2.2's recorded diagnosis** | "the encoder's representation is the ceiling"; next lever is a fine-tune, "materially larger than a $0.70 rental" | **withdrawn**; next lever is a zero-shot prior (new Step 2.4), fine-tune last | Kermut scores 0.62 on this exact protocol with a **frozen, mean-pooled** sequence kernel, so the frozen pooled representation is not what caps the task at 0.409. The diagnosis enumerated only components this model *has* (capacity, loss, normalisation, readout) and so could not detect one it **lacks**: every method above 0.55 here carries a pretrained likelihood as a separate term and this project had never computed one. The costing was wrong too — the relevant fine-tune is 4 min/assay on an H100, and buys **+0.003** at n = 128 and **−0.015** at n = 512. See `diagnostics/finetune_scoping.md` |
+| 2026-11-27 | **`vs_literature`'s status** | an unchecked item in Step 2.2 | **a precondition for interpreting H1** | Every published figure is a mean over its own assay list; +0.409 is a mean over ours. The registered 0.55 was set from published means, so an unknown part of the 0.141 shortfall is assay difficulty rather than method quality. Until it is closed, neither a pass nor a fail of H1 is attributable to the method |
+
+**No threshold was edited.** The 2026-11-27 entries withdraw a *conclusion* and re-order the
+work; H1's four thresholds are untouched and its FAIL verdict stands. Step 2.4 adds one new
+threshold (`zeroshot_feature_margin > 0.05`), registered **before** the measurement was run.
+
+**What a future H1 re-run may and may not claim.** The order ≥ 3 test set has now been read
+three times — H1, the positional readout, and Step 2.4. Step 2.4's model is specified from
+published results plus diagnostics taken on that same test set, so a later H1 pass is
+**weaker evidence than this document originally intended**. Recorded now rather than
+reconstructed later; the mitigation is to report per-assay results and the matched-assay
+comparison rather than leaning on the mean.
+
+**No threshold was edited in Phase 1.** All six Step 1.1 entries correct a measurement error or a definition.
 None follows from a model result, because no model exists — these come from the step whose
 purpose is to find such errors. They are logged as amendments rather than pre-Phase-1
 revisions only because Step 1.1 is itself the first step of Phase 1.

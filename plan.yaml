@@ -224,7 +224,9 @@ phases:
           - id: vs_literature
             name: Versus Kermut, ProteinNPT, MULTI-evolve, Cerebra atlas
           - id: vs_zeroshot
-            name: Versus ProSST / VenusREM zero-shot
+            name: Versus zero-shot likelihood (SaProt / ESM-2 masked marginals)
+          - id: zeroshot_as_prior
+            name: Does a zero-shot prior add to the frozen features (Kermut's mean function)
           - id: vs_frozen_regression
             name: Versus regression head on the frozen encoder
           - id: higher_order_extrapolation
@@ -266,6 +268,42 @@ phases:
           - id: shared_vs_independent_trunk
             name: Shared versus independent trunk ensembles
         outputs: [results/calibration.md]
+
+      - id: "2.4"
+        name: The missing component -- a zero-shot prior, before any encoder work
+        size: M
+        prereg_required: true
+        why: >
+          H1 failed at +0.409 and the recorded diagnosis was that the frozen encoder's
+          representation is the ceiling. That is contradicted by Kermut, which scores 0.62
+          on this same protocol from mean-pooled FROZEN embeddings. What the leaders carry
+          and this project does not is a pretrained likelihood as a separate term. The
+          measured value of that term is +0.21 at n=128; the measured value of fine-tuning
+          the encoder at the same n is +0.003. See diagnostics/finetune_scoping.md.
+        experiments:
+          - id: zeroshot_ranker
+            name: Zero-shot masked marginals as a standalone ranker on H1's test set
+          - id: zeroshot_feature
+            name: Zero-shot as a feature on the frozen ridge (Kermut's prior mean, cheapest form)
+          - id: msa_zeroshot
+            name: MSA-based zero-shot instead of single-sequence
+          - id: mpnn_site_features
+            name: ProteinMPNN site distributions as a structural feature
+          - id: matched_assay_literature
+            name: Matched-assay comparison, so a mean is attributable to method not assay list
+          - id: gp_composite_kernel
+            name: GP with a composite kernel on the pooled cache, zero-shot as prior mean
+          - id: predictor_class_control
+            name: Is a ridge/MLP tie evidence about features or only about ridge-like classes
+        thresholds:
+          # the same margin size H1 required of the additive null. If the zero-shot term
+          # buys less than this on OUR assays, the published +0.21 does not transfer and
+          # the diagnosis changes again rather than the threshold.
+          - metric: zeroshot_feature_margin
+            op: ">"
+            value: 0.05
+            hypothesis: H1
+        outputs: [diagnostics/finetune_scoping.md, results/reward_benchmark.md]
 
   - id: "3"
     name: World model B (deterministic)

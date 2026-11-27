@@ -275,6 +275,10 @@ data/processed/d1_folds/
 # 2.4 GB. The npz files are the rental's product and belong on disk, not in git.
 data/processed/pooled_cache/
 data/processed/positional_cache/
+# Zero-shot log-odds scores, 7.3 MB per (backbone, rule): a deterministic function of the
+# backbone and the wild type, so scripts/zeroshot_baseline.py regenerates them and resumes
+# from them. data/processed/zeroshot_baseline.json IS committed -- that is the result.
+data/processed/zeroshot_*_marginals.npz
 
 # dry-run and partial outputs: never real results
 data/processed/*.dryrun.json

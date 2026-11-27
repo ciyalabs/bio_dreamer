@@ -95,11 +95,14 @@ failing conditions are measured on our own data against our own baselines.
 It says: *encoder (D2 result), adapter capacity, loss (ranking vs regression), per-assay
 normalisation.* The evidence now points hard at the first and acquits the rest.
 
-1. **Encoder — the binding constraint.** Every configuration tried reads the same 1280-d
+1. ~~**Encoder — the binding constraint.** Every configuration tried reads the same 1280-d
    mean-pooled SaProt vector. A linear model on it matches a trained 266k head (+0.019).
    Within-order ρ ceilings at ~+0.21 across all configurations. Mean-pooling 735 residues
    into one vector is the prime suspect: it discards which position changed, and Step 1.4
-   already measured that per-residue structure is load-bearing.
+   already measured that per-residue structure is load-bearing.~~
+   **WITHDRAWN** — see "What the diagnosis missed" below. The pooling suspicion was tested
+   and cleared (`diagnostics/positional_readout.md`), and the fallback to "then it is the
+   encoder" does not survive either.
 2. **Adapter capacity — acquitted.** Step 1.3 swept d = 64/128/256/512 and found 128
    matches the unprojected 1280. More capacity on a saturated representation is not the
    gap.
@@ -108,13 +111,43 @@ normalisation.* The evidence now points hard at the first and acquits the rest.
 4. **Per-assay normalisation — acquitted, and provably so.** Per-assay Spearman is
    invariant under increasing per-assay rescaling, so this cannot be the cause.
 
-**Recommended next step: abandon the pooled cache for the fitness head and re-encode
-per-residue**, or fine-tune the encoder. The pooled cache was adopted on a measurement
-(`pool_first` cost nothing on *stability*, +0.337 vs +0.329) that was taken on 1,000
-Tsuboyama single mutants of 36–72 residue domains and generalised to multi-mutant fitness
-on proteins up to 735 residues. **That generalisation is now the leading suspect, and it
-was never tested on fitness.** Testing it costs a GPU rental and 170 GiB rather than
-2.25 GB, which is why the cheap path was taken first — the cheap path is now exhausted.
+~~**Recommended next step: abandon the pooled cache for the fitness head and re-encode
+per-residue**, or fine-tune the encoder.~~ Both halves of this recommendation were acted on
+and both were wrong. The per-residue re-encode was run for $0.70 and changed nothing
+(`diagnostics/positional_readout.md`); the fine-tune was costed and is near-worthless at
+this data scale (`diagnostics/finetune_scoping.md`).
+
+---
+
+## What the diagnosis missed
+
+**The four-item list above enumerates components this model *has*.** Capacity, loss,
+normalisation and readout were each tested and acquitted, and the conclusion treated the
+list as exhaustive: if everything present is innocent, the encoder must be guilty. That
+inference is invalid, because the list cannot detect **a component the model lacks
+entirely.**
+
+It lacks a **zero-shot likelihood**. Every method above 0.55 on this protocol carries one as
+a separate term — Kermut as its Gaussian-process prior mean, ProteinNPT as input features,
+PoET as the score itself. `vs_zeroshot` stood unchecked in Step 2.2 from the day the step was
+written, and was reported in the row above as "not done rather than estimated". It was the
+one box whose contents would have falsified the diagnosis.
+
+**The direct refutation.** Kermut scores **0.62** on this exact protocol, and its sequence
+kernel is a squared-exponential kernel on **ESM-2 650M embeddings, mean-pooled across the
+length dimension, in R^1280** — the same backbone size, pooling and dimension as
+`data/processed/pooled_cache`. A frozen mean-pooled 1280-d vector therefore supports 0.62
+here, not 0.409. It is also, in Kermut's own decomposition, the term that carries
+**epistasis** — the exact capability this report concluded a pooled vector could not provide.
+
+**And the fine-tune was mis-costed in both directions.** It is not "materially larger than a
+$0.70 rental": the relevant recipe is 4 minutes per assay on an H100. What it is, is nearly
+worthless at our n — **+0.003** over a frozen pooled head with the same ranking loss at
+n = 128 multi-mutants, and **−0.015** at n = 512, against **+0.211** for simply adding a
+zero-shot score to the features. The registered cap of 300 sits inside that crossover.
+
+Step 2.4 replaces the recommendation with the lever order that follows from those numbers.
+A fine-tune is last on it, on payoff rather than price.
 
 ---
 

@@ -1,0 +1,150 @@
+{
+  "instance": "benchmark",
+  "seed": 0,
+  "assays": [
+    "CAPSD_AAV2S_Sinai_2021",
+    "D7PM05_CLYGR_Somermeyer_2022",
+    "F7YBW8_MESOW_Aakre_2015",
+    "F7YBW8_MESOW_Ding_2023",
+    "GCN4_YEAST_Staller_2018",
+    "GFP_AEQVI_Sarkisyan_2016",
+    "HIS7_YEAST_Pokusaeva_2019",
+    "PHOT_CHLRE_Chen_2023",
+    "Q6WV12_9MAXI_Somermeyer_2022",
+    "Q8WTC7_9CNID_Somermeyer_2022",
+    "SPG1_STRSG_Wu_2016"
+  ],
+  "zeroshot": {
+    "saprot/masked-marginals": {
+      "per_assay": {
+        "CAPSD_AAV2S_Sinai_2021": 0.21770317696282812,
+        "D7PM05_CLYGR_Somermeyer_2022": 0.031698954243679515,
+        "F7YBW8_MESOW_Aakre_2015": 0.15416715752395327,
+        "F7YBW8_MESOW_Ding_2023": 0.6362352499388677,
+        "GCN4_YEAST_Staller_2018": 0.16182956868724613,
+        "GFP_AEQVI_Sarkisyan_2016": 0.09892361201766098,
+        "HIS7_YEAST_Pokusaeva_2019": 0.11784410913534653,
+        "PHOT_CHLRE_Chen_2023": 0.8117610382233583,
+        "Q6WV12_9MAXI_Somermeyer_2022": -0.03527381730519531,
+        "Q8WTC7_9CNID_Somermeyer_2022": -0.040770156736593136,
+        "SPG1_STRSG_Wu_2016": 0.09043043833525383
+      },
+      "within_order": {
+        "CAPSD_AAV2S_Sinai_2021": 0.054997145633632234,
+        "D7PM05_CLYGR_Somermeyer_2022": -0.010628307251341992,
+        "F7YBW8_MESOW_Aakre_2015": 0.11708410385438658,
+        "F7YBW8_MESOW_Ding_2023": 0.4003266772384815,
+        "GCN4_YEAST_Staller_2018": 0.07765613937524819,
+        "GFP_AEQVI_Sarkisyan_2016": 0.02687753758647961,
+        "HIS7_YEAST_Pokusaeva_2019": 0.1115023023899225,
+        "PHOT_CHLRE_Chen_2023": 0.7947915774228406,
+        "Q6WV12_9MAXI_Somermeyer_2022": -0.050221604970270645,
+        "Q8WTC7_9CNID_Somermeyer_2022": -0.051595464260365584,
+        "SPG1_STRSG_Wu_2016": 0.03935461090439275
+      },
+      "within_order_mean": 0.13728588344758233,
+      "mean": 0.20404993918421874,
+      "median": 0.11784410913534653,
+      "min": -0.040770156736593136,
+      "n_positive": 9,
+      "seconds": 0.5
+    },
+    "saprot/wt-marginals": {
+      "per_assay": {
+        "CAPSD_AAV2S_Sinai_2021": 0.46155322514965974,
+        "D7PM05_CLYGR_Somermeyer_2022": 0.3259280644427594,
+        "F7YBW8_MESOW_Aakre_2015": 0.27864294728235695,
+        "F7YBW8_MESOW_Ding_2023": 0.6638017899314772,
+        "GCN4_YEAST_Staller_2018": 0.18644403851184138,
+        "GFP_AEQVI_Sarkisyan_2016": 0.4538907946107361,
+        "HIS7_YEAST_Pokusaeva_2019": 0.207885682121606,
+        "PHOT_CHLRE_Chen_2023": 0.5294081275639557,
+        "Q6WV12_9MAXI_Somermeyer_2022": 0.14091073304143203,
+        "Q8WTC7_9CNID_Somermeyer_2022": 0.17372133460200045,
+        "SPG1_STRSG_Wu_2016": 0.10474452468051307
+      },
+      "within_order": {
+        "CAPSD_AAV2S_Sinai_2021": 0.10739878327014044,
+        "D7PM05_CLYGR_Somermeyer_2022": 0.0029143875143862984,
+        "F7YBW8_MESOW_Aakre_2015": 0.041046297632044884,
+        "F7YBW8_MESOW_Ding_2023": 0.45389783321674043,
+        "GCN4_YEAST_Staller_2018": 0.10732366787745772,
+        "GFP_AEQVI_Sarkisyan_2016": 0.01977683299347422,
+        "HIS7_YEAST_Pokusaeva_2019": 0.037391202718151474,
+        "PHOT_CHLRE_Chen_2023": 0.7521309354732197,
+        "Q6WV12_9MAXI_Somermeyer_2022": -0.07754011245534864,
+        "Q8WTC7_9CNID_Somermeyer_2022": -0.0497917336073988,
+        "SPG1_STRSG_Wu_2016": 0.04362302043715404
+      },
+      "within_order_mean": 0.13074282864272924,
+      "mean": 0.3206301147216671,
+      "median": 0.27864294728235695,
+      "min": 0.10474452468051307,
+      "n_positive": 11,
+      "seconds": 31.0
+    }
+  },
+  "prior_mean": {
+    "CAPSD_AAV2S_Sinai_2021": {
+      "ridge_count": 0.5719660278212879,
+      "ridge_count_zeroshot": 0.5653078084553345
+    },
+    "D7PM05_CLYGR_Somermeyer_2022": {
+      "ridge_count": 0.4253185775527213,
+      "ridge_count_zeroshot": 0.4258021888892901
+    },
+    "F7YBW8_MESOW_Aakre_2015": {
+      "ridge_count": 0.3654491027733961,
+      "ridge_count_zeroshot": 0.38656588451260854
+    },
+    "F7YBW8_MESOW_Ding_2023": {
+      "ridge_count": 0.6524267682593959,
+      "ridge_count_zeroshot": 0.6815227426001099
+    },
+    "GCN4_YEAST_Staller_2018": {
+      "ridge_count": -0.1797960922266752,
+      "ridge_count_zeroshot": 0.1625329962028152
+    },
+    "GFP_AEQVI_Sarkisyan_2016": {
+      "ridge_count": 0.4816693299831152,
+      "ridge_count_zeroshot": 0.42463294467158413
+    },
+    "HIS7_YEAST_Pokusaeva_2019": {
+      "ridge_count": 0.48444731178099787,
+      "ridge_count_zeroshot": 0.48460348778350154
+    },
+    "PHOT_CHLRE_Chen_2023": {
+      "ridge_count": 0.48444390142266136,
+      "ridge_count_zeroshot": 0.7478955023470735
+    },
+    "Q6WV12_9MAXI_Somermeyer_2022": {
+      "ridge_count": 0.4002733924318143,
+      "ridge_count_zeroshot": 0.40218096290909483
+    },
+    "Q8WTC7_9CNID_Somermeyer_2022": {
+      "ridge_count": 0.2364801515950576,
+      "ridge_count_zeroshot": 0.24016273669268842
+    },
+    "SPG1_STRSG_Wu_2016": {
+      "ridge_count": 0.3650200244456243,
+      "ridge_count_zeroshot": 0.36700834349472344
+    }
+  },
+  "ours": {
+    "reward head (depth-aware)": 0.409,
+    "frozen ridge + mutation count": 0.39,
+    "additive null": 0.324,
+    "frozen ridge": 0.301
+  },
+  "literature": {
+    "ProteinNPT": 0.56,
+    "MULTI-evolve": 0.61,
+    "Kermut": 0.62,
+    "Cerebra": 0.65
+  },
+  "metrics": {
+    "ridge_count_mean": 0.3897907723490361,
+    "ridge_count_zeroshot_mean": 0.4443832362326204,
+    "zeroshot_feature_margin": 0.0545924638835843
+  }
+}
