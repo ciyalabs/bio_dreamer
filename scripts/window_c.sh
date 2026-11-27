@@ -46,8 +46,13 @@ say() { printf '\n==== %s ====\n' "$*"; }
 # than found on sys.path. The first pod run of this project lost three minutes to exactly
 # this, which is also why the smoke test exists.
 say "stage 1: install"
-pip install -e . --quiet
-python -I -c "import biodreamer; print('biodreamer importable')"
+# `python -I` ignores the working directory AND the environment, so neither sys.path nor
+# PYTHONPATH will find the package -- it has to be installed. Recent CUDA images ship a
+# PEP 668 "externally managed" Python, which refuses a plain `pip install`, and `--no-deps`
+# keeps pip from resolving (and possibly replacing) the image's own torch build.
+pip install -e . --no-deps --break-system-packages --quiet 2>&1 | grep -v "^WARNING: Running pip" || true
+pip install --break-system-packages --quiet transformers pandas scipy scikit-learn 2>&1 | grep -v "^WARNING: Running pip" || true
+python -I -c "import biodreamer, torch, transformers, sklearn; print('imports ok', torch.__version__)"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 
 say "stage 2: smoke"

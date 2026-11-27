@@ -1032,6 +1032,45 @@ appendix afterthought.
 
 **Outputs.** `results/calibration.md`.
 
+**✅ DONE (2026-11-27), CPU only, $0.** See `results/calibration.md`.
+
+**None of the three uncertainty estimates ranks error, and declining to act makes accuracy
+worse.**
+
+| source | ρ(predicted sd, rank error) | risk–coverage gain at 25% coverage |
+|---|---:|---:|
+| GP predictive variance (closed form) | **+0.015** | −0.019, positive on 3/11 |
+| independent-trunk ensemble, 5 members | **−0.048** | −0.128, positive on 2/11 |
+| shared-trunk ensemble, 5 heads | **+0.019** | −0.051, positive on 2/11 |
+
+All three are zero within their spread, and the GP's per-assay range (−0.074 … +0.186) has
+no usable case either. Keeping only the most confident quarter is *worse* than keeping
+everything on 8 of 11 assays.
+
+**The shared-trunk question the step singles out, answered:** the cheap ensemble is exactly
+as accurate (+0.2986 against +0.3015) and reports **3.1% of the dispersion** — it
+understates epistemic uncertainty by about **32×**, consistently across all 11 assays
+(ratio 0.017 … 0.098). Members sharing a trunk cannot disagree about anything the trunk
+has already decided. The prediction was right; it is also moot, since an estimate 32× too
+small and one of the right magnitude are equally uninformative here.
+
+**The metric had to be fixed first, and the first version produced a false finding.**
+Measuring error as |residual| against a z-scored truth made the independent ensemble look
+**anti**-calibrated at −0.204. These heads train with a *pairwise ranking loss*, which
+fixes order and leaves scale free — member spreads were ~2.5 for the independent ensemble
+against ~0.06 for the shared one — so that number measured output scale, not error.
+Rank error, `|rank(pred) − rank(truth)|/n`, moves it to −0.048: no signal rather than a
+reversed one. Sixth instrument artifact in this project, and the first caught before it
+reached a write-up.
+
+**What it constrains.** H3's uncertainty-guided exploration assumes an epistemic estimate
+that locates ignorance; on this reward model that estimate does not exist yet, so a Phase 6
+policy must either not depend on it or report the dependence as resting on an uncalibrated
+signal. Also: **do not spend five training runs on a deep ensemble** — it buys dispersion
+of the right size and no more information than the one-run variant. The GP's variance is
+free from the same Cholesky factor as its mean, and is the only one whose scale can be
+checked at all (nominal 90% interval covers 82.6%, range 0.549 … 0.993).
+
 ---
 
 ## Step 2.4 — The missing component: a zero-shot prior, before any encoder work `M` ⚠️

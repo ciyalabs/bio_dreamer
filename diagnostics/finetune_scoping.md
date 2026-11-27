@@ -232,6 +232,48 @@ Which changes the conclusion a second time, and this is the part to carry forwar
 > diagnosis never examined, because a ridge and a 266k MLP agreeing told us the features
 > were saturated **for that class of predictor** and nothing more.
 
+## 6.4 The predictor class, measured — and a correction to how I first reported it
+
+Step 2.4 went on to reproduce **Kermut-sequence** on this project's own cache: an RBF
+kernel on the mean-pooled 1280-d vectors, `m(x) = alpha*f0(x) + beta` with `f0` the summed
+log-likelihood ratio at the mutated positions, exact GP, hyperparameters by marginal
+likelihood, no structure kernel. An exact GP is free at this scale — the protocol caps
+training at 300 per assay, so the Cholesky is microseconds.
+
+The totals and the depth-free skill tell different stories, and only the second is
+informative:
+
+| model | total ρ | **within-order ρ** | of which depth |
+|---|---:|---:|---:|
+| reward head, depth-aware, 266k params | +0.409 | **+0.161** | **+0.248** |
+| frozen ridge + mutation count | +0.390 | +0.300 | +0.090 |
+| frozen ridge + count + zero-shot | +0.444 | +0.352 | +0.093 |
+| GP, constant mean | +0.375 | +0.330 | +0.045 |
+| **GP, zero-shot mean (Kermut-sequence)** | +0.428 | **+0.371** | +0.057 |
+| GP, zero-shot mean + order term | +0.435 | +0.370 | +0.065 |
+
+**Correction.** The commit that first reported the GP compared its +0.371 against the
+*head's* +0.161 and called it 2.3× the skill. That comparison is true and it is the wrong
+one. Against the **ridge**, which is the baseline that actually matters because it is what
+tied with the head at 2.2, the GP buys **+0.071** total and about **+0.02 … +0.03** at
+matched prior (+0.330 vs +0.300 with no zero-shot; +0.371 vs +0.352 with it). The
+predictor class is a real but small effect, not a doubling.
+
+**What the table actually exposes is this project's own head.** It has the second-highest
+total and by far the lowest skill: **61% of its +0.409 is the depth penalty** (+0.248 of
++0.409), against 23% for the ridge and 13% for the GP. Step 2.1 added that penalty because
+it lifted the mean from +0.260 to +0.384, and it did — but what it bought was a mutation
+counter bolted onto a weak sequence model, and the total hid that a plain ridge was already
+reading the sequence almost twice as well. The head was never compared to the ridge on the
+depth-free diagnostic until now.
+
+**The zero-shot prior is consistent across both estimators**, which is the one clean
+regularity here: +0.052 of skill on the ridge (+0.300 → +0.352) and +0.041 on the GP
+(+0.330 → +0.371). As a *prior mean* it is worth about the same as it is as a *feature*,
+so Kermut's mechanism is not the source of its advantage either.
+
+---
+
 ## 7. The comparability problem, which is now blocking
 
 Every published number above is a mean over **its own assay list**. This project's +0.409 is
