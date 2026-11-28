@@ -1,0 +1,207 @@
+"""Steps 3.1-3.3 — train World Model B and log the collapse gate every run.
+
+    python -I scripts/train_wm_b.py --dry-run
+    python -I scripts/train_wm_b.py --assay GFP_AEQVI_Sarkisyan_2016 --epochs 30
+
+Uses the **`planning` instance** (Step 0.3's two-instance rule). The `benchmark` assays
+are the reward model's evaluation set and must not be trained on here.
+
+The loss is
+
+    L = w(epoch) * ||f(h_t, a) - sg[h_{t+1}]||^2      dynamics, ramped
+      + CE(position) + CE(amino acid)                 inverse dynamics
+      + reward MSE                                    gives the latent something to hold
+      + lambda * SIGReg(h)                            the only anti-collapse term
+
+with `sg` a stop-gradient and no EMA target, per the registered design. `w` is zero for
+`--warmup` epochs and then ramps, so the inverse and reward heads shape the latent before
+the dynamics loss -- whose target is produced by the adapter it is training -- can start
+flattening it.
+
+Collapse diagnostics are written for **every epoch**, not just the last, because the
+question Step 3.2 asks is whether the representation degrades over training.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+import torch
+from torch import nn
+
+from biodreamer import tracking
+from biodreamer.reward.data import assays_for
+from biodreamer.world_model import (
+    WorldModelB,
+    build,
+    diagnostics,
+    dynamics_weight,
+    split,
+)
+
+OUT = Path("data/processed/wm_b.json")
+RANK_FLOOR = 0.5  # plan.yaml step 3.2, latent_effective_rank_ratio
+
+
+def run_one(tr, args, device) -> dict:
+    torch.manual_seed(args.seed)
+    z = torch.tensor(tr.z, device=device)
+    src = torch.tensor(tr.src, device=device)
+    dst = torch.tensor(tr.dst, device=device)
+    pos = torch.tensor(tr.position, device=device)
+    aa = torch.tensor(tr.aa, device=device)
+    y = torch.tensor(tr.score, device=device)
+    y = (y - y.mean()) / (y.std() + 1e-8)
+
+    itr, iva = split(len(tr), seed=args.seed)
+    itr_t = torch.tensor(itr, device=device)
+    iva_t = torch.tensor(iva, device=device)
+
+    model = WorldModelB(
+        d_in=z.shape[1], d_model=args.d_model,
+        length=int(pos.max().item()) + 1, seed=args.seed,
+    ).to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
+    ce = nn.CrossEntropyLoss()
+
+    history = []
+    for epoch in range(args.epochs):
+        model.train()
+        w = dynamics_weight(epoch, args.warmup, args.ramp)
+        perm = itr_t[torch.randperm(len(itr_t), device=device)]
+        tot = {"dyn": 0.0, "inv": 0.0, "rew": 0.0, "sig": 0.0}
+        nb = 0
+        for s0 in range(0, len(perm), args.batch):
+            b = perm[s0 : s0 + args.batch]
+            if len(b) < 8:
+                continue
+            h = model.encode(z)
+            h_t, h_next = h[src[b]], h[dst[b]]
+            pred = model.step(h_t, pos[b], aa[b])
+            l_dyn = (pred - h_next.detach()).pow(2).sum(-1).mean()
+            lp, la = model.inverse_logits(h_t, h_next)
+            l_inv = ce(lp, pos[b]) + ce(la, aa[b])
+            l_rew = (model.predict_reward(h_next) - y[dst[b]]).pow(2).mean()
+            l_sig = model.sigreg(h_next)
+            loss = w * l_dyn + l_inv + l_rew + args.sigreg * l_sig
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+            tot["dyn"] += float(l_dyn)
+            tot["inv"] += float(l_inv)
+            tot["rew"] += float(l_rew)
+            tot["sig"] += float(l_sig)
+            nb += 1
+
+        d = diagnostics(model, z, src[iva_t], dst[iva_t], pos[iva_t], aa[iva_t])
+        d.update({k: v / max(nb, 1) for k, v in tot.items()})
+        d["epoch"] = epoch
+        d["dynamics_weight"] = w
+        history.append(d)
+        print(
+            f"  ep{epoch:>3d} w={w:.2f} dyn={d['dyn']:.4f} inv={d['inv']:.4f} "
+            f"rew={d['rew']:.4f} sig={d['sig']:.4f} | rank_ratio={d['latent_effective_rank_ratio']:.3f} "
+            f"pos@1={d['inverse_position_top1']:.3f} vs_identity={d['one_step_vs_identity']:.3f}",
+            flush=True,
+        )
+    return {"history": history, "final": history[-1], "n_transitions": len(tr)}
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--assay", default=None, help="default: every planning assay")
+    ap.add_argument("--epochs", type=int, default=20)
+    ap.add_argument("--warmup", type=int, default=3)
+    ap.add_argument("--ramp", type=int, default=5)
+    ap.add_argument("--batch", type=int, default=512)
+    ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--d-model", type=int, default=256)
+    ap.add_argument("--sigreg", type=float, default=1.0)
+    ap.add_argument("--max-transitions", type=int, default=60000)
+    ap.add_argument(
+        "--min-transitions", type=int, default=1000,
+        help="skip an assay with fewer usable transitions than this. A transition needs "
+             "BOTH endpoints in the pooled cache, and that cache was built for the H1 and "
+             "literature splits rather than whole assays, so four planning assays fall "
+             "below 1,000 and would contribute noise rather than signal. Skipped assays "
+             "are recorded, not dropped quietly.",
+    )
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--dry-run", action="store_true")
+    args = ap.parse_args()
+
+    names = [args.assay] if args.assay else list(assays_for("planning"))
+    device = torch.device(args.device)
+    print(f"device={device}  assays={len(names)}  max_transitions={args.max_transitions}")
+
+    results: dict = {}
+    skipped: dict = {}
+    for n in names:
+        t0 = time.time()
+        tr = build(n, max_transitions=args.max_transitions, seed=args.seed)
+        print(f"{n}: {len(tr):,} transitions over {len(tr.z):,} states, "
+              f"cache coverage {tr.coverage:.0%} "
+              f"({time.time() - t0:.0f}s to build)")
+        if args.dry_run:
+            continue
+        if len(tr) < args.min_transitions:
+            print(f"  SKIPPED: {len(tr):,} < --min-transitions {args.min_transitions:,}")
+            skipped[n] = {"n_transitions": len(tr), "coverage": tr.coverage}
+            continue
+        results[n] = run_one(tr, args, device)
+
+    if args.dry_run:
+        return 0
+
+    finals = [r["final"] for r in results.values()]
+    summary = {
+        "latent_effective_rank_ratio": float(
+            np.mean([f["latent_effective_rank_ratio"] for f in finals])
+        ),
+        "min_rank_ratio": float(min(f["latent_effective_rank_ratio"] for f in finals)),
+        "inverse_position_top1": float(np.mean([f["inverse_position_top1"] for f in finals])),
+        "inverse_aa_top1": float(np.mean([f["inverse_aa_top1"] for f in finals])),
+        "one_step_vs_identity": float(np.mean([f["one_step_vs_identity"] for f in finals])),
+        "one_step_normalised": float(np.mean([f["one_step_normalised"] for f in finals])),
+        "sigreg_stat": float(np.mean([f["sigreg_stat"] for f in finals])),
+    }
+    passed = summary["latent_effective_rank_ratio"] >= RANK_FLOOR
+    print(f"\n{'=' * 72}")
+    for k, v in summary.items():
+        print(f"  {k:34s} {v:+.4f}")
+    print(f"\n  latent_effective_rank_ratio >= {RANK_FLOOR}  -> "
+          f"{'PASS -- no collapse' if passed else 'FAIL -- COLLAPSE, apply the remedy ladder'}")
+
+    Path(args.out).write_text(
+        json.dumps({"summary": summary, "collapse_gate_passed": passed,
+                    "threshold": RANK_FLOOR, "config": vars(args),
+                    "skipped_for_too_few_transitions": skipped,
+                    "per_assay": results}, indent=2, default=str) + "\n"
+    )
+    print(f"wrote {args.out}")
+
+    with tracking.run(
+        "3.2", "latent_rank",
+        variant={"instance": "planning", "model": "world_model_B", "ema": False},
+        config={k: v for k, v in vars(args).items() if k != "out"},
+        seed=args.seed, datasets=["data/processed/pooled_cache"],
+        notes=("World Model B with no EMA target; SIGReg is the only anti-collapse "
+               "mechanism, so the effective-rank ratio is the gate. Diagnostics are "
+               "logged every epoch because the question is whether the representation "
+               "degrades over training, which the loss curve cannot answer -- a "
+               "collapsed model has a LOW prediction loss."),
+    ) as r:
+        r.log_metrics(summary)
+        r.log_artifact(args.out, kind="table")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

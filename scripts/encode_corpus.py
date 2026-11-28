@@ -80,6 +80,25 @@ def instance_sequences(instance: str) -> dict[str, list[str]]:
     return out
 
 
+def transition_sequences(instance: str = "planning") -> dict[str, list[str]]:
+    """EVERY variant of an instance's assays, for Phase 3's transition graph.
+
+    `instance_sequences` returns H1's split: <=300 order<=2 variants plus all order>=3.
+    That is the right set for the reward model and the wrong one for a world model,
+    because a transition needs BOTH endpoints and the excluded low-order variants are
+    precisely the parents. Measured on the cache as built, four of the seven planning
+    assays yield fewer than 1,000 usable transitions out of 1,395,965 available.
+
+    Encoding resumes per sequence on the sequence hash, so running this over an assay
+    that is already partly cached pays only for what is missing -- about 59k sequences
+    of the 354k total.
+    """
+    from biodreamer.reward.data import assays_for, detection_limits, load_assay  # noqa: PLC0415
+
+    limits = detection_limits()
+    return {n: load_assay(n, limits).sequence.tolist() for n in assays_for(instance)}
+
+
 def literature_sequences() -> dict[str, list[str]]:
     """Only the variants the literature protocol actually draws, across its 3 seeds.
 
@@ -217,6 +236,7 @@ WORKLOADS = {
     "planning": lambda: instance_sequences("planning"),
     "benchmark": lambda: instance_sequences("benchmark"),
     "literature": literature_sequences,
+    "transitions": transition_sequences,
 }
 
 
