@@ -1,4 +1,48 @@
-# Step 2.2 — H1: **FAIL.** Do not proceed to Phase 3.
+# Phase 2 — H1: **PASS** at +0.574 (2026-11-28). Phase 3 is unblocked.
+
+> **This file opens with the Step 2.2 FAIL, which is superseded but kept.** The verdict
+> moved twice and the intermediate readings are part of the record, not noise to tidy
+> away. Nothing below this banner was edited to match the outcome.
+
+**Final gate**, on `gp_structure_kernel` — a GP with Kermut's composite kernel (eq. 4) and
+an alignment-based zero-shot prior mean — over the same 11 `benchmark` assays and split
+seed 0:
+
+| condition | threshold | 2.2 head | 2.4 GP | **2.5 completed** | |
+|---|---|---:|---:|---:|---|
+| `spearman_mean` | ≥ 0.55 | +0.409 | +0.479 | **+0.574** | **PASS** |
+| `margin_over_additive_null` | > 0.05 | +0.085 | +0.155 | **+0.250** | PASS |
+| `frac_assays_beating_null` | ≥ 0.70 | 0.636 | 0.818 | **0.909** | PASS |
+| `spearman_mean_vs_frozen_regression` | > 0 | +0.108 | +0.178 | **+0.273** | PASS |
+
+Within-order ρ — the depth-free diagnostic — went **+0.161 → +0.417 → +0.500**.
+
+**No threshold was edited at any point in Phase 2.** The verdict changed because two
+experiments registered under Step 2.4 were run for the first time: `msa_zeroshot` (never
+run) and `mpnn_site_features` as a *kernel* rather than the scalar mean term that was
+tested and measured −0.002.
+
+**What did it:** the zero-shot prior. Every `f0` this project used read one sequence in
+isolation; a published alignment-based prior is worth **+0.096**, against **+0.049** for
+the structure kernel.
+
+**Against our own interest, in full:** `structure_kernel_margin` **FAILS** at +0.0494
+against its registered > 0.05 (passes on within-order at +0.0658; the registered metric is
+the total). Step 2.4's `spearman_mean_gp`, defined on Kermut-*sequence*, **remains a FAIL**
+at +0.525. The assay-list difficulty offset — six published methods score 0.12 … 0.27
+lower on these eleven assays than on the other 206 — contributed **nothing**, because H1
+clears 0.55 unadjusted. `f0` is now read from ProteinGym's published archive rather than
+computed here, which is what Kermut does but is a dependency this project now owns. The
+structures are ESMFold, not the AlphaFold2 ones Kermut used.
+
+Full account: `diagnostics/finetune_scoping.md` §9, `PREREGISTRATION.md` Phase 2 gate.
+Reproduce with `python -I scripts/gp_reward.py --instance benchmark --zs-backbone
+msa-transformer --structure-kernel` then `python -I scripts/h1_verdict_gp.py --source
+data/processed/gp_reward_zs-msa-transformer_structkern.json`.
+
+---
+
+# Step 2.2 — H1: **FAIL.** Do not proceed to Phase 3. *(superseded 2026-11-28)*
 
 **Run:** 2026-11-27, CPU only, `benchmark` instance, 11 assays, 943,411 unseen order ≥ 3
 variants. Reproduce with `python -I scripts/h1_benchmark.py`.
