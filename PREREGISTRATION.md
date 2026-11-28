@@ -284,6 +284,146 @@ Step 2.4 GP.
 
 ---
 
+## Decisions on the three open amendments (2026-11-28)
+
+Three amendments were left open with their evidence rather than taken. All three are now
+decided. **Two are declined and one is taken, and the one taken is made harder than the
+number already in hand, not easier.**
+
+### 1. DECLINED — `spearman_mean_gp` keeps reading `gp_zeroshot_mean`. It stays a FAIL.
+
+| configuration | what it is | `spearman_mean` | vs 0.55 |
+|---|---|---:|---|
+| `gp_zeroshot_mean` | Kermut-*sequence* as published: RBF on pooled embeddings + affine zero-shot mean | **+0.525** | **FAIL — the registered reading** |
+| `gp_composite_kernel` | π·k_subs + (1−π)·k_seq, a **substitution-one-hot stand-in** written when this project had no ProteinMPNN | +0.559 | would PASS |
+| `gp_structure_kernel` | Kermut eq. 4 proper, π·k_struct + (1−π)·k_seq | +0.574 | passes; H1's reading |
+
+Re-reading `spearman_mean_gp` on `gp_composite_kernel` would flip a FAIL to a PASS. It is
+declined for two independent reasons, either of which is sufficient:
+
+1. **It is not what the metric was registered against.** `plan.yaml` Step 2.4 carries the
+   comment *"Kermut-sequence (no structure kernel) is the published configuration being
+   reproduced; it reports 0.614 at n=128 on multi-mutants"*, and `scripts/gp_reward.py`
+   fixes the referent in code: *"`gp_zeroshot_mean` is Kermut-sequence as published — no
+   order term, because Kermut has none — so it is the one the thresholds are read on."*
+2. **The reading was already settled while it was costless.** The superseded 2026-11-27
+   gate below records it explicitly — *"`spearman_mean_gp` is read on `gp_zeroshot_mean`
+   (+0.428) … not on the better composite kernel (+0.479). Both fail 0.55"* — at a time
+   when both configurations failed and the choice changed no verdict. Changing it now, when
+   it decides a FAIL, is the move the pre-registration exists to prevent.
+
+There is a real argument on the other side and it is recorded rather than used:
+`gp_composite_kernel` also has no structure kernel, so "Kermut-sequence" is not a
+self-evidently unique description. It fails anyway, because that configuration's own
+docstring calls its substitution one-hot *"standing in for the structure kernel this
+project has no ProteinMPNN for yet"* — a placeholder for a component that now exists in
+`gp_structure_kernel`. Promoting a superseded surrogate to the registered referent on the
+run where it happens to clear the bar is not a defensible reading.
+
+**Net effect: Step 2.4's `spearman_mean_gp` is a FAIL at +0.525 and stays one.** H1 is
+unaffected; it is read on `gp_structure_kernel` under the amendment logged below, which was
+argued from Kermut's published full-model ablation and not from our scores.
+
+### 2. DECLINED — 0.55 is not adjusted for this assay list.
+
+`published_bar_check` measures six published methods scoring 0.12 … 0.27 lower on our
+eleven `benchmark` assays than on ProteinGym's other 206, mean offset −0.174. That is
+sufficient to argue the bar was calibrated on an easier list.
+
+**It is not cashed in.** H1 clears 0.55 **unadjusted** at +0.574, so adjusting the bar
+would change no verdict while permanently weakening every number this project reports
+against the literature. An offset measured and then not spent is evidence; the same offset
+spent to move a threshold is an excuse. It stays in the record for the reason it was taken:
+the measurement was owed either way, and had H1 landed at +0.52 this paragraph would have
+had to be written with the opposite conclusion and defended.
+
+### 3. TAKEN, with a harder threshold than the one in hand — Step 3.2's collapse gate.
+
+See the Phase 3 gate section below. In one line: the registered
+`latent_effective_rank_ratio >= 0.5` is **arithmetically unreachable** on single-protein
+variant data, the replacement is registered here **before** the run that will be read
+against it, and its threshold is set at **0.7 mean / 0.5 min** rather than the 0.5 that the
+already-measured 0.55 would have passed.
+
+---
+
+## Phase 3 gate (2026-11-28): Step 3.2 as registered FAILS, and the metric is replaced
+
+**The registered reading, recorded as a fail:** `latent_effective_rank_ratio` **+0.022**
+against `>= 0.5`. `plan.yaml` Step 3.2 names the metric without naming a denominator;
+`biodreamer/world_model/collapse.py` fixed it as a fraction of `d_model`, which is the
+standard reading in the collapse literature, and that is the reading taken. The ambiguity is
+noted but **not** exploited.
+
+**Why the remedy ladder was not applied.** The three registered remedies — a masked-token
+loss, an EMA target, AC-MTM — all treat *training* pathologies. The input was measured
+first, and the ceiling is on the input side:
+
+| | effective rank | of |
+|---|---:|---:|
+| frozen encoder states, `PHOT_CHLRE` | **6.6** | 1280 |
+| frozen encoder states, `CAPSD_AAV2S` | 14.8 | 1280 |
+| frozen encoder states, `GFP_AEQVI` | 21.8 | 1280 |
+| world-model latent, `PHOT_CHLRE` | 7.3 | 256 |
+
+Every variant of one protein is a near-identical sequence, so the frozen encoder places a
+whole assay in a thin shell around the wild type. A latent cannot span more directions than
+its input contains, so `>= 0.5 * d_model` is unreachable here **by any model**, for reasons
+unrelated to training. No remedy adds information the input does not carry.
+
+**The strongest objection to that argument was tested and does not rescue the gate.** The
+numbers above are pooled states, and pooling is itself a rank-destroying operation — so the
+per-residue state Step 3.1 registers might not share the ceiling. Measured on all eleven
+cached assays (`scripts/state_rank_ceiling.py`, no new encoding required):
+
+| state | effective rank, of 1280 |
+|---|---|
+| pooled | 6.0 … 37.3 |
+| **per-residue rows** | **26.1 … 69.5** |
+| gain from going per-residue | 1.8× … 8.2× |
+| **needed to clear the registered floor** | **640** |
+
+Per-residue raises the ceiling about threefold and leaves it roughly ninefold short. The
+floor is therefore unreachable on the registered state format too, and the amendment below
+is grounded on both formats rather than on the pooled stand-in alone.
+
+**Replacement metric, registered now, before the run it will be read against.**
+
+| metric | op | value | hypothesis |
+|---|---|---|---|
+| `rank_preserved_vs_input` (mean over assays) | `>=` | **0.7** | no-collapse |
+| `rank_preserved_vs_input` (min over assays) | `>=` | **0.5** | no-collapse |
+
+`rank_preserved_vs_input` = latent effective rank ÷ input effective rank: does the adapter
+keep the variation its input actually has.
+
+**The threshold is deliberately above the value already measured.** The mean on the pooled
+pipeline-validation run is **0.55**, which the originally-proposed `>= 0.5` would have
+passed by 0.05 — and a gate cleared that narrowly, by a mean that one assay carries, is not
+a gate. The bar is instead set from what a working adapter was *observed* to do:
+`PHOT_CHLRE`, the one assay with ample transitions, preserves **1.10** of its input rank.
+Full preservation is therefore achievable on this architecture and this encoder, and 0.7
+mean / 0.5 min is the weakest bar consistent with that demonstration. **On the numbers in
+hand this replacement gate FAILS** (mean 0.55 < 0.7, min 0.22 < 0.5). It is registered in
+that state on purpose.
+
+**Two conditions on how it is read**, both registered here rather than chosen afterwards:
+
+1. It is read on the **per-residue** state Step 3.1 registers, not on the pooled state.
+   The pooled run is a pipeline validation (`results/world_model_B.md`).
+2. It is read **after** the transition cache-coverage gap is closed. Rank preservation on
+   the pooled run tracks transition count — `PHOT` 1.10 at 60,000, `CAPSD` 0.34 at 20,142,
+   `GFP` 0.22 at 3,769, alongside inverse-dynamics accuracy 1.000 / 0.726 / 0.271 — and
+   those counts are an artefact of a cache built for the H1 split, not a property of the
+   assays. Reading a collapse gate on starved assays measures starvation.
+
+If the gate still fails once both conditions are met, the diagnosis is data volume and the
+remedy is more transitions, which is a data fix and not a threshold fix. The registered
+remedy ladder is applied only if preservation fails *with* adequate transitions, which is
+the condition under which it would be the right tool.
+
+---
+
 ## Phase 2 gate (2026-11-27): H1 FAILED, Phase 3 BLOCKED — superseded, kept for the record
 
 `RESEARCH_PLAN.md`'s Phase 2 gate carries the full statement. Recorded here because the
@@ -336,6 +476,9 @@ threshold stays visible.
 
 | Date | What | From | To | Reason |
 |---|---|---|---|---|
+| 2026-11-28 | **Step 3.2's collapse gate** | `latent_effective_rank_ratio >= 0.5`, a fraction of `d_model` | **`rank_preserved_vs_input >= 0.7` mean and `>= 0.5` min**, read on the per-residue state after the coverage gap is closed | The registered floor is arithmetically unreachable, not merely unmet: the FROZEN encoder's own states have effective rank 6.6-21.8 of 1280, because every variant of one protein is a near-identical sequence. No adapter spans more directions than its input has, so no model and no remedy could pass it on single-protein variant data. The objection that POOLING caused this was tested: the per-residue rows Step 3.1 registers reach only 26-70 of 1280, about 3x the pooled ceiling and still ~9x short of the required 640, so the floor is unreachable on the registered state format as well. The registered reading is recorded as a FAIL at +0.022 and kept. The replacement threshold is set ABOVE the 0.55 already measured -- 0.5 would have passed -- and is calibrated on `PHOT_CHLRE` preserving 1.10, which shows full preservation is achievable here. It FAILS on the numbers in hand and is registered that way |
+| 2026-11-28 | *(declined)* **`spearman_mean_gp`'s configuration** | `gp_zeroshot_mean`, +0.525 FAIL | *no change* -- `gp_composite_kernel` at +0.559 would have PASSED | Declined. `plan.yaml` 2.4 and `scripts/gp_reward.py` both name Kermut-*sequence* / `gp_zeroshot_mean` as the referent, and the superseded 2026-11-27 gate settled the reading while BOTH configurations failed and the choice was costless. `gp_composite_kernel`'s substitution one-hot is its own docstring's stand-in for the structure kernel that now exists. Recorded because the rejected reading is the one that would have helped |
+| 2026-11-28 | *(declined)* **H1's 0.55 bar for this assay list** | ≥ 0.55 | *no change* -- a −0.174 published offset would have justified lowering it | Declined. H1 clears 0.55 unadjusted at +0.574, so the adjustment changes no verdict while permanently weakening every comparison this project reports. The offset stays as evidence; it is not spent |
 | 2026-11-28 | **`f0`, the zero-shot prior mean** | SaProt masked marginals (single-sequence) | **MSA Transformer ensemble** (alignment-based), read from ProteinGym's published archive | `msa_zeroshot` was registered under Step 2.4 and never run. On H1's own test set the single-sequence prior scores +0.249/+0.164 (total/within-order) against +0.442/+0.328. The primary was fixed as `msa-transformer` on ProteinGym's published per-assay table **before** the GP runs finished, not on our test set; all four candidates are reported. Disclosure: the five candidates had already been scored on H1's test set when the choice was made, so it was not blind |
 | 2026-11-28 | **Reward model for the H1 gate** | GP, RBF on pooled embeddings + affine zero-shot mean (Kermut-*sequence*) | **GP, Kermut eq. 4**: π·k_struct + (1−π)·k_seq with the ProteinMPNN site kernel | `mpnn_site_features` was registered under Step 2.4 and run only as a scalar mean term, which is not the component Kermut ablates. H1's 0.55 was grounded on published **full**-model scores (Kermut 0.62, Cerebra 0.65), so reading it against a configuration with that model's largest component removed was the mismatch. Step 2.4's `spearman_mean_gp` keeps its original Kermut-sequence definition and keeps its FAIL |
 | 2026-11-26 | **TEV data rule** | full landscape | **depth-filtered**, reads ≥ median (209) | Step 1.1: TEV's reliability ceiling is R² ≤ 0.668. At full depth its out-of-fold pairwise increment is +0.030; filtered it is +0.257. The full-depth figure measures read noise |

@@ -1,0 +1,138 @@
+{
+  "d_model_of_encoder": 1280,
+  "registered_floor_rank": 640.0,
+  "per_assay": {
+    "CAPSD_AAV2S_Sinai_2021": {
+      "length": 735,
+      "d": 1280,
+      "pooled": 14.069205730252575,
+      "wt_rows": 65.02027138105755,
+      "mut_rows": 41.389426383053866,
+      "all_rows": 49.39270494440562,
+      "row_displacement": 25.439353543876273,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 3.510696047197464
+    },
+    "D7PM05_CLYGR_Somermeyer_2022": {
+      "length": 235,
+      "d": 1280,
+      "pooled": 37.27476209091896,
+      "wt_rows": 55.980111753398226,
+      "mut_rows": 67.55141418154899,
+      "all_rows": 68.63751626347488,
+      "row_displacement": 34.841757811857086,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 1.8413938121471376
+    },
+    "F7YBW8_MESOW_Aakre_2015": {
+      "length": 93,
+      "d": 1280,
+      "pooled": 11.881201146470612,
+      "wt_rows": 52.330485855059045,
+      "mut_rows": 28.08146945980913,
+      "all_rows": 31.209110376725175,
+      "row_displacement": 18.085364630630213,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 2.626763909808567
+    },
+    "F7YBW8_MESOW_Ding_2023": {
+      "length": 93,
+      "d": 1280,
+      "pooled": 16.55816236867814,
+      "wt_rows": 52.330485855059045,
+      "mut_rows": 66.05014385753972,
+      "all_rows": 69.54173865869771,
+      "row_displacement": 39.38950775134343,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 4.199846402656656
+    },
+    "GCN4_YEAST_Staller_2018": {
+      "length": 281,
+      "d": 1280,
+      "pooled": 22.947319661553536,
+      "wt_rows": 55.99915857273053,
+      "mut_rows": 62.684786843318484,
+      "all_rows": 65.5646693118915,
+      "row_displacement": 40.14736148575496,
+      "n_pooled": 2638,
+      "n_rows": 4096,
+      "per_residue_gain": 2.857182027308403
+    },
+    "GFP_AEQVI_Sarkisyan_2016": {
+      "length": 238,
+      "d": 1280,
+      "pooled": 25.777632235165846,
+      "wt_rows": 55.01776548079754,
+      "mut_rows": 57.863363421776555,
+      "all_rows": 59.36291300148511,
+      "row_displacement": 33.00332662635965,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 2.3028846272584427
+    },
+    "HIS7_YEAST_Pokusaeva_2019": {
+      "length": 220,
+      "d": 1280,
+      "pooled": 12.569874650962774,
+      "wt_rows": 52.81760269368013,
+      "mut_rows": 56.99184621348681,
+      "all_rows": 58.92843326095468,
+      "row_displacement": 33.30369612380548,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 4.6880684889281
+    },
+    "PHOT_CHLRE_Chen_2023": {
+      "length": 118,
+      "d": 1280,
+      "pooled": 7.6189214466749515,
+      "wt_rows": 69.11325719222107,
+      "mut_rows": 22.538479224626304,
+      "all_rows": 26.08801778823683,
+      "row_displacement": 19.09835737113203,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 3.4241090383760495
+    },
+    "Q6WV12_9MAXI_Somermeyer_2022": {
+      "length": 222,
+      "d": 1280,
+      "pooled": 27.7316491993611,
+      "wt_rows": 50.46388920619033,
+      "mut_rows": 58.42220194754998,
+      "all_rows": 59.48212412824557,
+      "row_displacement": 30.572937359353055,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 2.144918381904815
+    },
+    "Q8WTC7_9CNID_Somermeyer_2022": {
+      "length": 238,
+      "d": 1280,
+      "pooled": 28.306182332329726,
+      "wt_rows": 53.69934545830665,
+      "mut_rows": 54.316887609204656,
+      "all_rows": 55.881707947110314,
+      "row_displacement": 28.486881531309372,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 1.9741873803761016
+    },
+    "SPG1_STRSG_Wu_2016": {
+      "length": 448,
+      "d": 1280,
+      "pooled": 5.989540783720662,
+      "wt_rows": 77.49412597944765,
+      "mut_rows": 36.852722388662144,
+      "all_rows": 49.171461745290685,
+      "row_displacement": 25.90998662651206,
+      "n_pooled": 4096,
+      "n_rows": 4096,
+      "per_residue_gain": 8.209554541967023
+    }
+  }
+}

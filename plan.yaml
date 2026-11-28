@@ -410,10 +410,49 @@ phases:
           - id: inverse_recovery_during_training
             name: Inverse-dynamics recovery accuracy over training
         thresholds:
+          # ORIGINAL, recorded as a FAIL at +0.022 and kept visible. The metric was
+          # registered without naming a denominator; collapse.py fixed it as a fraction
+          # of d_model, which is the standard reading, and that is the reading taken --
+          # the ambiguity is NOT exploited. It is arithmetically unreachable: the frozen
+          # encoder's OWN states have effective rank 6.6-21.8 of 1280, because every
+          # variant of one protein is a near-identical sequence and the encoder places a
+          # whole assay in a thin shell around the wild type. No adapter spans more
+          # directions than its input has, so no model and no remedy on the ladder could
+          # pass this on single-protein variant data. Superseded by the two below.
           - metric: latent_effective_rank_ratio
             op: ">="
             value: 0.5
             hypothesis: no-collapse
+            superseded: "2026-11-28"
+            measured: 0.0222
+            verdict: FAIL
+          # AMENDED 2026-11-28, BEFORE the run these are read against. Ratio to the
+          # INPUT's effective rank: does the adapter keep the variation it was given.
+          # Deliberately set ABOVE the 0.55 already in hand -- the originally proposed
+          # 0.5 would have passed by 0.05, carried by one assay, which is not a gate.
+          # Calibrated instead on PHOT_CHLRE preserving 1.10 of its input rank, which
+          # shows full preservation is achievable on this architecture and encoder.
+          # On the numbers in hand BOTH of these FAIL (mean 0.55, min 0.22).
+          - metric: rank_preserved_vs_input
+            op: ">="
+            value: 0.7
+            aggregate: mean
+            hypothesis: no-collapse
+          - metric: rank_preserved_vs_input
+            op: ">="
+            value: 0.5
+            aggregate: min
+            hypothesis: no-collapse
+        read_on: >
+          The PER-RESIDUE state step 3.1 registers, not the pooled state, and only AFTER
+          the transition cache-coverage gap is closed. Both conditions are registered here
+          rather than chosen afterwards. On the pooled validation run, rank preservation
+          tracks transition count -- PHOT 1.10 at 60,000, CAPSD 0.34 at 20,142, GFP 0.22
+          at 3,769, alongside inverse-dynamics accuracy 1.000 / 0.726 / 0.271 -- and those
+          counts are an artefact of a cache built for the H1 split, not a property of the
+          assays. Reading a collapse gate on starved assays measures starvation. If the
+          gate fails WITH adequate transitions, the remedy ladder is the right tool; if it
+          fails for lack of them, the fix is more data and not a lower threshold.
         outputs: [collapse dashboard, remedy applied if needed]
 
       - id: "3.3"

@@ -67,11 +67,22 @@ completely. GFP, with 3,769, keeps a fifth of it. That is the signature of data
 starvation, not of an anti-collapse mechanism failing — and the starved assays are exactly
 the ones the cache-coverage gap below created.
 
-**Proposed amendment, not taken:** replace `latent_effective_rank_ratio >= 0.5` (against
-`d_model`) with `rank_preserved_vs_input >= 0.5`. Measured value **0.55**, which would
-pass — marginally, and *that is precisely why this document does not take it*. It belongs
-in `PREREGISTRATION.md` with the input-rank evidence above, decided by the project owner,
-before any re-run that claims a pass.
+**Amendment DECIDED 2026-11-28, and made harder than the number in hand.**
+`latent_effective_rank_ratio >= 0.5` (against `d_model`) is recorded as a FAIL at +0.022
+and kept. The gate becomes `rank_preserved_vs_input` with **mean ≥ 0.7 and min ≥ 0.5**.
+
+The originally proposed `>= 0.5` would have passed at the measured 0.55 — by 0.05, on a
+mean that `PHOT` alone carries, with `GFP` at 0.22. A gate cleared that way is not a gate.
+The bar is instead set from what a working adapter was *observed* to do: `PHOT_CHLRE`, the
+one assay with ample transitions, preserves **1.10**. Full preservation is achievable here,
+so 0.7 / 0.5 is the weakest bar consistent with that. **Both conditions FAIL on the numbers
+in this document** (mean 0.55, min 0.22), and the gate is registered in that state.
+
+Two conditions on how it is read, registered in `PREREGISTRATION.md` before the run: on the
+**per-residue** state Step 3.1 registers, and **after** the coverage gap below is closed.
+See `results/state_representation.md` — going per-residue raises the encoder's rank ceiling
+only ~3× (to 26–70 of 1280, against the 640 the original floor needs), which is what rules
+out rescuing the original reading rather than replacing it.
 
 ---
 
@@ -138,6 +149,18 @@ Downloading PHOT's 50.6 GB at the measured ~10 MB/s takes ~85 minutes, against 1
 to produce it. **The sensible shape is to train on the rented box where the cache lives
 and bring home metrics and a checkpoint**, not the cache — roughly $0.35 for encode plus
 training, against an hour and a half of transfer for the same result.
+
+**Two follow-ups measured since, both in `results/state_representation.md`:**
+
+- A **windowed** cache — wild type plus only the rows near each mutation — would have cut
+  the seven-assay total from 216.7 GB to 81.9 GB. It is **refuted**: on `CAPSD` a radius-16
+  window recovers 37.6% of the pooled displacement (cosine 0.697), because a substitution's
+  effect on the pooled vector is a diffuse chain-wide shift rather than a local one. It
+  works on short `PHOT` (93.6% at radius 16) and fails exactly where the saving would be.
+  Store the full tensor.
+- The local card does **270 res/s** per-residue against the rented A40's ~26,000: 45 hours
+  against 28 minutes for the 43.6M residues this needs. Storage is not the constraint —
+  `/home` has 464 GB free — throughput is, by 96×.
 
 ---
 

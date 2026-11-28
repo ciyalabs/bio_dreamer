@@ -45,7 +45,13 @@ from biodreamer.world_model import (
 )
 
 OUT = Path("data/processed/wm_b.json")
-RANK_FLOOR = 0.5  # plan.yaml step 3.2, latent_effective_rank_ratio
+# plan.yaml step 3.2. The ORIGINAL floor is kept and still reported: it is a fraction of
+# d_model, it reads +0.022, and it is recorded as a FAIL. It was superseded on 2026-11-28
+# because it is arithmetically unreachable -- the frozen encoder's own states have
+# effective rank 6.6-21.8 of 1280 -- not because it was merely unmet.
+RANK_FLOOR = 0.5                 # latent_effective_rank_ratio, superseded, still reported
+PRESERVED_FLOOR_MEAN = 0.7       # rank_preserved_vs_input, mean over assays
+PRESERVED_FLOOR_MIN = 0.5        # rank_preserved_vs_input, worst assay
 
 
 def run_one(tr, args, device) -> dict:
@@ -173,34 +179,58 @@ def main() -> int:
         "rank_preserved_vs_input": float(
             np.mean([f["rank_preserved_vs_input"] for f in finals])
         ),
+        "min_rank_preserved_vs_input": float(
+            min(f["rank_preserved_vs_input"] for f in finals)
+        ),
         "inverse_position_top1": float(np.mean([f["inverse_position_top1"] for f in finals])),
         "inverse_aa_top1": float(np.mean([f["inverse_aa_top1"] for f in finals])),
         "one_step_vs_identity": float(np.mean([f["one_step_vs_identity"] for f in finals])),
         "one_step_normalised": float(np.mean([f["one_step_normalised"] for f in finals])),
         "sigreg_stat": float(np.mean([f["sigreg_stat"] for f in finals])),
     }
-    passed = summary["latent_effective_rank_ratio"] >= RANK_FLOOR
+    superseded_passed = summary["latent_effective_rank_ratio"] >= RANK_FLOOR
+    passed = (
+        summary["rank_preserved_vs_input"] >= PRESERVED_FLOOR_MEAN
+        and summary["min_rank_preserved_vs_input"] >= PRESERVED_FLOOR_MIN
+    )
     print(f"\n{'=' * 72}")
     for k, v in summary.items():
         print(f"  {k:34s} {v:+.4f}")
-    print(f"\n  latent_effective_rank_ratio >= {RANK_FLOOR}  -> "
-          f"{'PASS -- no collapse' if passed else 'FAIL as registered'}")
-    print(
-        "  NOTE: that floor is a fraction of d_model "
-        f"({int(finals[0]['latent_dim'])}), but the FROZEN ENCODER's own states have an\n"
-        f"  effective rank of only {summary['input_effective_rank']:.1f} (of 1280): every "
-        "variant of one protein is a\n  near-identical sequence, so they occupy a thin "
-        "shell around the wild type. No adapter can\n  span more directions than its input "
-        "has, so the floor is unreachable here for reasons that\n  have nothing to do with "
-        "training, and the remedy ladder treats training pathologies.\n"
-        f"  rank_preserved_vs_input = {summary['rank_preserved_vs_input']:.2f} is the "
-        "diagnostic that separates a collapsing model\n  from a faithful one. Amending the "
-        "gate to use it is a PREREGISTRATION decision, not this\n  script's."
-    )
+
+    print(f"\n  SUPERSEDED reading, reported not hidden:")
+    print(f"    latent_effective_rank_ratio >= {RANK_FLOOR} (of d_model "
+          f"{int(finals[0]['latent_dim'])})  -> "
+          f"{'PASS' if superseded_passed else 'FAIL as registered'}")
+    print(f"    the frozen encoder's OWN states have effective rank only "
+          f"{summary['input_effective_rank']:.1f} of 1280, so no adapter\n"
+          f"    could pass this floor on single-protein variant data. Unreachable, not "
+          f"merely unmet.")
+
+    print(f"\n  GATE (amended 2026-11-28, registered before this run):")
+    print(f"    rank_preserved_vs_input mean >= {PRESERVED_FLOOR_MEAN}  "
+          f"{summary['rank_preserved_vs_input']:+.4f}  "
+          f"{'PASS' if summary['rank_preserved_vs_input'] >= PRESERVED_FLOOR_MEAN else 'FAIL'}")
+    print(f"    rank_preserved_vs_input min  >= {PRESERVED_FLOOR_MIN}  "
+          f"{summary['min_rank_preserved_vs_input']:+.4f}  "
+          f"{'PASS' if summary['min_rank_preserved_vs_input'] >= PRESERVED_FLOOR_MIN else 'FAIL'}")
+    print(f"    -> {'PASS -- no collapse' if passed else 'FAIL'}")
+    if not passed:
+        print("    The threshold was set ABOVE the 0.55 already in hand (the originally\n"
+              "    proposed 0.5 would have passed), calibrated on PHOT_CHLRE preserving\n"
+              "    1.10. Before applying the remedy ladder, check transition counts: on\n"
+              "    the pooled run preservation tracked them 0.22/0.34/1.10 at\n"
+              "    3,769/20,142/60,000. Starvation and collapse look alike in this metric\n"
+              "    and the ladder only fixes one of them.")
 
     Path(args.out).write_text(
         json.dumps({"summary": summary, "collapse_gate_passed": passed,
-                    "threshold": RANK_FLOOR, "config": vars(args),
+                    "superseded_gate_passed": superseded_passed,
+                    "thresholds": {
+                        "latent_effective_rank_ratio": RANK_FLOOR,
+                        "rank_preserved_vs_input_mean": PRESERVED_FLOOR_MEAN,
+                        "rank_preserved_vs_input_min": PRESERVED_FLOOR_MIN,
+                    },
+                    "config": vars(args),
                     "skipped_for_too_few_transitions": skipped,
                     "per_assay": results}, indent=2, default=str) + "\n"
     )
