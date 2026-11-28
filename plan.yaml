@@ -320,6 +320,70 @@ phases:
             hypothesis: H1
         outputs: [diagnostics/finetune_scoping.md, results/reward_benchmark.md]
 
+      - id: "2.5"
+        name: Finish the two Step 2.4 experiments that were registered and never run
+        size: M
+        prereg_required: true
+        why: >
+          H1's FAIL at +0.479 was read while two experiments registered under Step 2.4 were
+          still outstanding: msa_zeroshot ("MSA-based zero-shot instead of single-sequence")
+          was never run at all, and mpnn_site_features was run only as a scalar MEAN term,
+          not as the site-comparing KERNEL that Kermut's ablation measures. Both are
+          components the published 0.62 carries and this model does not, so the verdict was
+          read against a deliberately incomplete reproduction. This step completes them and
+          re-reads H1 ONCE. It is not a new hypothesis and it moves no threshold.
+
+          The shortfall and the missing component are the same size. Kermut's largest
+          ablation is its structure kernel at -0.065; the gap from +0.479 to 0.55 is 0.071.
+
+          On the prior, the case is now quantified rather than assumed. ProteinGym publishes
+          per-variant zero-shot scores, and on THIS project's 11 assays and order>=3 test
+          set the single-sequence prior in use scores +0.249 total / +0.164 within-order
+          while the alignment-based ones score +0.397/+0.280 (EVE) to +0.442/+0.328 (MSA
+          Transformer). Evolutionary information is a category of evidence no term in this
+          model carries at all.
+        disclosure: >
+          NOT A BLIND CHOICE. The five candidate priors were each scored on H1's own order>=3
+          test set before this step was written, so selecting among them is a researcher
+          degree of freedom. Mitigation: every candidate is run through the GP and ALL of
+          them are reported; the primary is fixed here, before those runs finished, as
+          msa-transformer -- chosen on ProteinGym's own published per-assay table (0.447,
+          against GEMME 0.445), which is an external measurement over all variants of each
+          assay rather than our test set. Any other ordering in the results is a sensitivity.
+        experiments:
+          - id: msa_zeroshot
+            name: Alignment-based zero-shot as the GP prior mean (registered under 2.4, unrun)
+          - id: mpnn_structure_kernel
+            name: ProteinMPNN site distributions as a KERNEL, not the mean term already tested
+          - id: published_bar_check
+            name: Is 0.55 the right bar for THIS assay list, read from published per-assay numbers
+          - id: h1_verdict_rescored_2
+            name: H1's four conditions re-read once, after both components are in
+        thresholds:
+          # Same margin convention as everywhere else in this phase. The prior swap changes
+          # one term and nothing else, so anything smaller than this is not worth the
+          # dependency on a third-party score file.
+          - metric: msa_prior_margin_over_esm2
+            op: ">"
+            value: 0.05
+            hypothesis: H1
+          # Kermut's own ablation for this component is -0.065 on single-mutant splits. We
+          # require it to clear the same 0.05 margin on order>=3 extrapolation, which is a
+          # harder setting and may well not transfer -- that is the thing being tested.
+          - metric: structure_kernel_margin
+            op: ">"
+            value: 0.05
+            hypothesis: H1
+          # H1's own bar. UNCHANGED at 0.55 and not to be edited by this step. If the
+          # published_bar_check shows 0.55 is wrong for this assay list, that is an
+          # amendment with its own entry and its own justification, argued from published
+          # per-assay numbers and never from our own score.
+          - metric: spearman_mean_gp_complete
+            op: ">="
+            value: 0.55
+            hypothesis: H1
+        outputs: [diagnostics/finetune_scoping.md, results/reward_benchmark.md]
+
   - id: "3"
     name: World model B (deterministic)
     goal: Establish the pipeline, collapse diagnostics and multi-step evaluation machinery.

@@ -66,8 +66,30 @@ data, used as a benchmark. It gives breadth across domains, not depth of mutants
 | Acquired | `DMS_ProteinGym_substitutions.zip` 42 MB (1,015 MiB unzipped, 217 assays) · `sha256:3a83766254ac` |
 | | `cv_folds_multiples_substitutions.zip` 33 MB · `sha256:4f1453ee8ccf` |
 | | `DMS_substitutions_reference.csv` 204 KB · `sha256:a8f498011532` |
+| | `zero_shot_substitutions_scores.zip` 1.78 GiB (4.8 GiB unzipped, 217 assays) · `sha256:3fd7cdb5e78f` — acquired 2026-11-28 |
 | Composition | 217 assays, 2,465,767 variants, 28% single / 72% multiple |
 | Role | Reward head; multi-mutant supervised evaluation; **and** the source for GB1 and HIS3 |
+
+> **Fetching this host needs the chain completed, as of 2026-11-23.** The leaf certificate
+> `marks.hms.harvard.edu` renewed on that date is issued by `Sectigo Public Server
+> Authentication CA DV R36`, but the server sends a different intermediate (`InCommon RSA
+> OV SSL CA 3`). The issuing intermediate is therefore absent from the chain, so curl and
+> wget both fail with "unable to get local issuer certificate" while browsers succeed by
+> chasing the AIA pointer. `scripts/download_data.sh` worked before this date and does not
+> now. The fix is to do what a browser does — fetch the issuer named in the leaf's AIA
+> extension (`http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt`),
+> confirm it verifies against the system trust store, and append it to the CA bundle for
+> the request. **Do not pass `-k` / `--no-check-certificate`**: that turns a chain problem
+> into no authentication at all, and the fix above keeps verification whole.
+
+**Zero-shot baseline scores.** `zero_shot_substitutions_scores.zip` is one CSV per assay
+with a column per published baseline (112 of them), not a directory per model.
+`scripts/extract_pgym_priors.py` slices out the four this project uses as candidate prior
+means — `GEMME`, `MSA_Transformer_ensemble`, `TranceptEVE_L`, `EVE_ensemble` — plus
+`ESM2_650M` as a join check. Coverage of this project's variants is **100% on all 13
+assays**, multi-mutants included, and our independently computed ESM-2 masked marginals
+reproduce their `ESM2_650M` column at **rho = 1.0000**, which is what establishes that the
+mutant keys line up.
 
 **Mutation-order histograms** (the number Step 0.2 exists to produce), top assays:
 
