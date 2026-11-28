@@ -103,3 +103,61 @@ def test_gradients_reach_the_adapter_only_through_the_prediction():
     loss.backward()
     assert m.adapter[0].weight.grad is not None
     assert torch.isfinite(m.adapter[0].weight.grad).all()
+
+
+def test_mmap_rows_reorders_without_materialising_the_whole_table(tmp_path):
+    """`full[want]` on a memmap is fancy indexing and materialises every requested row
+    at once -- 52 GB on CAPSD. `_MmapRows` keeps it lazy, and must still return rows in
+    the order asked for, including with repeats and out-of-order reads.
+    """
+    import numpy as np
+
+    from biodreamer.world_model.transitions import _MmapRows
+
+    path = tmp_path / "t.npy"
+    table = np.arange(12 * 3 * 2, dtype=np.float16).reshape(12, 3, 2)
+    np.save(path, table)
+    full = np.load(path, mmap_mode="r")
+
+    want = np.array([7, 1, 7, 0, 11])
+    view = _MmapRows(full, want)
+    assert view.shape == (5, 3, 2)
+    assert len(view) == 5
+    np.testing.assert_array_equal(view[np.arange(5)], table[want])
+    # a scalar index returns one state, not a length-1 batch
+    np.testing.assert_array_equal(view[2], table[7])
+    # a subset, out of order, still maps through `want`
+    np.testing.assert_array_equal(view[np.array([4, 0])], table[[11, 7]])
+
+
+def test_transition_index_needs_no_cache_and_finds_more_than_the_pooled_one():
+    """The coverage gap: the pooled cache was built for the H1 split, which excludes the
+    low-order PARENTS of transitions. The index computed from mutant strings alone must
+    find strictly more, or encoding against it buys nothing.
+    """
+    from biodreamer.world_model import transition_index
+
+    assay = "D7PM05_CLYGR_Somermeyer_2022"
+    _, src_all, _, _, _, cov_all = transition_index(assay, present=None)
+    assert cov_all == 1.0
+    assert len(src_all) > 20000
+
+    from biodreamer.world_model.transitions import BACKBONE, CACHE
+
+    f = CACHE / f"{BACKBONE}__{assay}.npz"
+    if f.exists():
+        import numpy as np
+        with np.load(f) as z:
+            present = set(z["keys"])
+        _, src_cached, _, _, _, cov_cached = transition_index(assay, present=present)
+        assert cov_cached < 1.0
+        assert len(src_cached) < len(src_all)
+
+
+def test_build_rejects_an_unknown_state():
+    import pytest
+
+    from biodreamer.world_model import build
+
+    with pytest.raises(ValueError, match="state must be"):
+        build("D7PM05_CLYGR_Somermeyer_2022", state="per_residue")

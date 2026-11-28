@@ -1365,6 +1365,38 @@ and the remedy ladder decided in advance rather than improvised.
 
 **Outputs.** Collapse dashboard; whichever remedy was needed, logged with evidence.
 
+### ⚠️ Gate amended 2026-11-28 — and the ladder above was NOT the fix
+
+The registered gate `latent_effective_rank_ratio >= 0.5` (a fraction of `d_model`) reads
+**+0.022** and is recorded as a FAIL. It was not met by applying a remedy, because it is
+**arithmetically unreachable rather than merely unmet**, and every rung of the ladder
+treats a *training* pathology:
+
+| state | effective rank, of 1280 | needed for the gate |
+|---|---|---|
+| frozen encoder, pooled | 6 … 37 | **640** |
+| frozen encoder, per-residue rows | 26 … 70 | **640** |
+
+Every variant of one protein is a near-identical sequence, so the frozen encoder places a
+whole assay in a few dozen directions. A latent cannot span more directions than its input
+contains. The obvious objection — that *pooling* caused this and the per-residue state Step
+3.1 registers would not share it — was tested and is only a ~3× effect, leaving the floor
+~9× away (`scripts/state_rank_ceiling.py`). No remedy adds information the input lacks.
+
+**The gate is now `rank_preserved_vs_input`: mean ≥ 0.7 and min ≥ 0.5**, read on the
+per-residue state and only after the transition coverage gap is closed. It was registered
+in `PREREGISTRATION.md` **before** the run it is read against, and its threshold is set
+*above* the 0.55 already measured — the obvious `>= 0.5` would have passed by 0.05 on a
+mean that one assay carried, with another at 0.22. 0.7/0.5 is calibrated on `PHOT_CHLRE`
+preserving **1.10**, which shows full preservation is achievable here.
+
+**The ladder is not retired.** It is the right tool if preservation fails *with* adequate
+transitions. On the pooled run preservation tracked transition count (0.22 / 0.34 / 1.10 at
+3,769 / 20,142 / 60,000), so starvation and collapse look alike in this metric and only one
+of them is a training pathology. Closing the coverage gap is therefore a precondition for
+reading the gate, not an optimisation: encoding exactly the variants the transition index
+names lifts `D7PM05` from 55 usable transitions to 20,513 and `Q6WV12` from 92 to 34,111.
+
 ---
 
 ## Step 3.3 — One-step accuracy `S`

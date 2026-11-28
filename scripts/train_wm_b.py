@@ -37,10 +37,12 @@ from torch import nn
 from biodreamer import tracking
 from biodreamer.reward.data import assays_for
 from biodreamer.world_model import (
+    ResidueWorldModelB,
     WorldModelB,
     build,
     diagnostics,
     dynamics_weight,
+    residue_diagnostics,
     split,
 )
 
@@ -52,6 +54,93 @@ OUT = Path("data/processed/wm_b.json")
 RANK_FLOOR = 0.5                 # latent_effective_rank_ratio, superseded, still reported
 PRESERVED_FLOOR_MEAN = 0.7       # rank_preserved_vs_input, mean over assays
 PRESERVED_FLOOR_MIN = 0.5        # rank_preserved_vs_input, worst assay
+
+
+def run_residue(tr, args, device) -> dict:
+    """Step 3.1 proper: the per-residue state.
+
+    The state table is a disk-backed memmap of 26-52 GB, so unlike `run_one` this never
+    holds it in memory: each batch reads only the 2 * batch states it touches. That makes
+    the batch size a memory decision about the GPU, not about the assay.
+    """
+    torch.manual_seed(args.seed)
+    z = tr.z                                   # (n_states, L, 1280) memmap view
+    length = z.shape[1]
+    pos_all = torch.tensor(tr.position)
+    aa_all = torch.tensor(tr.aa)
+    y = torch.tensor(tr.score)
+    y = (y - y.mean()) / (y.std() + 1e-8)
+
+    itr, iva = split(len(tr), seed=args.seed)
+    model = ResidueWorldModelB(
+        d_in=z.shape[2], d_model=args.d_model, length=length, seed=args.seed,
+    ).to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
+    ce = nn.CrossEntropyLoss()
+
+    def gather(rows: np.ndarray) -> torch.Tensor:
+        return torch.from_numpy(np.asarray(z[rows], dtype=np.float32)).to(device)
+
+    history = []
+    for epoch in range(args.epochs):
+        model.train()
+        w = dynamics_weight(epoch, args.warmup, args.ramp)
+        perm = itr[np.random.default_rng(args.seed + epoch).permutation(len(itr))]
+        tot = {"dyn": 0.0, "inv": 0.0, "rew": 0.0, "sig": 0.0}
+        nb = 0
+        for s0 in range(0, len(perm), args.batch):
+            b = perm[s0 : s0 + args.batch]
+            if len(b) < 8:
+                continue
+            h_t = model.encode(gather(tr.src[b]))
+            h_next = model.encode(gather(tr.dst[b]))
+            pos = pos_all[b].to(device)
+            aa = aa_all[b].to(device)
+            pred = model.step(h_t, pos, aa)
+            l_dyn = (pred - h_next.detach()).pow(2).flatten(1).sum(-1).mean()
+            lp, la = model.inverse_logits(h_t, h_next)
+            l_inv = ce(lp, pos) + ce(la, aa)
+            l_rew = (model.predict_reward(h_next) - y[tr.dst[b]].to(device)).pow(2).mean()
+            l_sig = model.sigreg(model.rows(h_next))
+            loss = w * l_dyn + l_inv + l_rew + args.sigreg * l_sig
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+            tot["dyn"] += float(l_dyn)
+            tot["inv"] += float(l_inv)
+            tot["rew"] += float(l_rew)
+            tot["sig"] += float(l_sig)
+            nb += 1
+            if nb % 50 == 0:
+                print(f"    ep{epoch} batch {nb}/{len(perm) // args.batch}", flush=True)
+
+        vb = iva[: args.val_batch]
+        d = residue_diagnostics(
+            model, gather(tr.src[vb]), gather(tr.dst[vb]),
+            pos_all[vb].to(device), aa_all[vb].to(device),
+        )
+        d.update({k: v / max(nb, 1) for k, v in tot.items()})
+        d["epoch"] = epoch
+        d["dynamics_weight"] = w
+        history.append(d)
+        print(
+            f"  ep{epoch:>3d} w={w:.2f} dyn={d['dyn']:.4f} inv={d['inv']:.4f} "
+            f"rew={d['rew']:.4f} sig={d['sig']:.4f} | "
+            f"preserved={d['rank_preserved_vs_input']:.3f} "
+            f"pos@1={d['inverse_position_top1']:.3f} "
+            f"vs_identity={d['one_step_vs_identity']:.3f}",
+            flush=True,
+        )
+    out = {"history": history, "final": history[-1], "n_transitions": len(tr),
+           "length": length, "state": "residue"}
+    if args.save_checkpoint:
+        ck = Path(args.save_checkpoint) / f"wm_residue__{tr.assay}.pt"
+        ck.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"model": model.state_dict(), "config": vars(args),
+                    "assay": tr.assay, "length": length}, ck)
+        print(f"  checkpoint -> {ck} ({ck.stat().st_size / 1e6:.0f} MB)")
+        out["checkpoint"] = str(ck)
+    return out
 
 
 def run_one(tr, args, device) -> dict:
@@ -141,6 +230,15 @@ def main() -> int:
              "are recorded, not dropped quietly.",
     )
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument(
+        "--state", default="pooled", choices=["pooled", "residue"],
+        help="'residue' is the state Step 3.1 registers and the one the amended Step 3.2 "
+             "gate is read on; 'pooled' reproduces the superseded validation run.",
+    )
+    ap.add_argument("--val-batch", type=int, default=256,
+                    help="per-residue only: validation transitions per diagnostic pass")
+    ap.add_argument("--save-checkpoint", default=None,
+                    help="per-residue only: directory for one checkpoint per assay")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--dry-run", action="store_true")
@@ -148,15 +246,18 @@ def main() -> int:
 
     names = [args.assay] if args.assay else list(assays_for("planning"))
     device = torch.device(args.device)
-    print(f"device={device}  assays={len(names)}  max_transitions={args.max_transitions}")
+    print(f"device={device}  state={args.state}  assays={len(names)}  "
+          f"max_transitions={args.max_transitions}")
 
     results: dict = {}
     skipped: dict = {}
     for n in names:
         t0 = time.time()
-        tr = build(n, max_transitions=args.max_transitions, seed=args.seed)
+        tr = build(n, max_transitions=args.max_transitions, seed=args.seed,
+                   state=args.state)
         print(f"{n}: {len(tr):,} transitions over {len(tr.z):,} states, "
-              f"cache coverage {tr.coverage:.0%} "
+              f"transitions retained {tr.transition_coverage:.0%} "
+              f"(variants cached {tr.coverage:.0%}) "
               f"({time.time() - t0:.0f}s to build)")
         if args.dry_run:
             continue
@@ -164,12 +265,28 @@ def main() -> int:
             print(f"  SKIPPED: {len(tr):,} < --min-transitions {args.min_transitions:,}")
             skipped[n] = {"n_transitions": len(tr), "coverage": tr.coverage}
             continue
-        results[n] = run_one(tr, args, device)
+        results[n] = (run_residue if args.state == 'residue' else run_one)(
+            tr, args, device
+        )
 
     if args.dry_run:
         return 0
 
     finals = [r["final"] for r in results.values()]
+    if not finals:
+        # Every assay asked for fell below --min-transitions. That is a legitimate
+        # outcome when the script is driven one assay at a time (phase3_pod.sh does
+        # exactly that, and GCN4_YEAST has 144 transitions), so it is recorded and
+        # exits clean rather than crashing the surrounding run on an empty min().
+        print(f"\n  every assay was skipped below --min-transitions "
+              f"{args.min_transitions:,}; no gate is read on this run")
+        Path(args.out).write_text(json.dumps(
+            {"summary": None, "collapse_gate_passed": None,
+             "skipped_for_too_few_transitions": skipped,
+             "config": vars(args), "per_assay": {}}, indent=2, default=str) + "\n")
+        print(f"wrote {args.out}")
+        return 0
+
     summary = {
         "latent_effective_rank_ratio": float(
             np.mean([f["latent_effective_rank_ratio"] for f in finals])
@@ -238,9 +355,12 @@ def main() -> int:
 
     with tracking.run(
         "3.2", "latent_rank",
-        variant={"instance": "planning", "model": "world_model_B", "ema": False},
+        variant={"instance": "planning", "model": "world_model_B",
+                 "state": args.state, "ema": False},
         config={k: v for k, v in vars(args).items() if k != "out"},
-        seed=args.seed, datasets=["data/processed/pooled_cache"],
+        seed=args.seed,
+        datasets=[f"data/processed/{'residue' if args.state == 'residue' else 'pooled'}"
+                  "_cache"],
         notes=("World Model B with no EMA target; SIGReg is the only anti-collapse "
                "mechanism, so the effective-rank ratio is the gate. Diagnostics are "
                "logged every epoch because the question is whether the representation "

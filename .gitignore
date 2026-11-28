@@ -302,3 +302,6 @@ splits/work/
 
 # Embedding caches (large, regenerable)
 models/cache*/
+
+# Per-residue state cache (tens of GB, regenerable, pod-local)
+data/processed/residue_cache/

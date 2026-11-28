@@ -1,0 +1,15 @@
+{
+  "backbone": "westlake-repl/SaProt_650M_AF2",
+  "max_transitions": 60000,
+  "total_gb": 0.09,
+  "per_assay": {
+    "GCN4_YEAST_Staller_2018": {
+      "n_states": 119,
+      "n_transitions": 144,
+      "length": 281,
+      "residues": 33439,
+      "seconds": 144.1,
+      "gb": 0.09
+    }
+  }
+}
