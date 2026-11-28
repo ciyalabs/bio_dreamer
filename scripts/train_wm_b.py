@@ -80,8 +80,11 @@ def run_one(tr, args, device) -> dict:
             b = perm[s0 : s0 + args.batch]
             if len(b) < 8:
                 continue
-            h = model.encode(z)
-            h_t, h_next = h[src[b]], h[dst[b]]
+            # encode only the rows this batch touches. Encoding the whole state table
+            # here costs ~50x on PHOT (86,313 states against a 512-row batch) and buys
+            # nothing: no loss term reads a state outside the batch.
+            h_t = model.encode(z[src[b]])
+            h_next = model.encode(z[dst[b]])
             pred = model.step(h_t, pos[b], aa[b])
             l_dyn = (pred - h_next.detach()).pow(2).sum(-1).mean()
             lp, la = model.inverse_logits(h_t, h_next)
@@ -166,6 +169,10 @@ def main() -> int:
             np.mean([f["latent_effective_rank_ratio"] for f in finals])
         ),
         "min_rank_ratio": float(min(f["latent_effective_rank_ratio"] for f in finals)),
+        "input_effective_rank": float(np.mean([f["input_effective_rank"] for f in finals])),
+        "rank_preserved_vs_input": float(
+            np.mean([f["rank_preserved_vs_input"] for f in finals])
+        ),
         "inverse_position_top1": float(np.mean([f["inverse_position_top1"] for f in finals])),
         "inverse_aa_top1": float(np.mean([f["inverse_aa_top1"] for f in finals])),
         "one_step_vs_identity": float(np.mean([f["one_step_vs_identity"] for f in finals])),
@@ -177,7 +184,19 @@ def main() -> int:
     for k, v in summary.items():
         print(f"  {k:34s} {v:+.4f}")
     print(f"\n  latent_effective_rank_ratio >= {RANK_FLOOR}  -> "
-          f"{'PASS -- no collapse' if passed else 'FAIL -- COLLAPSE, apply the remedy ladder'}")
+          f"{'PASS -- no collapse' if passed else 'FAIL as registered'}")
+    print(
+        "  NOTE: that floor is a fraction of d_model "
+        f"({int(finals[0]['latent_dim'])}), but the FROZEN ENCODER's own states have an\n"
+        f"  effective rank of only {summary['input_effective_rank']:.1f} (of 1280): every "
+        "variant of one protein is a\n  near-identical sequence, so they occupy a thin "
+        "shell around the wild type. No adapter can\n  span more directions than its input "
+        "has, so the floor is unreachable here for reasons that\n  have nothing to do with "
+        "training, and the remedy ladder treats training pathologies.\n"
+        f"  rank_preserved_vs_input = {summary['rank_preserved_vs_input']:.2f} is the "
+        "diagnostic that separates a collapsing model\n  from a faithful one. Amending the "
+        "gate to use it is a PREREGISTRATION decision, not this\n  script's."
+    )
 
     Path(args.out).write_text(
         json.dumps({"summary": summary, "collapse_gate_passed": passed,

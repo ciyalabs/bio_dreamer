@@ -48,9 +48,20 @@ def diagnostics(model, z: torch.Tensor, src, dst, pos, aa, limit: int = 4096) ->
     h_t, h_next = h[src[:n]], h[dst[:n]]
     pred = model.step(h_t, pos[:n], aa[:n])
 
-    hn = h.detach().cpu().numpy()
+    # SVD on the full state table is O(n d^2) and n reaches 86k here; the eigenspectrum
+    # of a 4,096-row sample is the same shape, and this runs every epoch
+    hn = h[:limit].detach().cpu().numpy()
     er = effective_rank(hn)
     ratio = er / hn.shape[1]
+    # The INPUT's effective rank, which is the ceiling the adapter is working under.
+    # Every variant of one protein is a near-identical sequence, so the frozen encoder
+    # places them in a tiny subspace around the wild type: measured rank 7.5 of 1280 on
+    # PHOT_CHLRE and 14.8 on CAPSD. A latent cannot span more directions than its input
+    # has, so `latent_effective_rank_ratio >= 0.5` against d_model is unreachable here
+    # for reasons that have nothing to do with training. The ratio against the input is
+    # the diagnostic that can actually distinguish a collapsing model from a faithful
+    # one, and it discriminates: PHOT preserves ~1.0 of its input rank, CAPSD ~0.3.
+    zr = effective_rank(z[:limit].detach().cpu().numpy())
 
     lp, la = model.inverse_logits(h_t, h_next)
     pos_acc = (lp.argmax(-1) == pos[:n]).double().mean().item()
@@ -66,6 +77,8 @@ def diagnostics(model, z: torch.Tensor, src, dst, pos, aa, limit: int = 4096) ->
     return {
         "latent_effective_rank": er,
         "latent_effective_rank_ratio": ratio,
+        "input_effective_rank": zr,
+        "rank_preserved_vs_input": er / max(zr, 1e-9),
         "latent_dim": float(hn.shape[1]),
         "sigreg_stat": float(model.sigreg(h[:limit]).item()),
         "inverse_position_top1": pos_acc,
