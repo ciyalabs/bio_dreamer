@@ -1,0 +1,174 @@
+{
+  "probe": {
+    "groups": {
+      "probe": {
+        "n_sequences": 200,
+        "residues": 8075,
+        "seconds": 38.8,
+        "residues_per_second": 208.2
+      }
+    },
+    "total_seconds": 38.8,
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "cache_dir": "models/cache"
+  },
+  "planning": {
+    "groups": {
+      "CAPSD_AAV2S_Sinai_2021": {
+        "n_sequences": 31263,
+        "residues": 22978305,
+        "seconds": 847.2,
+        "residues_per_second": 27122.0
+      },
+      "D7PM05_CLYGR_Somermeyer_2022": {
+        "n_sequences": 13498,
+        "residues": 3172030,
+        "seconds": 115.3,
+        "residues_per_second": 27503.4
+      },
+      "GCN4_YEAST_Staller_2018": {
+        "n_sequences": 2638,
+        "residues": 741278,
+        "seconds": 29.0,
+        "residues_per_second": 25531.7
+      },
+      "GFP_AEQVI_Sarkisyan_2016": {
+        "n_sequences": 38153,
+        "residues": 9080414,
+        "seconds": 329.1,
+        "residues_per_second": 27589.7
+      },
+      "PHOT_CHLRE_Chen_2023": {
+        "n_sequences": 165531,
+        "residues": 19532658,
+        "seconds": 774.7,
+        "residues_per_second": 25213.4
+      },
+      "Q6WV12_9MAXI_Somermeyer_2022": {
+        "n_sequences": 14568,
+        "residues": 3234096,
+        "seconds": 122.5,
+        "residues_per_second": 26411.5
+      },
+      "Q8WTC7_9CNID_Somermeyer_2022": {
+        "n_sequences": 21349,
+        "residues": 5081062,
+        "seconds": 184.3,
+        "residues_per_second": 27563.4
+      }
+    },
+    "total_seconds": 2402.2,
+    "backbone": "westlake-repl/SaProt_650M_AF2",
+    "cache_dir": "models/cache"
+  },
+  "benchmark": {
+    "groups": {
+      "CAPSD_AAV2S_Sinai_2021": {
+        "n_sequences": 31263,
+        "residues": 22978305,
+        "seconds": 697.6,
+        "residues_per_second": 32940.4
+      },
+      "D7PM05_CLYGR_Somermeyer_2022": {
+        "n_sequences": 13498,
+        "residues": 3172030,
+        "seconds": 244.4,
+        "residues_per_second": 12981.3
+      },
+      "F7YBW8_MESOW_Aakre_2015": {
+        "n_sequences": 8956,
+        "residues": 832908,
+        "seconds": 73.2,
+        "residues_per_second": 11380.7
+      },
+      "F7YBW8_MESOW_Ding_2023": {
+        "n_sequences": 7922,
+        "residues": 736746,
+        "seconds": 64.5,
+        "residues_per_second": 11424.4
+      },
+      "GCN4_YEAST_Staller_2018": {
+        "n_sequences": 2638,
+        "residues": 741278,
+        "seconds": 52.3,
+        "residues_per_second": 14168.8
+      },
+      "GFP_AEQVI_Sarkisyan_2016": {
+        "n_sequences": 38153,
+        "residues": 9080414,
+        "seconds": 500.5,
+        "residues_per_second": 18142.5
+      },
+      "HIS7_YEAST_Pokusaeva_2019": {
+        "n_sequences": 494794,
+        "residues": 108854680,
+        "seconds": 7678.3,
+        "residues_per_second": 14176.9
+      },
+      "PHOT_CHLRE_Chen_2023": {
+        "n_sequences": 165531,
+        "residues": 19532658,
+        "seconds": 816.6,
+        "residues_per_second": 23918.2
+      },
+      "Q6WV12_9MAXI_Somermeyer_2022": {
+        "n_sequences": 14568,
+        "residues": 3234096,
+        "seconds": 124.2,
+        "residues_per_second": 26046.2
+      },
+      "Q8WTC7_9CNID_Somermeyer_2022": {
+        "n_sequences": 21349,
+        "residues": 5081062,
+        "seconds": 196.5,
+        "residues_per_second": 25862.8
+      },
+      "SPG1_STRSG_Wu_2016": {
+        "n_sequences": 147493,
+        "residues": 66076864,
+        "seconds": 2434.8,
+        "residues_per_second": 27138.2
+      }
+    },
+    "total_seconds": 12882.9,
+    "backbone": "facebook/esm2_t33_650M_UR50D",
+    "cache_dir": "models/cache"
+  },
+  "literature": {
+    "groups": {
+      "CAPSD_AAV2S_Sinai_2021": {
+        "n_sequences": 14496,
+        "residues": 10654560,
+        "seconds": 508.8,
+        "residues_per_second": 20941.9
+      },
+      "GFP_AEQVI_Sarkisyan_2016": {
+        "n_sequences": 14801,
+        "residues": 3522638,
+        "seconds": 133.7,
+        "residues_per_second": 26349.5
+      },
+      "GRB2_HUMAN_Faure_2021": {
+        "n_sequences": 15187,
+        "residues": 3295579,
+        "seconds": 125.0,
+        "residues_per_second": 26362.8
+      },
+      "HIS7_YEAST_Pokusaeva_2019": {
+        "n_sequences": 16360,
+        "residues": 3599200,
+        "seconds": 135.8,
+        "residues_per_second": 26494.2
+      },
+      "PABP_YEAST_Melamed_2013": {
+        "n_sequences": 14238,
+        "residues": 8215326,
+        "seconds": 314.1,
+        "residues_per_second": 26152.5
+      }
+    },
+    "total_seconds": 1217.5,
+    "backbone": "facebook/esm2_t33_650M_UR50D",
+    "cache_dir": "models/cache"
+  }
+}

@@ -281,7 +281,17 @@ data/processed/positional_cache/
 data/processed/zeroshot_*_marginals.npz
 # GP test-set predictions and predictive variances, regenerable by scripts/gp_reward.py
 # and consumed by scripts/calibration.py. data/processed/gp_reward.json IS the result.
-data/processed/gp_predictions.npz
+# The glob covers the per-variant tags (_emb-esm2, _zs-gemme, ...): one 13 MB npz per cell
+# of a backbone/prior comparison adds up fast, and every one of them is reproducible.
+data/processed/gp_predictions*.npz
+# Published zero-shot scores sliced out of ProteinGym's archive by
+# scripts/extract_pgym_priors.py (27 MB). Third-party data, not ours to vendor, and
+# regenerable from the archive recorded in DATA_REGISTER.md.
+data/processed/pgym_priors.npz
+# ESMFold wild-type structures for the ProteinMPNN structure kernel: 13 PDBs, same
+# reasoning as data/processed/d1_folds/ above -- model output, regenerable in ~60 s of
+# rented GPU from the sequences the assay files already pin.
+data/processed/wt_structures/
 
 # dry-run and partial outputs: never real results
 data/processed/*.dryrun.json

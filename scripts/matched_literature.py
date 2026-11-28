@@ -100,20 +100,34 @@ def gp_rho(xtr, ytr, f0tr, xte, f0te, truth, zero_shot_mean, steps, lr, seed) ->
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--backbone", default="saprot", choices=["saprot", "esm2"])
+    ap.add_argument("--backbone", default="saprot", choices=["saprot", "esm2"],
+                    help="backbone for the EMBEDDINGS the kernel runs on")
+    ap.add_argument("--zs-backbone", default=None, choices=["saprot", "esm2"],
+                    help="backbone for f0, the zero-shot prior mean. Defaults to "
+                         "--backbone, which is how this script ran originally and is "
+                         "what Kermut specifies. Setting it separately de-confounds the "
+                         "two: on H1's protocol the representation and the zero-shot "
+                         "scorer prefer DIFFERENT backbones, so a single --backbone flag "
+                         "cannot attribute a difference to either one.")
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--lr", type=float, default=0.05)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
+    zs_bb = args.zs_backbone or args.backbone
     bb = {"saprot": "westlake-repl_SaProt_650M_AF2",
           "esm2": "facebook_esm2_t33_650M_UR50D"}[args.backbone]
-    mat_file = matrix_path(args.backbone)
+    mat_file = matrix_path(zs_bb)
     if not args.dry_run and not mat_file.exists():
         raise FileNotFoundError(
             f"{mat_file} missing -- run scripts/zeroshot_baseline.py "
-            f"--save-logprob-matrix --backbones {args.backbone}"
+            f"--save-logprob-matrix --backbones {zs_bb}"
         )
+    global OUT
+    if args.zs_backbone and args.zs_backbone != args.backbone:
+        OUT = OUT.with_name(f"matched_literature_emb-{args.backbone}_zs-{zs_bb}.json")
+    elif args.backbone != "saprot":
+        OUT = OUT.with_name(f"matched_literature_{args.backbone}.json")
     mats = np.load(mat_file) if not args.dry_run else None
 
     methods = ["ohe", "ohe_aug", "emb_ridge", "emb_aug", "gp_constant", "gp_zeroshot"]
@@ -200,7 +214,8 @@ def main() -> int:
     metrics["ohe_control_gap_n128"] = ohe_gap[128]
     metrics["gp_minus_kermut_n128"] = kermut_gap[128]
     OUT.write_text(json.dumps(
-        {"backbone": args.backbone, "protocol": "literature random split, 5000 test",
+        {"backbone": args.backbone, "zs_backbone": zs_bb,
+         "protocol": "literature random split, 5000 test",
          "seeds": list(LITERATURE_SEEDS), "train_sizes": list(LITERATURE_TRAIN_SIZES),
          "summary": summary, "per_dataset": per_dataset, "published": PUBLISHED,
          "ohe_control_gap": ohe_gap, "gp_minus_kermut": kermut_gap}, indent=2) + "\n")
@@ -208,7 +223,8 @@ def main() -> int:
 
     with tracking.run(
         "2.4", "matched_assay_literature",
-        variant={"backbone": args.backbone, "protocol": "literature_random_split"},
+        variant={"backbone": args.backbone, "zs_backbone": zs_bb,
+                 "protocol": "literature_random_split"},
         config={"steps": args.steps, "lr": args.lr,
                 "train_sizes": list(LITERATURE_TRAIN_SIZES)},
         seed=0, datasets=[str(CACHE), str(mat_file)],

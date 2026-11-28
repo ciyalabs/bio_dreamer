@@ -438,17 +438,71 @@ for both the embeddings and `f0`**, so the ESM-2 row is the faithful reproductio
 Ahead of the published figure at every training size, and by most at the smallest, which is
 the regime the registered H1 protocol sits closest to.
 
-**Three independent measurements now say the same thing about the default backbone.**
+> **Correction, 2026-11-28. The paragraph below conflated two different uses of a
+> backbone and is withdrawn.** It is kept visible because the error is instructive: two of
+> its "three independent measurements" varied only the **zero-shot scorer** `f0`, and the
+> third varied the scorer *and* the embeddings together, so none of them isolated the
+> representation. §7.1c runs the 2x2 that separates them. The corrected finding is
+> narrower: **ESM-2 is the better `f0`; it is not the better representation.**
+
+~~**Three independent measurements now say the same thing about the default backbone.**
 Zero-shot masked marginals (+0.249 against +0.204, within-order +0.164 against +0.137), the
 GP on H1's own protocol (+0.444 against +0.428, and `gp_margin_over_ridge` passing rather
 than failing), and now the matched literature protocol (+0.663 against +0.631 at n = 128).
 `PREREGISTRATION.md` fixed SaProt as the default on a **stability** measurement (+0.337
 against +0.209 pooled Spearman); on **fitness** the comparator leads everywhere it has been
-measured.
+measured.~~
 
-That is a concrete, actionable amendment for whoever closes this phase — and it is an
-*amendment*, to be written down with its reason before any re-run, not a swap made after
-seeing which side of a threshold each backbone lands on.
+### 7.1c The 2x2 that separates the representation from the prior
+
+A backbone is used for two unrelated jobs here: supplying the 1280-d **embeddings** the
+kernel measures similarity in, and supplying **`f0`**, the zero-shot prior mean. One flag
+used to change both at once. `--embed-backbone` now separates them, and both protocols
+were re-run as a full 2x2.
+
+**H1's own protocol**, 11 assays, `gp_composite_kernel` (total / within-order):
+
+| embeddings \ `f0` | SaProt `f0` | ESM-2 `f0` |
+|---|---:|---:|
+| **SaProt emb** | +0.479 / +0.417 | +0.489 / +0.426 |
+| **ESM-2 emb** | +0.474 / +0.403 | +0.484 / +0.415 |
+
+**The literature's protocol**, 5 datasets, `gp_zeroshot`, mean Spearman:
+
+| embeddings \ `f0` | n = 24 | n = 32 | n = 48 | n = 128 | n = 512 |
+|---|---:|---:|---:|---:|---:|
+| SaProt emb / SaProt `f0` | +0.433 | +0.468 | +0.506 | +0.631 | +0.733 |
+| SaProt emb / **ESM-2 `f0`** | +0.485 | +0.530 | +0.557 | +0.651 | +0.744 |
+| **ESM-2 emb** / SaProt `f0` | +0.468 | +0.496 | +0.540 | +0.650 | +0.740 |
+| **ESM-2 emb / ESM-2 `f0`** | +0.500 | +0.539 | +0.578 | +0.663 | +0.743 |
+
+**`f0` is the factor that holds.** ESM-2 is the better prior on both protocols and in every
+cell: +0.010 … +0.016 on H1, +0.020 at n = 128 on the literature's. **The representation is
+not.** It is worth +0.019 at n = 128 on the literature's five datasets and **−0.005** on
+H1's eleven, so the two protocols disagree about it and no general preference is supported.
+
+The apparent representation effect in the withdrawn paragraph was the `f0` effect plus an
+assay-set effect, read off a single flag that moved both.
+
+#### One assay carries the whole embedding difference on H1
+
+`gp_constant_mean` drops the prior entirely, so it is the clean read on the representation:
+
+| | SaProt | ESM-2 |
+|---|---:|---:|
+| all 11 assays | +0.375 | +0.306 |
+| excluding `PHOT_CHLRE_Chen_2023` | +0.387 | +0.375 |
+| `PHOT_CHLRE_Chen_2023` alone | +0.260 | **−0.381** |
+
+85% of the mean gap is one assay, where ESM-2's embeddings are *anti*-correlated with
+fitness under an RBF kernel. The prior mean and substitution kernel mask it completely
+(composite: ESM-2 +0.810 against SaProt +0.790 on that assay), which is why it is invisible
+in the headline number and why `gp_constant_mean` is worth reporting separately. Across the
+other ten the two are a near-tie on the mean, with SaProt ahead on the median.
+
+**The amendment this supports is narrower than the one withdrawn above:** change `f0` to
+ESM-2, keep SaProt embeddings. It belongs in the amendment table with its reason *before*
+any re-run, not after seeing which side of a threshold it lands on.
 
 ### 7.2 The harness control says we are, if anything, pessimistic
 

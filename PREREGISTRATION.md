@@ -244,13 +244,23 @@ and both are recorded rather than taken.**
 2. `spearman_mean_gp` is read on `gp_zeroshot_mean` (+0.428), the configuration it was
    registered against, not on the better composite kernel (+0.479). Both fail 0.55.
 
-**An amendment this phase earned but did not take.** Three independent measurements now put
-ESM-2 ahead of SaProt on *fitness*: zero-shot masked marginals (+0.249 against +0.204,
-within-order +0.164 against +0.137), the GP on H1's protocol (+0.444 against +0.428), and
-the matched literature protocol (+0.663 against +0.631 at n = 128). The default was fixed
-above on a **stability** measurement. Changing it is defensible and belongs in the table
-below *before* a re-run, with this reason stated. It was not changed tonight, because the
-only reason to change it tonight would have been that it moves a threshold.
+**An amendment this phase earned but did not take.** A backbone does two separable jobs
+here: it supplies the **embeddings** the kernel runs on, and it supplies **`f0`**, the
+zero-shot prior mean. Measured as a 2x2 on both protocols (`diagnostics/finetune_scoping.md`
+§7.1c), only one of them favours ESM-2:
+
+- **`f0`: ESM-2, consistently.** Ahead in every cell of both protocols — +0.010 … +0.016 on
+  H1's, +0.020 at n = 128 on the literature's — and ahead standalone as a zero-shot ranker
+  (+0.249 against +0.204, within-order +0.164 against +0.137). This is a real amendment.
+- **Embeddings: not supported.** +0.019 at n = 128 on the literature's five datasets but
+  **−0.005** on H1's eleven. The protocols disagree, so no change is justified.
+
+*An earlier version of this paragraph claimed three measurements supported changing the
+backbone outright. Two of the three varied only `f0` and the third varied both at once; the
+claim is withdrawn and the corrected version is the one above.* The default was fixed above
+on a **stability** measurement, which remains the right reason to revisit `f0`. It was not
+changed tonight, because the only reason to change it tonight would have been that it moves
+a threshold.
 
 **What the phase can and cannot claim.** The implementation is validated: on the
 literature's own datasets and protocol the Kermut-sequence reproduction scores +0.631 at

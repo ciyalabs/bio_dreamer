@@ -62,8 +62,26 @@ from zeroshot_baseline import cache_path, score_from_matrix, within_order_rho  #
 
 CACHE = Path("data/processed/pooled_cache")
 BACKBONE = "westlake-repl_SaProt_650M_AF2"
+EMBED_BACKBONES = {  # cache-file prefixes written by scripts/encode_corpus.py
+    "saprot": "westlake-repl_SaProt_650M_AF2",
+    "esm2": "facebook_esm2_t33_650M_UR50D",
+}
 ZS_BACKBONE = "saprot"  # the default fixed in PREREGISTRATION.md, not the better scorer
 BACKBONES_ZS = ("saprot", "esm2")
+# Published zero-shot predictors, read from ProteinGym's own score archive rather than
+# recomputed (scripts/extract_pgym_priors.py). These are ALIGNMENT-based: they read a
+# multiple sequence alignment of the protein family, which is a category of evidence no
+# prior this project has used so far carries at all. On the 11 benchmark assays' order>=3
+# test set the computed ESM-2 prior scores +0.249 total / +0.164 within-order; these land
+# between +0.397/+0.280 and +0.442/+0.328. The join is exact: our independently computed
+# ESM-2 masked marginals reproduce ProteinGym's ESM2_650M column at rho = 1.0000.
+PGYM_PRIORS = Path("data/processed/pgym_priors.npz")
+PUBLISHED_ZS = {
+    "gemme": "GEMME",
+    "msa-transformer": "MSA_Transformer_ensemble",
+    "trancepteve": "TranceptEVE_L",
+    "eve": "EVE_ensemble",
+}
 OUT = Path("data/processed/gp_reward.json")
 PRED = Path("data/processed/gp_predictions.npz")
 
@@ -218,10 +236,18 @@ def main() -> int:
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--lr", type=float, default=0.05)
     ap.add_argument(
-        "--zs-backbone", default=ZS_BACKBONE, choices=sorted(BACKBONES_ZS),
+        "--zs-backbone", default=ZS_BACKBONE,
+        choices=sorted(BACKBONES_ZS) + sorted(PUBLISHED_ZS),
         help="which backbone supplies f0. SaProt is this project's registered default and "
              "is the primary; esm2 is a SENSITIVITY, and it is method-specified rather "
              "than test-selected because Kermut names ESM-2 for its mean function.",
+    )
+    ap.add_argument(
+        "--embed-backbone", default="saprot", choices=sorted(EMBED_BACKBONES),
+        help="which backbone supplies the 1280-d embeddings the kernel runs on. SaProt is "
+             "the registered default; esm2 is the backbone Kermut specifies, and running "
+             "it here makes the backbone the ONLY thing that changes between the two "
+             "numbers -- H1's own assays, split and protocol either way.",
     )
     ap.add_argument(
         "--structure-mean", action="store_true",
@@ -236,8 +262,11 @@ def main() -> int:
 
     # the two instances are different results and must not overwrite each other's files;
     # `benchmark` keeps the original names so earlier references stay valid
-    global OUT, PRED
+    global OUT, PRED, BACKBONE
+    BACKBONE = EMBED_BACKBONES[args.embed_backbone]
     tag = "" if args.instance == "benchmark" else f"_{args.instance}"
+    if args.embed_backbone != "saprot":
+        tag += f"_emb-{args.embed_backbone}"
     if args.zs_backbone != ZS_BACKBONE:
         tag += f"_zs-{args.zs_backbone}"
     if args.structure_mean:
@@ -246,10 +275,28 @@ def main() -> int:
         OUT = OUT.with_name(f"gp_reward{tag}.json")
         PRED = PRED.with_name(f"gp_predictions{tag}.npz")
 
-    zs_file = cache_path(args.zs_backbone, "masked-marginals")
+    published = args.zs_backbone in PUBLISHED_ZS
+    zs_file = PGYM_PRIORS if published else cache_path(args.zs_backbone, "masked-marginals")
     if not zs_file.exists():
-        raise FileNotFoundError(f"{zs_file} missing -- run scripts/zeroshot_baseline.py")
+        raise FileNotFoundError(
+            f"{zs_file} missing -- run scripts/"
+            + ("extract_pgym_priors.py" if published else "zeroshot_baseline.py")
+        )
     zs = np.load(zs_file)
+    if published:
+        col = PUBLISHED_ZS[args.zs_backbone]
+
+        def f0_for(name, tr, te):
+            # published scores are stored per variant over the WHOLE assay, so they are
+            # sliced by the split here; the computed caches are already split-shaped
+            v = zs[f"{name}/{col}"]
+            if not np.isfinite(v).all():
+                raise ValueError(f"{col} has non-finite scores for {name}")
+            return v[tr], v[te]
+    else:
+
+        def f0_for(name, tr, te):
+            return zs[f"{name}/tr"], zs[f"{name}/te"]
 
     names = assays_for(args.instance)
     limits = detection_limits()
@@ -294,7 +341,7 @@ def main() -> int:
         # per-assay standardisation of y, as everywhere else in this project
         ytr = a.score[tr]
         ytr_s = (ytr - ytr.mean()) / (ytr.std() + 1e-12)
-        f0tr_raw, f0te_raw = zs[f"{n}/tr"], zs[f"{n}/te"]
+        f0tr_raw, f0te_raw = f0_for(n, tr, te)
         fm, fs = f0tr_raw.mean(), f0tr_raw.std() + 1e-12
         f0tr = torch.tensor((f0tr_raw - fm) / fs)
         f0te = torch.tensor((f0te_raw - fm) / fs)
@@ -415,7 +462,8 @@ def main() -> int:
         "2.4", "gp_composite_kernel",
         variant={"instance": args.instance, "kernel": "rbf_sequence+composite",
                  "mean": "affine_zeroshot", "structure_kernel": False,
-                 "zeroshot_backbone": args.zs_backbone},
+                 "zeroshot_backbone": args.zs_backbone,
+                 "embedding_backbone": args.embed_backbone},
         config={"steps": args.steps, "lr": args.lr, "backbone": BACKBONE,
                 "zeroshot": args.zs_backbone},
         seed=args.seed, datasets=[str(CACHE), str(zs_file)],
