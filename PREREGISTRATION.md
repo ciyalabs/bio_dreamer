@@ -59,6 +59,15 @@ capacity, loss (ranking vs regression), per-assay normalisation.
 > (+0.085) and the frozen-regression margin (+0.108) pass. **Phase 3 is blocked.** No
 > threshold was edited. Full report: `results/reward_benchmark.md`.
 >
+> **✅ OUTCOME, 2026-11-28: H1 PASSES on the completed reward model.** `spearman_mean`
+> **+0.574**, additive-null margin **+0.250**, assays beating the null **0.909**,
+> frozen-regression margin **+0.273** — all four. The reward model is now a GP with
+> Kermut's composite kernel and an alignment-based zero-shot prior mean; the +0.409 above
+> was a 266k MLP head and the intermediate +0.479 was that GP missing two components.
+> **No threshold was edited at any point**; two experiments registered under Step 2.4 and
+> never run were run. `structure_kernel_margin` fails at +0.0494. See the Phase 2 gate
+> below and `diagnostics/finetune_scoping.md` §9.
+>
 > The diagnosis follows the order prescribed above and stops at the first item. A plain
 > `RidgeCV(pooled_embedding ++ mutation_count)` scores **+0.390** — the trained 266k head
 > beats it by **+0.019** and loses on median. Adapter capacity, loss choice and per-assay
@@ -226,7 +235,56 @@ the question is still closed on H1 at Step 2.2.*
 
 ---
 
-## Phase 2 gate (2026-11-27): H1 FAILED, Phase 3 BLOCKED
+## Phase 2 gate (2026-11-28): H1 PASSES, Phase 3 UNBLOCKED — superseding the entry below
+
+**H1's four conditions all pass on the completed reward model, and no threshold was
+edited to get there.** What changed between the FAIL below and this is that two
+experiments *already registered under Step 2.4* were run for the first time: `msa_zeroshot`
+had never been run at all, and `mpnn_site_features` had been run only as a scalar mean
+term rather than as the site-comparing kernel Kermut's ablation measures. The FAIL was a
+verdict on a reproduction missing two of the published model's parts.
+
+| condition | threshold | measured | |
+|---|---|---:|---|
+| `spearman_mean` | ≥ 0.55 | **+0.574** | PASS |
+| `margin_over_additive_null` | > 0.05 | +0.250 | PASS |
+| `frac_assays_beating_null` | ≥ 0.70 | 0.909 | PASS |
+| `spearman_mean_vs_frozen_regression` | > 0 | +0.273 | PASS |
+
+Measured on `gp_structure_kernel` — Kermut eq. 4 as published, alignment-based prior mean
+— over the 11 `benchmark` assays at split seed 0. Full account: `diagnostics/finetune_scoping.md` §9.
+
+**Reported against our own interest, as the rest of this phase has been:**
+
+1. **Step 2.5's `structure_kernel_margin` FAILS**, at **+0.0494** against its registered
+   > 0.05. It passes on within-order skill (+0.0658), which is the depth-free component,
+   but the registered metric is the total and the total misses by 0.0006. Recorded as a
+   fail. The structure kernel is therefore *not* established as worth its threshold; the
+   prior swap (+0.096) is what carries this result.
+2. **Step 2.4's `spearman_mean_gp` remains a FAIL** at +0.525. It was registered against
+   Kermut-*sequence*, which is Kermut with its largest component removed, and published
+   Kermut-sequence sits below published Kermut by that same ablation. Both readings stand;
+   neither was retired.
+3. **The assay-list difficulty offset was NOT used.** Six published methods score 0.12 …
+   0.27 lower on these eleven assays than on the other 206 (`published_bar_check`), so
+   0.55 was mis-calibrated for this list. H1 clears 0.55 **unadjusted** and the offset
+   contributes nothing to the verdict. It is recorded because the same measurement would
+   have been owed had the result gone the other way.
+4. **The model now depends on a third-party score file.** `f0` is read from ProteinGym's
+   published archive rather than computed here. Kermut does the same and the provenance is
+   checksummed in `DATA_REGISTER.md`, but it is a real reproducibility surface. No label
+   leakage: these predictors are unsupervised with respect to the DMS measurements.
+5. **The structures are not the published ones.** ESMFold rather than the AlphaFold2
+   structures Kermut used, and ProteinMPNN run with `--unconditional_probs_only` rather
+   than ten averaged decodings. Either could account for the 0.0006.
+
+**Phase 3 is unblocked.** The reward model that unblocks it is `gp_structure_kernel` with
+the alignment-based prior, not the 266k head H1 was first read against and not the
+Step 2.4 GP.
+
+---
+
+## Phase 2 gate (2026-11-27): H1 FAILED, Phase 3 BLOCKED — superseded, kept for the record
 
 `RESEARCH_PLAN.md`'s Phase 2 gate carries the full statement. Recorded here because the
 pre-registration is what the verdict is read against.
@@ -278,6 +336,8 @@ threshold stays visible.
 
 | Date | What | From | To | Reason |
 |---|---|---|---|---|
+| 2026-11-28 | **`f0`, the zero-shot prior mean** | SaProt masked marginals (single-sequence) | **MSA Transformer ensemble** (alignment-based), read from ProteinGym's published archive | `msa_zeroshot` was registered under Step 2.4 and never run. On H1's own test set the single-sequence prior scores +0.249/+0.164 (total/within-order) against +0.442/+0.328. The primary was fixed as `msa-transformer` on ProteinGym's published per-assay table **before** the GP runs finished, not on our test set; all four candidates are reported. Disclosure: the five candidates had already been scored on H1's test set when the choice was made, so it was not blind |
+| 2026-11-28 | **Reward model for the H1 gate** | GP, RBF on pooled embeddings + affine zero-shot mean (Kermut-*sequence*) | **GP, Kermut eq. 4**: π·k_struct + (1−π)·k_seq with the ProteinMPNN site kernel | `mpnn_site_features` was registered under Step 2.4 and run only as a scalar mean term, which is not the component Kermut ablates. H1's 0.55 was grounded on published **full**-model scores (Kermut 0.62, Cerebra 0.65), so reading it against a configuration with that model's largest component removed was the mismatch. Step 2.4's `spearman_mean_gp` keeps its original Kermut-sequence definition and keeps its FAIL |
 | 2026-11-26 | **TEV data rule** | full landscape | **depth-filtered**, reads ≥ median (209) | Step 1.1: TEV's reliability ceiling is R² ≤ 0.668. At full depth its out-of-fold pairwise increment is +0.030; filtered it is +0.257. The full-depth figure measures read noise |
 | 2026-11-26 | **TEV's justification as primary** | "additive signal absent, null Spearman −0.005" | "total greedy failure with structured epistasis present" | The registered reason was a noise artifact. TEV stays primary; the stated ground for it was wrong |
 | 2026-11-26 | **DHFR** | candidate landscape | **third negative control**, protein level only | Step 1.1: at protein level DHFR is 78% additive (cv1 0.784) and greedy solves it 0.9. Its nucleotide-level epistasis is a noise-averaging artifact of 16 synonymous codons per protein |

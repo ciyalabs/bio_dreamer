@@ -1,0 +1,56 @@
+{
+  "primary": "gp_zeroshot_mean",
+  "models": {
+    "gp_zeroshot_mean": {
+      "metrics": {
+        "spearman_mean": 0.5247017027832664,
+        "margin_over_additive_null": 0.20082050832388182,
+        "frac_assays_beating_null": 0.7272727272727273,
+        "spearman_mean_vs_frozen_regression": 0.22380053823919244
+      },
+      "verdict": {
+        "spearman_mean": false,
+        "margin_over_additive_null": true,
+        "frac_assays_beating_null": true,
+        "spearman_mean_vs_frozen_regression": true
+      },
+      "n_assays": 11,
+      "assays_beating_null": 8
+    },
+    "gp_composite_kernel": {
+      "metrics": {
+        "spearman_mean": 0.5586098954932033,
+        "margin_over_additive_null": 0.23472870103381865,
+        "frac_assays_beating_null": 0.8181818181818182,
+        "spearman_mean_vs_frozen_regression": 0.25770873094912927
+      },
+      "verdict": {
+        "spearman_mean": true,
+        "margin_over_additive_null": true,
+        "frac_assays_beating_null": true,
+        "spearman_mean_vs_frozen_regression": true
+      },
+      "n_assays": 11,
+      "assays_beating_null": 9
+    },
+    "gp_structure_kernel": {
+      "metrics": {
+        "spearman_mean": 0.5741445494488204,
+        "margin_over_additive_null": 0.2502633549894358,
+        "frac_assays_beating_null": 0.9090909090909091,
+        "spearman_mean_vs_frozen_regression": 0.2732433849047464
+      },
+      "verdict": {
+        "spearman_mean": true,
+        "margin_over_additive_null": true,
+        "frac_assays_beating_null": true,
+        "spearman_mean_vs_frozen_regression": true
+      },
+      "n_assays": 11,
+      "assays_beating_null": 10
+    }
+  },
+  "baselines_from": "data/processed/h1_benchmark.json",
+  "note": "thresholds read from plan.yaml step 2.2; baselines reused from the 2.2 run, not recomputed; only the model column changes",
+  "source": "data/processed/gp_reward_zs-msa-transformer_structkern.json"
+}

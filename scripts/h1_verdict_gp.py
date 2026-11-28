@@ -20,6 +20,7 @@ is an extension beyond the published configuration, so it is labelled rather tha
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -48,13 +49,20 @@ def passes(op: str, got: float, want: float) -> bool:
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--source", default=str(GP),
+                    help="gp_reward*.json to score; defaults to the registered run")
+    ap.add_argument("--out", default=str(OUT))
+    args = ap.parse_args()
     h1 = json.loads(H1.read_text())
-    gp = json.loads(GP.read_text())
+    gp = json.loads(Path(args.source).read_text())
     per = h1["per_assay"]
     assays = sorted(per)
 
     out: dict[str, dict] = {}
-    for model in ("gp_zeroshot_mean", "gp_composite_kernel"):
+    models = [m for m in ("gp_zeroshot_mean", "gp_composite_kernel",
+                          "gp_structure_kernel") if m in gp["per_assay"]]
+    for model in models:
         pred = gp["per_assay"][model]
         rows = [(a, pred[a], per[a]["additive_null"], per[a]["frozen_ridge"])
                 for a in assays if a in pred]
@@ -87,17 +95,18 @@ def main() -> int:
     print(f"  additive null                 {np.mean([per[a]['additive_null'] for a in assays]):+.3f}")
     print(f"  frozen ridge                  {np.mean([per[a]['frozen_ridge'] for a in assays]):+.3f}")
 
-    OUT.write_text(json.dumps(
+    Path(args.out).write_text(json.dumps(
         {"primary": PRIMARY, "models": out,
          "baselines_from": str(H1), "note":
          "thresholds read from plan.yaml step 2.2; baselines reused from the 2.2 run, "
-         "not recomputed; only the model column changes"}, indent=2) + "\n")
-    print(f"\nwrote {OUT}")
+         "not recomputed; only the model column changes",
+         "source": args.source}, indent=2) + "\n")
+    print(f"\nwrote {args.out}")
 
     with tracking.run(
         "2.4", "h1_verdict_rescored",
         variant={"instance": "benchmark", "model": PRIMARY, "rescored": True},
-        config={"source": str(GP)}, seed=0, datasets=[str(H1), str(GP)],
+        config={"source": args.source}, seed=0, datasets=[str(H1), args.source],
         notes=("H1's four registered conditions re-read against the Step 2.4 reward model. "
                "Thresholds come from plan.yaml and baselines are reused from the 2.2 run "
                "rather than recomputed, so only the model column changes. Primary is "
@@ -105,7 +114,7 @@ def main() -> int:
                "an extension beyond that configuration and is labelled, not promoted."),
     ) as r:
         r.log_metrics({f"{k}": v for k, v in out[PRIMARY]["metrics"].items()})
-        r.log_artifact(str(OUT), kind="table")
+        r.log_artifact(args.out, kind="table")
     return 0
 
 

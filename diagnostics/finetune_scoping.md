@@ -598,3 +598,155 @@ comparison and the comparability prerequisite close in the same experiment.
   zero-shot levels: <https://www.biorxiv.org/content/10.1101/2024.05.28.596156v4.full>
 - Kermut's composite kernel, its zero-shot prior mean and its component ablations:
   <https://proceedings.neurips.cc/paper_files/paper/2024/file/34547650b2ca69d91f3b3c3ae8b21962-Paper-Conference.pdf>
+
+---
+
+# 9. Step 2.5 — the two registered experiments that had never been run
+
+**H1 now passes, and no threshold was edited to make that happen.** What changed is that
+two experiments registered under Step 2.4 were finally run. `msa_zeroshot` — "MSA-based
+zero-shot instead of single-sequence" — had never been run at all. `mpnn_site_features`
+had been run only as the scalar mean term of §6.5, which is not the component Kermut's
+ablation is about. The FAIL at +0.479 was therefore a verdict on a reproduction that was
+missing two of the published model's parts.
+
+## 9.1 The prior was the hole
+
+Every `f0` this project had used reads **one sequence in isolation**. ProteinGym publishes
+per-variant zero-shot scores for 112 baselines, several of which read a multiple sequence
+alignment of the protein family instead. On H1's own test set — the unseen order ≥ 3
+variants of the 11 `benchmark` assays — they are not close:
+
+| zero-shot predictor | total ρ | within-order ρ |
+|---|---:|---:|
+| ESM-2 650M — *what this project used* | +0.249 | +0.164 |
+| EVE (ensemble) | +0.397 | +0.280 |
+| TranceptEVE L | +0.422 | +0.307 |
+| GEMME | +0.437 | +0.314 |
+| **MSA Transformer (ensemble)** | **+0.442** | **+0.328** |
+
+The alignment-based prior alone, with no training data at all, scores +0.442 — within
+0.04 of the entire trained GP of §7. On `GFP_AEQVI_Sarkisyan_2016` the single-sequence
+prior manages +0.081 where the alignment-based ones reach +0.64.
+
+**The join is exact, which is worth stating because the whole result rests on it.** Our
+independently computed ESM-2 masked marginals reproduce ProteinGym's own `ESM2_650M`
+column at **ρ = 1.0000** on every assay, and coverage of this project's variants is 100%
+on all 13, multi-mutants included. No label leakage is possible: these predictors are
+unsupervised with respect to the DMS measurements, fit to the protein family's alignment
+and never to the assay.
+
+Swapping the prior and changing nothing else:
+
+| prior | registered row | composite | within-order | margin over ridge |
+|---|---:|---:|---:|---:|
+| SaProt (registered default) | +0.428 | +0.479 | +0.417 | +0.038 **FAIL** |
+| ESM-2 (the §7.1c amendment) | +0.444 | +0.489 | +0.426 | +0.054 |
+| EVE | +0.488 | +0.526 | +0.442 | +0.098 |
+| TranceptEVE L | +0.506 | +0.539 | +0.451 | +0.116 |
+| GEMME | +0.514 | +0.549 | +0.464 | +0.124 |
+| **MSA Transformer** | **+0.525** | **+0.559** | **+0.474** | **+0.135** |
+
+`gp_margin_over_ridge`, the condition that was failing, passes on all four alignment-based
+priors — by 2.7× its threshold on the primary.
+
+**The primary was fixed before these ran**, as `msa-transformer`, on ProteinGym's
+published per-assay table (0.447 against GEMME's 0.445) rather than on our test set. It
+also turned out to be the best of the four here. That is luck rather than method, but it
+does mean the selection disclosure in `plan.yaml` costs nothing: the pre-specified choice
+and the post-hoc best are the same model.
+
+## 9.2 The structure kernel, built properly this time
+
+§6.5 scored ProteinMPNN as one number per variant and measured −0.002. Kermut compares
+**sites**: Hellinger distance between per-site amino-acid distributions, times a mutant
+log-probability term, times a Cα-distance term, summed over every pair of mutated
+positions (eq. 1–2). Collapsing that to a scalar discards both the pairing and the
+geometry, so §6.5 never tested the component it was named after.
+
+| configuration (MSA Transformer prior) | total ρ | within-order ρ |
+|---|---:|---:|
+| `gp_zeroshot_mean` — Kermut-sequence as published | +0.525 | +0.434 |
+| `gp_composite_kernel` — substitution stand-in | +0.559 | +0.474 |
+| **`gp_structure_kernel` — Kermut eq. 4 proper** | **+0.574** | **+0.500** |
+
+Against its registered threshold the structure kernel is a **marginal FAIL**:
+`structure_kernel_margin > 0.05`, measured **+0.0494** on total ρ. It clears the same bar
+on within-order skill (+0.0658), which is the depth-free component and arguably the one
+that matters, but the registered metric is the total and the total misses by 0.0006. It is
+recorded as a fail.
+
+Two deviations from the published setup, neither of which can be argued away:
+
+1. Structures are **ESMFold** predictions, not the AlphaFold2 structures ProteinGym ships
+   and Kermut used. Native-sequence recovery across these 13 runs 14.2% … 49.3%.
+2. ProteinMPNN is run with `--unconditional_probs_only`, one pass; Kermut decodes the wild
+   type ten times and averages. Both estimate p(aa | structure); they are not the same
+   estimator.
+
+Either could cost the 0.0006. Neither is a reason to re-read the threshold.
+
+## 9.3 H1's four conditions, re-read
+
+| condition | threshold | Kermut-sequence | composite | **full** |
+|---|---|---:|---:|---:|
+| `spearman_mean` | ≥ 0.55 | +0.525 ✗ | +0.559 ✓ | **+0.574 ✓** |
+| `margin_over_additive_null` | > 0.05 | +0.201 ✓ | +0.235 ✓ | **+0.250 ✓** |
+| `frac_assays_beating_null` | ≥ 0.70 | 0.727 ✓ | 0.818 ✓ | **0.909 ✓** |
+| `spearman_mean_vs_frozen_regression` | > 0 | +0.224 ✓ | +0.258 ✓ | **+0.273 ✓** |
+
+**All four pass on the completed model.** The `gp_zeroshot_mean` row still fails the
+headline, and *should*: it is Kermut with its largest component removed, and published
+Kermut-sequence sits below published Kermut by the same ablation (−0.065) that this row
+is missing. Step 2.4's `spearman_mean_gp` was registered against that reduced
+configuration and remains a FAIL at +0.525; Step 2.5's `spearman_mean_gp_complete` was
+registered against the completed one and passes at +0.574. Both are reported.
+
+## 9.4 The bar was calibrated on an easier assay list — and we did not need that
+
+`scripts/published_bar_check.py`. H1's 0.55 was grounded on published means — ProteinNPT
+0.56, MULTI-evolve 0.61, Kermut 0.62, Cerebra 0.65 — each over *its own* assay list. Ours
+is eleven assays chosen for multi-mutant depth. Read from ProteinGym's published per-assay
+supervised table, without looking at our numbers at all:
+
+| published method | all 217 | our 11 | offset |
+|---|---:|---:|---:|
+| Kermut | +0.674 | +0.522 | −0.160 |
+| ProteinNPT | +0.640 | +0.471 | −0.177 |
+| MSA Transformer Embeddings | +0.610 | +0.494 | −0.122 |
+| ESM-1v Embeddings | +0.560 | +0.305 | −0.269 |
+| Tranception Embeddings | +0.562 | +0.386 | −0.185 |
+| One-Hot Encodings | +0.224 | +0.098 | −0.133 |
+
+Negative for **6 of 6**, mean −0.174. A plain one-hot encoding agrees, which is what makes
+this a property of the assays and not of any model.
+
+**This did not contribute to the pass and must not be used as if it had.** H1 clears 0.55
+unadjusted. The offset is recorded because the grounding of the threshold was demonstrably
+mis-calibrated for the list it was applied to, and because the same measurement would have
+been needed had the result gone the other way — which is the only condition under which
+reporting it is honest.
+
+The level comparison is also not available: ProteinGym's supervised CV trains on ~80% of
+each assay including singles, while H1 trains on < 300 order ≤ 2 and tests on unseen
+order ≥ 3. Only *relative* difficulty across assays transfers, because the same method and
+protocol are applied to both groups.
+
+## 9.5 What this costs
+
+The reward model now depends on a **third-party score file**. `f0` is no longer computed
+in this repository; it is read from ProteinGym's published archive. That is what Kermut
+does too, and the provenance is recorded in `DATA_REGISTER.md` with a checksum, but it is a
+real dependency and a real reproducibility surface, and the project should know it owns it.
+
+The honest summary of the three levers, measured:
+
+| lever | effect on total ρ | verdict |
+|---|---:|---|
+| alignment-based prior instead of single-sequence | **+0.096** | the result |
+| structure kernel, as a kernel | +0.049 | marginal, below its own bar |
+| ~~structure as a mean term~~ (§6.5) | −0.002 | no |
+| ~~encoder fine-tune~~ (§5) | +0.003 published | no, never run |
+
+The component that was never tried mattered forty times more than the component the Step
+2.2 diagnosis pointed at.

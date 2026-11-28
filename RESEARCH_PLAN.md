@@ -1199,6 +1199,42 @@ same run. No rental: Kermut does three CV schemes on four datasets in ~10 minute
 
 ## Phase 2 gate — consolidate and decide `S` ⚠️ **GATE**
 
+**✅ H1 PASSES (2026-11-28). Phase 3 is unblocked.** All four conditions clear on the
+completed reward model, with **no threshold edited at any point**. The verdict moved
+because two experiments *already registered under Step 2.4* were run for the first time:
+`msa_zeroshot`, which had never been run, and `mpnn_site_features` as a **kernel** rather
+than the scalar mean term that was tested and measured nothing.
+
+| condition | threshold | head (2.2) | GP (2.4) | **completed (2.5)** |
+|---|---|---:|---:|---:|
+| `spearman_mean` | ≥ 0.55 | +0.409 ❌ | +0.479 ❌ | **+0.574 ✅** |
+| `margin_over_additive_null` | > 0.05 | +0.085 ✅ | +0.155 ✅ | **+0.250 ✅** |
+| `frac_assays_beating_null` | ≥ 0.70 | 0.636 ❌ | 0.818 ✅ | **0.909 ✅** |
+| `spearman_mean_vs_frozen_regression` | > 0 | +0.108 ✅ | +0.178 ✅ | **+0.273 ✅** |
+
+Within-order skill — ρ at fixed mutation depth, where depth carries no information — went
+**+0.161 → +0.417 → +0.500** across the same three models, so the headline is not being
+carried by a mutation counter.
+
+**What actually did it.** The prior. Every `f0` the project had used reads one sequence in
+isolation; swapping in a published alignment-based one is worth **+0.096**, against
+**+0.049** for the structure kernel and **−0.002** for the structure *mean* term that
+Step 2.4 tested instead. Evolutionary information was a category of evidence no term in
+this model carried, and it was a registered experiment nobody had run.
+
+**Recorded against our own interest:** `structure_kernel_margin` **fails** at +0.0494
+against its registered > 0.05 (it passes on within-order skill, +0.0658, but the
+registered metric is the total). Step 2.4's `spearman_mean_gp`, defined on
+Kermut-*sequence*, remains a FAIL at +0.525. The assay-list difficulty offset (six
+published methods score 0.12 … 0.27 lower on these eleven than on the other 206)
+contributed **nothing** — H1 clears 0.55 unadjusted. `f0` is now read from a third-party
+archive rather than computed here. Full account in `diagnostics/finetune_scoping.md` §9
+and `PREREGISTRATION.md`.
+
+---
+
+### The 2026-11-27 reading, superseded and kept
+
 **❌ H1 FAILED. Phase 3 stays blocked, and the pre-registration's instruction stands: fix
 the reward model before a planner is built on it.**
 
