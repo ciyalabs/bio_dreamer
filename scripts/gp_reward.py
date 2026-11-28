@@ -58,6 +58,12 @@ from biodreamer.reward.data import assays_for, detection_limits, h1_split, load_
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from encode_positional import resolve_wild_type  # noqa: E402
 from h1_benchmark import substitution_design  # noqa: E402
+from structure_kernel import (  # noqa: E402
+    StructureKernel,
+    assay_vocabulary,
+    load_site_data,
+    pair_distances,
+)
 from zeroshot_baseline import cache_path, score_from_matrix, within_order_rho  # noqa: E402
 
 CACHE = Path("data/processed/pooled_cache")
@@ -98,7 +104,7 @@ class ExactGP(torch.nn.Module):
     """
 
     def __init__(self, zero_shot_mean: bool, n_seq: int | None = None,
-                 n_mean: int = 1) -> None:
+                 n_mean: int = 1, structure: bool = False) -> None:
         super().__init__()
         self.log_lengthscale = torch.nn.Parameter(torch.zeros(1))
         self.log_outputscale = torch.nn.Parameter(torch.zeros(1))
@@ -116,6 +122,14 @@ class ExactGP(torch.nn.Module):
         if n_seq is not None:
             self.log_lengthscale_subs = torch.nn.Parameter(torch.zeros(1))
             self.logit_pi = torch.nn.Parameter(torch.zeros(1))
+        # STRUCTURE KERNEL. Kermut eq. 4 proper: pi*k_struct + (1-pi)*k_seq, with
+        # k_struct comparing the ProteinMPNN site distributions and CA distances of the
+        # mutated positions rather than a scalar summed over them. This is the component
+        # Step 2.4 tested as a mean term and found worth nothing, which measured the
+        # wrong thing: Kermut's largest ablation (-0.065) is this kernel, not that scalar.
+        self.struct = StructureKernel() if structure else None
+        if structure:
+            self.logit_pi_struct = torch.nn.Parameter(torch.zeros(1))
         # alpha exists only in the zero-shot variant; a constant-mean GP must not be able
         # to read f0 through a back door, or the ablation measures nothing
         # `n_mean` > 1 when a second zero-shot term is supplied -- the ProteinMPNN
@@ -133,7 +147,22 @@ class ExactGP(torch.nn.Module):
             return self.alpha[0] * f0 + self.beta
         return f0 @ self.alpha + self.beta
 
-    def kernel(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    def kernel(self, a: torch.Tensor, b: torch.Tensor, sa=None, sb=None,
+               dists=None) -> torch.Tensor:
+        if self.struct is not None:
+            k_seq = torch.exp(
+                -0.5 * torch.cdist(a, b).pow(2) / self.log_lengthscale.exp().pow(2)
+            )
+            pi = torch.sigmoid(self.logit_pi_struct)
+            k_st = self.struct(sa, sb, dists)
+            # k_struct is a SUM over pairs of mutated sites, so its scale grows with
+            # mutation depth while k_seq is bounded by 1. Left raw, pi would have to
+            # absorb that and the mixture would be dominated by whichever variant has
+            # the most mutations. Normalising by the train-block maximum puts the two
+            # terms on a comparable scale before they are mixed; the outputscale is
+            # still free to rescale the whole kernel.
+            k_st = k_st / (self._struct_scale + 1e-12)
+            return self.log_outputscale.exp() * (pi * k_st + (1.0 - pi) * k_seq)
         if self.n_seq is None:
             d2 = torch.cdist(a, b).pow(2)
             return self.log_outputscale.exp() * torch.exp(
@@ -151,9 +180,10 @@ class ExactGP(torch.nn.Module):
         pi = torch.sigmoid(self.logit_pi)
         return self.log_outputscale.exp() * (pi * k_sub + (1.0 - pi) * k_seq)
 
-    def nll(self, x: torch.Tensor, y: torch.Tensor, f0: torch.Tensor) -> torch.Tensor:
+    def nll(self, x: torch.Tensor, y: torch.Tensor, f0: torch.Tensor,
+            s=None, dists=None) -> torch.Tensor:
         n = x.shape[0]
-        k = self.kernel(x, x) + torch.eye(n, dtype=x.dtype) * (
+        k = self.kernel(x, x, s, s, dists) + torch.eye(n, dtype=x.dtype) * (
             self.log_noise.exp() + 1e-6
         )
         lo = torch.linalg.cholesky(k)
@@ -162,7 +192,8 @@ class ExactGP(torch.nn.Module):
         return 0.5 * (r * a).sum() + lo.diagonal().log().sum() + 0.5 * n * np.log(2 * np.pi)
 
     @torch.no_grad()
-    def predict(self, xtr, ytr, f0tr, chunks, with_var: bool = False):
+    def predict(self, xtr, ytr, f0tr, chunks, with_var: bool = False,
+                str_tr=None, dists_tr=None, dists_cross=None):
         """`chunks` yields (x, f0) blocks of the test set, already standardised.
 
         Streamed rather than taking one test matrix, because HIS7 alone has 494,494 test
@@ -171,14 +202,14 @@ class ExactGP(torch.nn.Module):
         attempt. The GP never needs more than one block at a time.
         """
         n = xtr.shape[0]
-        k = self.kernel(xtr, xtr) + torch.eye(n, dtype=xtr.dtype) * (
-            self.log_noise.exp() + 1e-6
-        )
+        k = self.kernel(xtr, xtr, str_tr, str_tr, dists_tr) + torch.eye(
+            n, dtype=xtr.dtype
+        ) * (self.log_noise.exp() + 1e-6)
         lo = torch.linalg.cholesky(k)
         a = torch.cholesky_solve((ytr - self.mean(f0tr)).unsqueeze(-1), lo)
         out, var = [], []
-        for x, f0 in chunks:
-            ks = self.kernel(x, xtr)
+        for x, f0, s_blk in chunks:
+            ks = self.kernel(x, xtr, s_blk, str_tr, dists_cross)
             out.append((self.mean(f0) + (ks @ a).squeeze(-1)).numpy())
             if with_var:
                 # Step 2.3 consumes this. k(x*,x*) is the outputscale for an RBF, so the
@@ -198,10 +229,18 @@ class ExactGP(torch.nn.Module):
 
 
 def fit(xtr, ytr, f0tr, zero_shot_mean: bool, steps: int, lr: float, seed: int,
-        n_seq: int | None = None) -> ExactGP:
+        n_seq: int | None = None, str_tr=None, dists_tr=None) -> ExactGP:
     torch.manual_seed(seed)
     n_mean = 1 if f0tr.ndim == 1 else f0tr.shape[1]
-    gp = ExactGP(zero_shot_mean, n_seq, n_mean).double()
+    structure = str_tr is not None
+    gp = ExactGP(zero_shot_mean, n_seq, n_mean, structure=structure).double()
+    if structure:
+        # k_struct sums over pairs of mutated sites, so its magnitude tracks mutation
+        # depth rather than similarity. Fix the scale once, on the training block, so
+        # that pi mixes two comparable quantities instead of also having to undo this.
+        with torch.no_grad():
+            raw = gp.struct(str_tr, str_tr, dists_tr)
+            gp.register_buffer("_struct_scale", raw.max().clamp(min=1e-12).clone())
     # a sensible lengthscale start: the median pairwise distance. Starting at 1.0 on
     # 1280-d standardised vectors puts every off-diagonal kernel entry at ~0, the
     # gradient at ~0, and the GP never leaves its prior.
@@ -218,7 +257,7 @@ def fit(xtr, ytr, f0tr, zero_shot_mean: bool, steps: int, lr: float, seed: int,
     opt = torch.optim.Adam(gp.parameters(), lr=lr)
     for _ in range(steps):
         opt.zero_grad()
-        loss = gp.nll(xtr, ytr, f0tr)
+        loss = gp.nll(xtr, ytr, f0tr, str_tr, dists_tr)
         loss.backward()
         opt.step()
     return gp
@@ -255,6 +294,15 @@ def main() -> int:
              "m(x) = a1*f0_seq(x) + a2*f0_struct(x) + b. Needs "
              "data/processed/mpnn_matrix.npz from scripts/structure_score.py.",
     )
+    ap.add_argument(
+        "--structure-kernel", action="store_true",
+        help="add Kermut's STRUCTURE KERNEL as a fifth config: pi*k_struct + "
+             "(1-pi)*k_seq, where k_struct compares the ProteinMPNN site distributions "
+             "and CA distances of the mutated positions. This is the component Kermut's "
+             "ablation ranks first (-0.065); --structure-mean tests a scalar summary of "
+             "the same data and is a different, weaker thing. Needs "
+             "data/processed/mpnn_matrix.npz and data/processed/wt_structures/.",
+    )
     ap.add_argument("--chunk", type=int, default=20000,
                     help="test rows per block; 20k x 1281 float64 is ~205 MB")
     ap.add_argument("--dry-run", action="store_true")
@@ -271,6 +319,8 @@ def main() -> int:
         tag += f"_zs-{args.zs_backbone}"
     if args.structure_mean:
         tag += "_struct"
+    if args.structure_kernel:
+        tag += "_structkern"
     if tag:
         OUT = OUT.with_name(f"gp_reward{tag}.json")
         PRED = PRED.with_name(f"gp_predictions{tag}.npz")
@@ -310,14 +360,15 @@ def main() -> int:
         if missing:
             raise KeyError(f"{mp} has no structure matrix for {missing}")
         print(f"structure mean: {mp} covering {len(mpnn.files)} assays")
-    # (label, zero_shot_mean, use_order)
-    # (label, zero_shot_mean, use_order, composite)
+    # (label, zero_shot_mean, use_order, composite, structure)
     configs = [
-        ("gp_constant_mean", False, False, False),
-        ("gp_zeroshot_mean", True, False, False),
-        ("gp_zeroshot_mean_order", True, True, False),
-        ("gp_composite_kernel", True, False, True),
+        ("gp_constant_mean", False, False, False, False),
+        ("gp_zeroshot_mean", True, False, False, False),
+        ("gp_zeroshot_mean_order", True, True, False, False),
+        ("gp_composite_kernel", True, False, True, False),
     ]
+    if args.structure_kernel:
+        configs.append(("gp_structure_kernel", True, False, False, True))
     res: dict[str, dict[str, float]] = {c[0]: {} for c in configs}
     wo: dict[str, dict[str, float]] = {c[0]: {} for c in configs}
     pis: dict[str, float] = {}
@@ -357,6 +408,20 @@ def main() -> int:
             print(f"{n:30s} train={len(tr):4d} test={len(te):7,d} dim={xtr_s.shape[1]}")
             continue
 
+        structure = args.structure_kernel
+        S_tr = S_te = dists_tr = dists_cross = str_tr = None
+        if structure:
+            site = load_site_data(n)
+            S_tr, S_te, keys, train_cols = assay_vocabulary(a.mutant[tr], a.mutant[te])
+            # columns are the TRAINING mutations only -- the cross kernel never needs
+            # more, and (L*19) x (L*19) would be 17M entries for the largest assay
+            train_keys = [keys[i] for i in train_cols]
+            dists_cross = [
+                torch.tensor(d) for d in pair_distances(keys, train_keys, site)
+            ]
+            dists_tr = [d[train_cols] for d in dists_cross]
+            str_tr = torch.tensor(S_tr[:, train_cols].toarray())
+
         otr = a.order[tr].astype(np.float64)
         om, os_ = otr.mean(), otr.std() + 1e-12
         dtr, vocab = substitution_design(a.mutant[tr])
@@ -373,9 +438,12 @@ def main() -> int:
                 if composite:
                     # built per block: HIS7's full one-hot would be 494,494 x |vocab|
                     x = np.hstack([x, substitution_design(a.mutant[blk], vocab)[0].toarray()])
-                yield torch.tensor(x), f0te[s0 : s0 + size]
+                # the structure indicator stays SPARSE across the full mutation
+                # vocabulary; see StructureKernel.forward for why it is not densified
+                s_blk = S_te[s0 : s0 + size] if structure else None
+                yield torch.tensor(x), f0te[s0 : s0 + size], s_blk
 
-        for label, zsm, use_order, composite in configs:
+        for label, zsm, use_order, composite, use_struct in configs:
             # one extra standardised column for depth; the kernel then measures similarity
             # in sequence AND depth, which is how a GP is given the term the ridge baseline
             # gets as a feature. Kermut has no such term, which is why it is a separate row.
@@ -389,13 +457,18 @@ def main() -> int:
             xt = torch.tensor(xtr)
             t0 = time.time()
             gp = fit(xt, yt, f0tr, zsm, args.steps, args.lr, args.seed,
-                     n_seq=n_seq if composite else None)
+                     n_seq=n_seq if composite else None,
+                     str_tr=str_tr if use_struct else None,
+                     dists_tr=dists_tr if use_struct else None)
             if composite:
                 pis[n] = float(torch.sigmoid(gp.logit_pi).detach())
             want_var = label == "gp_zeroshot_mean"
             if want_var:
                 pred, pvar = gp.predict(
-                    xt, yt, f0tr, test_chunks(use_order, composite), with_var=True
+                    xt, yt, f0tr, test_chunks(use_order, composite), with_var=True,
+                    str_tr=str_tr if use_struct else None,
+                    dists_tr=dists_tr if use_struct else None,
+                    dists_cross=dists_cross if use_struct else None,
                 )
                 saved[f"{n}/pred"] = pred.astype(np.float32)
                 saved[f"{n}/var"] = pvar.astype(np.float32)
@@ -407,7 +480,12 @@ def main() -> int:
                 saved[f"{n}/ymu"] = np.float32(ytr.mean())
                 saved[f"{n}/ysd"] = np.float32(ytr.std())
             else:
-                pred = gp.predict(xt, yt, f0tr, test_chunks(use_order, composite))
+                pred = gp.predict(
+                    xt, yt, f0tr, test_chunks(use_order, composite),
+                    str_tr=str_tr if use_struct else None,
+                    dists_tr=dists_tr if use_struct else None,
+                    dists_cross=dists_cross if use_struct else None,
+                )
             res[label][n] = rho(pred, a.score[te])
             wo[label][n] = within_order_rho(pred, a.score[te], a.order[te])
             print(
